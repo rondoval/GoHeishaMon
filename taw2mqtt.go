@@ -84,17 +84,7 @@ type configStruct struct {
 	HAAutoDiscover         bool
 }
 
-var cfgfile *string
-var topicfile *string
 var configfile string
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 
 func setGPIODebug() {
 	err := ioutil.WriteFile("/sys/class/gpio/export", []byte("2"), 0200)
@@ -248,23 +238,6 @@ func updateConfig(configfile string) bool {
 	return true
 }
 
-func encodeTopicsToTOML(topnr int, data topicData) {
-	f, err := os.Create(fmt.Sprintf("data/%d", topnr))
-	if err != nil {
-		// failed to create/open the file
-		log.Fatal(err)
-	}
-	if err := toml.NewEncoder(f).Encode(data); err != nil {
-		// failed to encode
-		log.Fatal(err)
-	}
-	if err := f.Close(); err != nil {
-		// failed to close the file
-		log.Fatal(err)
-
-	}
-
-}
 func updatePassword() bool {
 	_, err = os.Stat("/mnt/usb/GoHeishaMonPassword.new")
 	if err != nil {
@@ -700,11 +673,6 @@ func startsub(c mqtt.Client) {
 }
 
 func handleMSGfromMQTT(mclient mqtt.Client, msg mqtt.Message) {
-
-}
-
-func remove(slice []string, s int) []string {
-	return append(slice[:s], slice[s+1:]...)
 }
 
 func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
@@ -1038,21 +1006,6 @@ func calcChecksum(command []byte, length int) byte {
 	return chk
 }
 
-func parseTopicList2() {
-
-	// Loop through lines & turn into object
-	for key := range allTopics {
-		var data topicData
-		if _, err := toml.DecodeFile(configfile, &data); err != nil {
-			log.Fatal(err)
-		}
-		allTopics[key] = data
-		//a	fmt.Println(data)
-		//EncodeTopicsToTOML(TNUM, data)
-
-	}
-}
-
 func sendCommand(command []byte, length int) bool {
 
 	var chk byte
@@ -1074,22 +1027,6 @@ func sendCommand(command []byte, length int) bool {
 	//allowreadtime = millis() + SERIALTIMEOUT //set allowreadtime when to timeout the answer of this command
 	return true
 }
-
-// func pushCommandBuffer(command []byte , length int) {
-// 	if (commandsInBuffer < MAXCOMMANDSINBUFFER) {
-// 	  command_struct* newCommand = new command_struct;
-// 	  newCommand->length = length;
-// 	  for (int i = 0 ; i < length ; i++) {
-// 		newCommand->value[i] = command[i];
-// 	  }
-// 	  newCommand->next = commandBuffer;
-// 	  commandBuffer = newCommand;
-// 	  commandsInBuffer++;
-// 	}
-// 	else {
-// 	  log_message("Too much commands already in buffer. Ignoring this commands.");
-// 	}
-//   }
 
 func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
 
@@ -1249,7 +1186,6 @@ func getPumpFlow(data []byte) string { // TOP1 //
 	PumpFlow1 := int(data[170])
 	PumpFlow2 := ((float64(data[169]) - 1) / 256)
 	PumpFlow := float64(PumpFlow1) + PumpFlow2
-	//return String(PumpFlow,2);
 	return fmt.Sprintf("%.2f", PumpFlow)
 }
 
@@ -1273,7 +1209,6 @@ func getErrorInfo(data []byte) string { // TOP44 //
 
 func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 
-	var updatenow bool = false
 	m := map[string]func(byte) string{
 		"getBit7and8":         getBit7and8,
 		"unknown":             unknown,
@@ -1292,10 +1227,6 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 		"getBit3and4": getBit3and4,
 	}
 
-	// 	if (millis() > nextalldatatime) {
-	// 	  updatenow = true;
-	// 	  nextalldatatime = millis() + UPDATEALLTIME;
-	// 	}
 	for k, v := range allTopics {
 		var inputByte byte
 		var topicValue string
@@ -1335,7 +1266,7 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 
 		}
 
-		if (updatenow) || (actData[k] != topicValue) {
+		if actData[k] != topicValue {
 			actData[k] = topicValue
 			fmt.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
 			if config.Aquarea2mqttCompatible {
