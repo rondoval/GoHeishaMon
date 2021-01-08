@@ -4,9 +4,22 @@ import (
 	"encoding/binary"
 	"fmt"
 	"strings"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
+
+var actData [92]string
+
+func clearActData() {
+	for {
+		time.Sleep(time.Second * time.Duration(config.ForceRefreshTime))
+		for k := range actData {
+			actData[k] = "nil" //funny i know ;)
+		}
+
+	}
+}
 
 func callTopicFunction(data byte, f func(data byte) string) string {
 	return f(data)
