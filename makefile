@@ -38,9 +38,9 @@
 	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -o dist/$(BINARY_ARM)
     upx:
 	upx -f --brute -o dist/$(BINARY_MIPSUPX) dist/$(BINARY_MIPS)
-    install:
-	scp dist/GoHeishaMon_MIPSUPX root@172.17.136.82:/usr/bin/
-	ssh root@172.17.136.82 reboot
+    install: build-mips upx
+	scp dist/GoHeishaMon_MIPSUPX root@192.168.2.143:/usr/bin/
+	ssh root@192.168.2.143 reboot
     compilesquash:
 	cp dist/$(BINARY_MIPSUPX) OS/RootFS/usr/bin/$(BINARY_MIPSUPX)
 	mksquashfs OS/RootFS dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin -comp xz -noappend -always-use-fragments
