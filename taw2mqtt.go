@@ -22,7 +22,7 @@ const panasonicQuerySize int = 110
 //should be the same number
 const numberOfTopics int = 95
 
-var allTopics [95]topicData
+var allTopics [numberOfTopics]topicData
 var mqttKeepalive time.Duration
 var commandsToSend map[xid.ID][]byte
 var gpio map[string]string

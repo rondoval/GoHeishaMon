@@ -39,7 +39,7 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 		fmt.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, v.TopicType, strings.ReplaceAll(m.Name, " ", "_"))
 		fmt.Println("Publikuje do ", TOP, "warosc", string(topicValue))
-		token = mclient.Publish(TOP, byte(0), false, topicValue)
+		token = mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			fmt.Printf("Fail to publish, %v", token.Error())
 		}
@@ -57,7 +57,7 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 		fmt.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
 		fmt.Println("Publikuje do ", TOP, "warosc", string(topicValue))
-		token = mclient.Publish(TOP, byte(0), false, topicValue)
+		token = mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			fmt.Printf("Fail to publish, %v", token.Error())
 		}
