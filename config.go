@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bytes"
 	"crypto/md5"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,18 +16,17 @@ import (
 )
 
 type configStruct struct {
-	Loghex            bool   `yaml:"loghex"`
 	Device            string `yaml:"device"`
+	Loghex            bool   `yaml:"loghex"`
 	ReadInterval      int    `yaml:"readInterval"`
+	MqttTopicBase     string `yaml:"mqtt_topic_base"`
+	MqttSetBase       string `yaml:"mqtt_set_base"`
 	MqttServer        string `yaml:"mqttServer"`
 	MqttPort          string `yaml:"mqttPort"`
 	MqttLogin         string `yaml:"mqttLogin"`
-	MqttTopicBase     string `yaml:"mqtt_topic_base"`
-	MqttSetBase       string `yaml:"mqtt_set_base"`
 	MqttPass          string `yaml:"mqttPass"`
 	MqttClientID      string `yaml:"mqttClientID"`
 	MqttKeepalive     int    `yaml:"mqttKeepalive"`
-	ForceRefreshTime  int    `yaml:"forceRefreshTime"`
 	EnableCommand     bool   `yaml:"enableCommand"`
 	SleepAfterCommand int    `yaml:"sleepAfterCommand"`
 	HAAutoDiscover    bool   `yaml:"haAutoDiscover"`
@@ -47,11 +46,10 @@ func readConfig() configStruct {
 	if err != nil {
 		log.Printf("Config file is missing: %s ", configFile)
 		updateConfig()
-	}
-
-	_, err = os.Stat(configFile)
-	if err != nil {
-		log.Fatal("Config file is missing: ", configFile)
+		// it's either it reboots or we can't continue
+		for {
+			time.Sleep(10 * time.Second)
+		}
 	}
 
 	var config configStruct
@@ -68,55 +66,47 @@ func readConfig() configStruct {
 	return config
 }
 
-func updateConfig() bool {
+func updateConfig() {
 	var configfile = getConfigFile()
-	log.Printf("try to update configfile: %s", configfile)
+	log.Printf("Attempting to update config file: %s", configfile)
 	out, err := exec.Command("/usr/bin/usb_mount.sh").Output()
+	defer exec.Command("/usr/bin/usb_umount.sh").Output()
 	if err != nil {
 		log.Println(err.Error())
 	}
 	log.Println(out)
+
 	_, err = os.Stat("/mnt/usb/GoHeishaMonConfig.new")
 	if err != nil {
-		_, _ = exec.Command("/usr/bin/usb_umount.sh").Output()
-		return false
+		return
 	}
-	if getFileChecksum(configfile) != getFileChecksum("/mnt/usb/GoHeishaMonConfig.new") {
-		log.Printf("checksum of configfile and new configfile diffrent: %s ", configfile)
+	if !bytes.Equal(getFileChecksum(configfile), getFileChecksum("/mnt/usb/GoHeishaMonConfig.new")) {
+		log.Println("Updated configuration detected on USB media... will reboot")
 
-		_, _ = exec.Command("/bin/cp", "/mnt/usb/GoHeishaMonConfig.new", configfile).Output()
+		_, err = exec.Command("/bin/cp", "/mnt/usb/GoHeishaMonConfig.new", configfile).Output()
 		if err != nil {
-			log.Printf("can't update configfile %s", configfile)
-			return false
+			log.Printf("Can't update config file %s", configfile)
+			return
 		}
 		_, _ = exec.Command("sync").Output()
-
 		_, _ = exec.Command("/usr/bin/usb_umount.sh").Output()
 		_, _ = exec.Command("reboot").Output()
-		return true
 	}
-	_, _ = exec.Command("/usr/bin/usb_umount.sh").Output()
-
-	return true
 }
 
-func getFileChecksum(f string) string {
+func getFileChecksum(f string) []byte {
 	input := strings.NewReader(f)
 
 	hash := md5.New()
 	if _, err := io.Copy(hash, input); err != nil {
 		log.Fatal(err)
 	}
-	sum := hash.Sum(nil)
-
-	return fmt.Sprintf("%x\n", sum)
-
+	return hash.Sum(nil)
 }
 
 func updateConfigLoop() {
 	for {
 		updateConfig()
 		time.Sleep(time.Minute * 5)
-
 	}
 }
