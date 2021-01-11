@@ -14,15 +14,15 @@ const topicsFileWindows = "topics.yaml"
 var allTopics []topicData
 
 type topicData struct {
-	TopicNumber        int    `yaml:"topicNumber"`
 	TopicName          string `yaml:"topicName"`
 	TopicType          string `yaml:"topicType"`
 	TopicBit           int    `yaml:"topicBit"`
 	TopicFunction      string `yaml:"topicFunction"`
-	TopicUnit          string `yaml:"topicUnit"`
 	TopicA2M           string `yaml:"topicA2M"`
 	TopicDisplayUnit   string `yaml:"topicDisplayUnit"`
 	TopicValueTemplate string `yaml:"topicValueTemplate"`
+	TopicValue         string
+	//TODO  TopicUnit is not used - remove from yaml
 }
 
 func loadTopics() {
@@ -42,5 +42,4 @@ func loadTopics() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	actData = make([]string, len(allTopics))
 }

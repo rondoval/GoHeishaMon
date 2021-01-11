@@ -7,6 +7,10 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+var goodreads float64
+var totalreads float64
+var readpercentage float64
+
 func logMessage(a string) {
 	fmt.Println(a)
 }
@@ -16,20 +20,18 @@ func logHex(command []byte, length int) {
 
 }
 
-func calcChecksum(command []byte, length int) byte {
-	var chk byte
-	chk = 0
-	for i := 0; i < length; i++ {
-		chk += command[i]
+func calcChecksum(command []byte) byte {
+	var chk byte = 0
+	for _, v := range command {
+		chk += v
 	}
-	chk = (chk ^ 0xFF) + 01
-	return chk
+	return (chk ^ 0xFF) + 01
 }
 
 func sendCommand(command []byte, length int) bool {
 
 	var chk byte
-	chk = calcChecksum(command, length)
+	chk = calcChecksum(command)
 	var bytesSent int
 
 	bytesSent, err := serialPort.Write(command) //first send command
@@ -43,8 +45,6 @@ func sendCommand(command []byte, length int) bool {
 	if config.Loghex == true {
 		logHex(command, length)
 	}
-	//readSerial()
-	//allowreadtime = millis() + SERIALTIMEOUT //set allowreadtime when to timeout the answer of this command
 	return true
 }
 
@@ -98,10 +98,9 @@ func isValidReceiveHeader(data []byte) bool {
 }
 
 func isValidReceiveChecksum(data []byte) bool {
-	var chk byte
-	chk = 0
-	for i := 0; i < len(data); i++ {
-		chk += data[i]
+	var chk byte = 0
+	for _, v := range data {
+		chk += v
 	}
 	return (chk == 0) //all received bytes + checksum should result in 0
 }

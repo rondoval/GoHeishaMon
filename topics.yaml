@@ -1,663 +1,568 @@
-- topicNumber: 0
-  topicName: "Heatpump_State"
+- topicName: "Heatpump_State"
   topicType: "binary_sensor"
   topicBit: 4
   topicFunction: "getBit7and8"
   topicUnit: "OffOn"
   topicA2M: "RunningStatus"
-- topicNumber: 1
-  topicName: "Pump_Flow"
+- topicName: "Pump_Flow"
   topicBit: 0
   topicDisplayUnit: "L/m"
   topicFunction: "unknown"
   topicUnit: "LitersPerMin"
   topicA2M: "WaterFlow"
-- topicNumber: 2
-  topicName: "Force_DHW_State"
+- topicName: "Force_DHW_State"
   topicBit: 4
   topicType: "binary_sensor"
   topicFunction: "getBit1and2"
   topicUnit: "DisabledEnabled"
   topicA2M: ""
-- topicNumber: 3
-  topicName: "Quiet_Mode_Schedule"
+- topicName: "Quiet_Mode_Schedule"
   topicBit: 7
   topicType: "binary_sensor"
   topicFunction: "getBit1and2"
   topicUnit: "DisabledEnabled"
   topicA2M: ""
-- topicNumber: 4
-  topicName: "Operating_Mode_State"
+- topicName: "Operating_Mode_State"
   topicBit: 6
   topicValueTemplate: '{%- if value == "0" -%} Heat {%- elif value == "1" -%} Cool {%- elif value == "2" -%} Auto(Heat) {%- elif value == "3" -%} DHW {%- elif value == "4" -%} Heat+DHW {%- elif value == "5" -%} Cool+DHW {%- elif value == "6" -%} Auto(Heat)+DHW {%- elif value == "7" -%} Auto(Cool) {%- elif value == "8" -%} Auto(Cool)+DHW {%- endif -%}'
   topicFunction: "getOpMode"
   topicUnit: "OpModeDesc"
   topicA2M: "WorkingMode"
-- topicNumber: 5
-  topicName: "Main_Inlet_Temp"
+- topicName: "Main_Inlet_Temp"
   topicBit: 143
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "WaterInleet"
-- topicNumber: 6
-  topicName: "Main_Outlet_Temp"
+- topicName: "Main_Outlet_Temp"
   topicBit: 144
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "WaterOutleet"
-- topicNumber: 7
-  topicName: "Main_Target_Temp"
+- topicName: "Main_Target_Temp"
   topicBit: 153
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 8
-  topicName: "Compressor_Freq"
+- topicName: "Compressor_Freq"
   topicBit: 166
   topicFunction: "getIntMinus1"
   topicUnit: "Hertz"
   topicDisplayUnit: "hz"
   topicA2M: ""
-- topicNumber: 9
-  topicName: "DHW_Target_Temp"
+- topicName: "DHW_Target_Temp"
   topicBit: 42
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "DailyWaterTankSetpointTemperature"
-- topicNumber: 10
-  topicName: "DHW_Temp"
+- topicName: "DHW_Temp"
   topicBit: 141
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: "DailyWaterTankActualTemperature"
-- topicNumber: 11
-  topicName: "Operations_Hours"
+- topicName: "Operations_Hours"
   topicBit: 0
   topicFunction: "unknown"
   topicDisplayUnit: "h"
   topicUnit: "Hours"
   topicA2M: ""
-- topicNumber: 12
-  topicName: "Operations_Counter"
+- topicName: "Operations_Counter"
   topicBit: 0
   topicFunction: "unknown"
   topicUnit: "Counter"
   topicA2M: ""
-- topicNumber: 13
-  topicName: "Main_Schedule_State"
+- topicName: "Main_Schedule_State"
   topicBit: 5
   topicType: "binary_sensor"
   topicFunction: "getBit1and2"
   topicUnit: "DisabledEnabled"
   topicA2M: ""
-- topicNumber: 14
-  topicName: "Outside_Temp"
+- topicName: "Outside_Temp"
   topicDisplayUnit: "°C"
   topicBit: 142
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: "OutdoorTemperature"
-- topicNumber: 15
-  topicName: "Heat_Energy_Production"
+- topicName: "Heat_Energy_Production"
   topicBit: 194
   topicDisplayUnit: "W"
   topicFunction: "getEnergy"
   topicUnit: "Watt"
   topicA2M: ""
-- topicNumber: 16
-  topicName: "Heat_Energy_Consumption"
+- topicName: "Heat_Energy_Consumption"
   topicBit: 193
   topicFunction: "getEnergy"
   topicDisplayUnit: "W"
   topicUnit: "Watt"
   topicA2M: ""
-- topicNumber: 17
-  topicName: "Powerful_Mode_Time"
+- topicName: "Powerful_Mode_Time"
   topicBit: 7
   topicDisplayUnit: "Min"
   topicValueTemplate: "{{ (value | int) * 30 }}"
   topicFunction: "getRight3bits"
   topicUnit: "Powerfulmode"
   topicA2M: ""
-- topicNumber: 18
-  topicName: "Quiet_Mode_Level"
+- topicName: "Quiet_Mode_Level"
   topicBit: 7
   topicFunction: "getBit3and4and5"
   topicUnit: "Quietmode"
   topicValueTemplate: '{%- if value == "4" -%} Scheduled {%- else -%} {{ value }} {%- endif -%}'
   topicA2M: ""
-- topicNumber: 19
-  topicName: "Holiday_Mode_State"
+- topicName: "Holiday_Mode_State"
   topicBit: 5
   topicType: "binary_sensor"
   topicFunction: "getBit3and4"
   topicUnit: "HolidayState"
   topicA2M: ""
-- topicNumber: 20
-  topicName: "ThreeWay_Valve_State"
+- topicName: "ThreeWay_Valve_State"
   topicBit: 111
   topicFunction: "getBit7and8"
   topicValueTemplate: '{%- if value == "0" -%} Room {%- elif value == "1" -%} Tank {%- endif -%}'
   topicUnit: "Valve"
   topicA2M: ""
-- topicNumber: 21
-  topicName: "Outside_Pipe_Temp"
+- topicName: "Outside_Pipe_Temp"
   topicBit: 158
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 22
-  topicName: "DHW_Heat_Delta"
+- topicName: "DHW_Heat_Delta"
   topicBit: 99
   topicFunction: "getIntMinus128"
   topicUnit: "Kelvin"
   topicDisplayUnit: "°K"
   topicA2M: ""
-- topicNumber: 23
-  topicName: "Heat_Delta"
+- topicName: "Heat_Delta"
   topicBit: 84
   topicFunction: "getIntMinus128"
   topicUnit: "Kelvin"
   topicDisplayUnit: "°K"
   topicA2M: ""
-- topicNumber: 24
-  topicName: "Cool_Delta"
+- topicName: "Cool_Delta"
   topicBit: 94
   topicFunction: "getIntMinus128"
   topicUnit: "Kelvin"
   topicA2M: ""
   topicDisplayUnit: "°K"
-- topicNumber: 25
-  topicName: "DHW_Holiday_Shift_Temp"
+- topicName: "DHW_Holiday_Shift_Temp"
   topicBit: 44
   topicFunction: "getIntMinus128"
   topicUnit: "Kelvin"
   topicDisplayUnit: "°K"
   topicA2M: ""
-- topicNumber: 26
-  topicName: "Defrosting_State"
+- topicName: "Defrosting_State"
   topicType: "binary_sensor"
   topicBit: 111
   topicFunction: "getBit5and6"
   topicUnit: "DisabledEnabled"
   topicA2M: ""
-- topicNumber: 27
-  topicName: "Z1_Heat_Request_Temp"
+- topicName: "Z1_Heat_Request_Temp"
   topicBit: 38
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: "Zone1SetpointTemperature"
-- topicNumber: 28
-  topicName: "Z1_Cool_Request_Temp"
+- topicName: "Z1_Cool_Request_Temp"
   topicBit: 39
   topicFunction: "getIntMinus128"
   topicDisplayUnit: "°C"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 29
-  topicName: "Z1_Heat_Curve_Target_High_Temp"
+- topicName: "Z1_Heat_Curve_Target_High_Temp"
   topicBit: 75
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 30
-  topicName: "Z1_Heat_Curve_Target_Low_Temp"
+- topicName: "Z1_Heat_Curve_Target_Low_Temp"
   topicBit: 76
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 31
-  topicName: "Z1_Heat_Curve_Outside_High_Temp"
+- topicName: "Z1_Heat_Curve_Outside_High_Temp"
   topicBit: 78
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 32
-  topicName: "Z1_Heat_Curve_Outside_Low_Temp"
+- topicName: "Z1_Heat_Curve_Outside_Low_Temp"
   topicBit: 77
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 33
-  topicName: "Room_Thermostat_Temp"
+- topicName: "Room_Thermostat_Temp"
   topicBit: 156
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 34
-  topicName: "Z2_Heat_Request_Temp"
+- topicName: "Z2_Heat_Request_Temp"
   topicBit: 40
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: "Zone2SetpointTemperature"
-- topicNumber: 35
-  topicName: "Z2_Cool_Request_Temp"
+- topicName: "Z2_Cool_Request_Temp"
   topicBit: 41
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 36
-  topicName: "Z1_Water_Temp"
+- topicName: "Z1_Water_Temp"
   topicBit: 145
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "Zone1WaterTemperature"
-- topicNumber: 37
-  topicName: "Z2_Water_Temp"
+- topicName: "Z2_Water_Temp"
   topicBit: 146
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "Zone2WaterTemperature"
-- topicNumber: 38
-  topicName: "Cool_Energy_Production"
+- topicName: "Cool_Energy_Production"
   topicBit: 196
   topicDisplayUnit: "W"
   topicFunction: "getEnergy"
   topicUnit: "Watt"
   topicA2M: ""
-- topicNumber: 39
-  topicName: "Cool_Energy_Consumption"
+- topicName: "Cool_Energy_Consumption"
   topicBit: 195
   topicDisplayUnit: "W"
   topicFunction: "getEnergy"
   topicUnit: "Watt"
   topicA2M: ""
-- topicNumber: 40
-  topicName: "DHW_Energy_Production"
+- topicName: "DHW_Energy_Production"
   topicBit: 198
   topicFunction: "getEnergy"
   topicUnit: "Watt"
   topicDisplayUnit: "W"
   topicA2M: ""
-- topicNumber: 41
-  topicName: "DHW_Energy_Consumption"
+- topicName: "DHW_Energy_Consumption"
   topicBit: 197
   topicFunction: "getEnergy"
   topicUnit: "Watt"
   topicDisplayUnit: "W"
   topicA2M: ""
-- topicNumber: 42
-  topicName: "Z1_Water_Target_Temp"
+- topicName: "Z1_Water_Target_Temp"
   topicBit: 147
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
   topicDisplayUnit: "°C"
-- topicNumber: 43
-  topicName: "Z2_Water_Target_Temp"
+- topicName: "Z2_Water_Target_Temp"
   topicBit: 148
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 44
-  topicName: "Error"
+- topicName: "Error"
   topicBit: 0
   topicFunction: "unknown"
   topicUnit: "ErrorState"
   topicA2M: ""
-- topicNumber: 45
-  topicName: "Room_Holiday_Shift_Temp"
+- topicName: "Room_Holiday_Shift_Temp"
   topicBit: 43
   topicFunction: "getIntMinus128"
   topicUnit: "Kelvin"
   topicDisplayUnit: "°K"
   topicA2M: ""
-- topicNumber: 46
-  topicName: "Buffer_Temp"
+- topicName: "Buffer_Temp"
   topicBit: 149
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "BufferTankTemperature"
-- topicNumber: 47
-  topicName: "Solar_Temp"
+- topicName: "Solar_Temp"
   topicBit: 150
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 48
-  topicName: "Pool_Temp"
+- topicName: "Pool_Temp"
   topicBit: 151
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 49
-  topicName: "Main_Hex_Outlet_Temp"
+- topicName: "Main_Hex_Outlet_Temp"
   topicBit: 154
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 50
-  topicName: "Discharge_Temp"
+- topicName: "Discharge_Temp"
   topicBit: 155
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 51
-  topicName: "Inside_Pipe_Temp"
+- topicName: "Inside_Pipe_Temp"
   topicBit: 157
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 52
-  topicName: "Defrost_Temp"
+- topicName: "Defrost_Temp"
   topicBit: 159
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
   topicDisplayUnit: "°C"
-- topicNumber: 53
-  topicDisplayUnit: "°C"
+- topicDisplayUnit: "°C"
   topicName: "Eva_Outlet_Temp"
   topicBit: 160
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-  
-- topicNumber: 54
-  topicName: "Bypass_Outlet_Temp"
+
+- topicName: "Bypass_Outlet_Temp"
   topicBit: 161
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 55
-  topicName: "Ipm_Temp"
+- topicName: "Ipm_Temp"
   topicBit: 162
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 56
-  topicName: "Z1_Temp"
+- topicName: "Z1_Temp"
   topicBit: 139
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "Zone1ActualTemperature"
-- topicNumber: 57
-  topicName: "Z2_Temp"
+- topicName: "Z2_Temp"
   topicBit: 140
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: "Zone2ActualTemperature"
-- topicNumber: 58
-  topicName: "DHW_Heater_State"
+- topicName: "DHW_Heater_State"
   topicBit: 9
   topicType: "binary_sensor"
   topicFunction: "getBit5and6"
   topicUnit: "BlockedFree"
   topicA2M: ""
-- topicNumber: 59
-  topicName: "Room_Heater_State"
+- topicName: "Room_Heater_State"
   topicBit: 9
   topicType: "binary_sensor"
   topicFunction: "getBit7and8"
   topicUnit: "BlockedFree"
   topicA2M: ""
-- topicNumber: 60
-  topicType: "binary_sensor"
+- topicType: "binary_sensor"
   topicName: "Internal_Heater_State"
   topicBit: 112
   topicFunction: "getBit7and8"
   topicUnit: "InactiveActive"
   topicA2M: ""
-  
-- topicNumber: 61
-  topicName: "External_Heater_State"
+
+- topicName: "External_Heater_State"
   topicBit: 112
   topicFunction: "getBit5and6"
   topicUnit: "InactiveActive"
   topicA2M: ""
   topicType: "binary_sensor"
-- topicNumber: 62
-  topicName: "Fan1_Motor_Speed"
+- topicName: "Fan1_Motor_Speed"
   topicBit: 173
   topicDisplayUnit: "R/min"
   topicFunction: "getIntMinus1Times10"
   topicUnit: "RotationsPerMin"
   topicA2M: ""
-- topicNumber: 63
-  topicName: "Fan2_Motor_Speed"
+- topicName: "Fan2_Motor_Speed"
   topicBit: 174
   topicDisplayUnit: "R/min"
   topicFunction: "getIntMinus1Times10"
   topicUnit: "RotationsPerMin"
   topicA2M: ""
-- topicNumber: 64
-  topicName: "High_Pressure"
+- topicName: "High_Pressure"
   topicBit: 163
   topicDisplayUnit: "Kgf/cm2"
   topicFunction: "getIntMinus1Div5"
   topicUnit: "Pressure"
   topicA2M: ""
-- topicNumber: 65
-  topicDisplayUnit: "R/mini"
+- topicDisplayUnit: "R/mini"
   topicName: "Pump_Speed"
   topicBit: 171
   topicFunction: "getIntMinus1Times50"
   topicUnit: "RotationsPerMin"
   topicA2M: "PumpSpeed"
-- topicNumber: 66
-  topicName: "Low_Pressure"
+- topicName: "Low_Pressure"
   topicBit: 164
   topicDisplayUnit: "Kgf/cm2"
   topicFunction: "getIntMinus1"
   topicUnit: "Pressure"
   topicA2M: ""
-- topicNumber: 67
-  topicName: "Compressor_Current"
+- topicName: "Compressor_Current"
   topicBit: 165
   topicDisplayUnit: "A"
   topicFunction: "getIntMinus1Div5"
   topicUnit: "Ampere"
   topicA2M: ""
-- topicNumber: 68
-  topicName: "Force_Heater_State"
+- topicName: "Force_Heater_State"
   topicBit: 5
   topicType: "binary_sensor"
   topicFunction: "getBit5and6"
   topicUnit: "InactiveActive"
   topicA2M: ""
-  
-- topicNumber: 69
-  topicName: "Sterilization_State"
+
+- topicName: "Sterilization_State"
   topicBit: 117
   topicType: "binary_sensor"
   topicFunction: "getBit5and6"
   topicUnit: "InactiveActive"
   topicA2M: ""
-- topicNumber: 70
-  topicName: "Sterilization_Temp"
+- topicName: "Sterilization_Temp"
   topicBit: 100
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 71
-  topicName: "Sterilization_Max_Time"
+- topicName: "Sterilization_Max_Time"
   topicBit: 101
   topicFunction: "getIntMinus1"
   topicUnit: "Minutes"
   topicDisplayUnit: "min"
   topicA2M: ""
-- topicNumber: 72
-  topicName: "Z1_Cool_Curve_Target_High_Temp"
+- topicName: "Z1_Cool_Curve_Target_High_Temp"
   topicBit: 86
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
   topicDisplayUnit: "°C"
-- topicNumber: 73
-  topicName: "Z1_Cool_Curve_Target_Low_Temp"
+- topicName: "Z1_Cool_Curve_Target_Low_Temp"
   topicBit: 87
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 74
-  topicName: "Z1_Cool_Curve_Outside_High_Temp"
+- topicName: "Z1_Cool_Curve_Outside_High_Temp"
   topicBit: 88
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 75
-  topicName: "Z1_Cool_Curve_Outside_Low_Temp"
+- topicName: "Z1_Cool_Curve_Outside_Low_Temp"
   topicBit: 89
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 76
-  topicName: "Heating_Mode"
+- topicName: "Heating_Mode"
   topicBit: 28
   topicFunction: "getBit7and8"
   topicUnit: "HeatCoolModeDesc"
   topicA2M: ""
-- topicNumber: 77
-  topicName: "Heating_Off_Outdoor_Temp"
+- topicName: "Heating_Off_Outdoor_Temp"
   topicBit: 83
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 78
-  topicName: "Heater_On_Outdoor_Temp"
+- topicName: "Heater_On_Outdoor_Temp"
   topicBit: 85
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
   topicDisplayUnit: "°C"
-- topicNumber: 79
-  topicName: "Heat_To_Cool_Temp"
+- topicName: "Heat_To_Cool_Temp"
   topicBit: 95
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 80
-  topicName: "Cool_To_Heat_Temp"
+- topicName: "Cool_To_Heat_Temp"
   topicBit: 96
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 81
-  topicName: "Cooling_Mode"
+- topicName: "Cooling_Mode"
   topicBit: 28
   topicFunction: "getBit5and6"
   topicUnit: "HeatCoolModeDesc"
   topicA2M: ""
-- topicNumber: 82
-  topicName: "Z2_Heat_Curve_Target_High_Temp"
+- topicName: "Z2_Heat_Curve_Target_High_Temp"
   topicBit: 79
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
   topicDisplayUnit: "°C"
-- topicNumber: 83
-  topicName: "Z2_Heat_Curve_Target_Low_Temp"
+- topicName: "Z2_Heat_Curve_Target_Low_Temp"
   topicBit: 80
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 84
-  topicName: "Z2_Heat_Curve_Outside_High_Temp"
+- topicName: "Z2_Heat_Curve_Outside_High_Temp"
   topicBit: 81
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 85
-  topicName: "Z2_Heat_Curve_Outside_Low_Temp"
+- topicName: "Z2_Heat_Curve_Outside_Low_Temp"
   topicBit: 82
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 86
-  topicName: "Z2_Cool_Curve_Target_High_Temp"
+- topicName: "Z2_Cool_Curve_Target_High_Temp"
   topicBit: 90
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 87
-  topicName: "Z2_Cool_Curve_Target_Low_Temp"
+- topicName: "Z2_Cool_Curve_Target_Low_Temp"
   topicBit: 91
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 88
-  topicName: "Z2_Cool_Curve_Outside_High_Temp"
+- topicName: "Z2_Cool_Curve_Outside_High_Temp"
   topicBit: 92
   topicDisplayUnit: "°C"
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicA2M: ""
-- topicNumber: 89
-  topicName: "Z2_Cool_Curve_Outside_Low_Temp"
+- topicName: "Z2_Cool_Curve_Outside_Low_Temp"
   topicBit: 93
   topicFunction: "getIntMinus128"
   topicUnit: "Celsius"
   topicDisplayUnit: "°C"
   topicA2M: ""
-- topicNumber: 90
-  topicName: "Room_Heater_Operations_Hours"
+- topicName: "Room_Heater_Operations_Hours"
   topicBit: 0
   topicDisplayUnit: "h"
   topicFunction: "unknown"
   topicUnit: "Hours"
   topicA2M: ""
-- topicNumber: 91
-  topicName: "DHW_Heater_Operations_Hours"
+- topicName: "DHW_Heater_Operations_Hours"
   topicBit: 0
   topicDisplayUnit: "h"
   topicFunction: "unknown"
   topicUnit: "Hours"
   topicA2M: ""
-- topicNumber: 92
-  topicName: "Heat_Pump_Model"
+- topicName: "Heat_Pump_Model"
   topicBit: 132
   topicDisplayUnit: "Model"
   topicFunction: "unknown"
   topicUnit: "Model"
   topicA2M: ""
-- topicNumber: 93
-  topicName: "Pump_Duty"
+- topicName: "Pump_Duty"
   topicBit: 172
   topicDisplayUnit: "Duty"
   topicFunction: "getIntMinus1"
   topicUnit: "Duty"
   topicA2M: ""
-- topicNumber: 94
-  topicName: "Zones_State"
+- topicName: "Zones_State"
   topicBit: 6
   topicDisplayUnit: "ZonesState"
   topicFunction: "getBit1and2"

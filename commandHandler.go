@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/rs/xid"
 )
 
 func makeSwitchTopic(name string, state string) {
@@ -109,12 +108,12 @@ func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
 func handleSendRawValue(mclient mqtt.Client, msg mqtt.Message) {
 	var command []byte
 	cts := strings.TrimSpace(string(msg.Payload()))
-	command, err = hex.DecodeString(cts)
+	command, err := hex.DecodeString(cts)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetOperationMode(mclient mqtt.Client, msg mqtt.Message) {
@@ -146,7 +145,7 @@ func handleSetOperationMode(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetDHWTemp(mclient mqtt.Client, msg mqtt.Message) {
@@ -166,7 +165,7 @@ func handleSetDHWTemp(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetPowerfulMode(mclient mqtt.Client, msg mqtt.Message) {
@@ -186,7 +185,7 @@ func handleSetPowerfulMode(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetHolidayMode(mclient mqtt.Client, msg mqtt.Message) {
@@ -208,7 +207,7 @@ func handleSetHolidayMode(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetForceSterilization(mclient mqtt.Client, msg mqtt.Message) {
@@ -230,7 +229,7 @@ func handleSetForceSterilization(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetForceDefrost(mclient mqtt.Client, msg mqtt.Message) {
@@ -252,7 +251,7 @@ func handleSetForceDefrost(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetForceDHW(mclient mqtt.Client, msg mqtt.Message) {
@@ -274,7 +273,7 @@ func handleSetForceDHW(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetZ1HeatRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
@@ -293,7 +292,7 @@ func handleSetZ1HeatRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetZ1CoolRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
@@ -311,7 +310,7 @@ func handleSetZ1CoolRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetZ2HeatRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
@@ -329,7 +328,7 @@ func handleSetZ2HeatRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetZ2CoolRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
@@ -347,7 +346,7 @@ func handleSetZ2CoolRequestTemperature(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetQuietMode(mclient mqtt.Client, msg mqtt.Message) {
@@ -367,7 +366,7 @@ func handleSetQuietMode(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }
 
 func handleSetHeatpump(mclient mqtt.Client, msg mqtt.Message) {
@@ -390,5 +389,5 @@ func handleSetHeatpump(mclient mqtt.Client, msg mqtt.Message) {
 	if config.Loghex == true {
 		logHex(command, len(command))
 	}
-	commandsToSend[xid.New()] = command
+	commandsChannel <- command
 }

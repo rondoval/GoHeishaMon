@@ -1,17 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
-	"runtime"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/rs/xid"
 	"go.bug.st/serial"
 )
 
@@ -20,90 +14,24 @@ var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x0
 const panasonicQuerySize int = 110
 
 var mqttKeepalive time.Duration
-var commandsToSend map[xid.ID][]byte
-var gpio map[string]string
 var config configStruct
-var sending bool
 var serialPort serial.Port
-var err error
-var goodreads float64
-var totalreads float64
-var readpercentage float64
 var switchTopics map[string]autoDiscoverStruct
+var commandsChannel chan []byte
 
 type commandStruct struct {
 	value  [128]byte
 	length int
 }
 
-type configStruct struct {
-	Readonly               bool
-	Loghex                 bool
-	Device                 string
-	ReadInterval           int
-	MqttServer             string
-	MqttPort               string
-	MqttLogin              string
-	Aquarea2mqttCompatible bool
-	MqttTopicBase          string
-	MqttSetBase            string
-	Aquarea2mqttPumpID     string
-	MqttPass               string
-	MqttClientID           string
-	MqttKeepalive          int
-	ForceRefreshTime       int
-	EnableCommand          bool
-	SleepAfterCommand      int
-	HAAutoDiscover         bool
-}
-
-var configfile string
-
-func updatePassword() bool {
-	_, err = os.Stat("/mnt/usb/GoHeishaMonPassword.new")
-	if err != nil {
-		return true
-	}
-	_, _ = exec.Command("chmod", "+x", "/root/pass.sh").Output()
-	dat, _ := ioutil.ReadFile("/mnt/usb/GoHeishaMonPassword.new")
-	fmt.Printf("updejtuje haslo na: %s", string(dat))
-	o, err := exec.Command("/root/pass.sh", string(dat)).Output()
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(o)
-
-		return false
-	}
-	fmt.Println(o)
-
-	_, _ = exec.Command("/bin/rm", "/mnt/usb/GoHeishaMonPassword.new").Output()
-
-	return true
-}
-
 func main() {
+	config = readConfig()
+
 	switchTopics = make(map[string]autoDiscoverStruct)
-
-	flag.Parse()
-	if runtime.GOOS != "windows" {
-		//	go UpdateGPIOStat()
-		configfile = "/etc/gh/config"
-
-	} else {
-		configfile = "config"
-
-	}
-	_, err := os.Stat(configfile)
-	if err != nil {
-		fmt.Printf("Config file is missing: %s ", configfile)
-		updateConfig(configfile)
-	}
-	go updateConfigLoop(configfile)
 	c1 := make(chan bool, 1)
 	go clearActData()
-	commandsToSend = make(map[xid.ID][]byte)
-	var in int
-	config = readConfig()
+	commandsChannel = make(chan []byte, 100)
+	go updateConfigLoop()
 
 	ports, err := serial.GetPortsList()
 	if err != nil {
@@ -136,28 +64,20 @@ func main() {
 		if MC.IsConnected() != true {
 			MC, MT = makeMQTTConn()
 		}
-		if len(commandsToSend) > 0 {
-			fmt.Println("jest wiecej niz jedna komenda tj", len(commandsToSend))
-			in = 1
-			for key, value := range commandsToSend {
-				if in == 1 {
+		var queueLen = len(commandsChannel)
+		if queueLen > 50 {
+			log.Println("Command queue length: ", len(commandsChannel))
+		}
 
-					sendCommand(value, len(value))
-					delete(commandsToSend, key)
-					in++
-					time.Sleep(time.Second * time.Duration(config.SleepAfterCommand))
+		select {
+		case value := <-commandsChannel:
+			sendCommand(value, len(value))
+			time.Sleep(time.Second * time.Duration(config.SleepAfterCommand))
 
-				} else {
-					fmt.Println("numer komenty  ", in, " jest za duzy zrobie to w nastepnym cyklu")
-					break
-				}
-				fmt.Println("koncze range po tablicy z komendami ")
-
-			}
-
-		} else {
+		default:
 			sendCommand(panasonicQuery, panasonicQuerySize)
 		}
+
 		go func() {
 			tbool := readSerial(MC, MT)
 			c1 <- tbool

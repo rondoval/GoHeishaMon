@@ -9,13 +9,11 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var actData []string
-
 func clearActData() {
 	for {
 		time.Sleep(time.Second * time.Duration(config.ForceRefreshTime))
-		for k := range actData {
-			actData[k] = "nil" //funny i know ;)
+		for k := range allTopics {
+			allTopics[k].TopicValue = "nil" //funny i know ;)
 		}
 
 	}
@@ -166,30 +164,30 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 		var inputByte byte
 		var topicValue string
 		var value string
-		switch k {
-		case 1:
+		switch v.TopicName {
+		case "Pump_Flow":
 			topicValue = getPumpFlow(data)
-		case 11:
+		case "Operations_Hours":
 			d := make([]byte, 2)
 			d[0] = data[183]
 			d[1] = data[182]
 			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case 12:
+		case "Operations_Counter":
 			d := make([]byte, 2)
 			d[0] = data[180]
 			d[1] = data[179]
 			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case 90:
+		case "Room_Heater_Operations_Hours":
 			d := make([]byte, 2)
 			d[0] = data[186]
 			d[1] = data[185]
 			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case 91:
+		case "DHW_Heater_Operations_Hours":
 			d := make([]byte, 2)
 			d[0] = data[189]
 			d[1] = data[188]
 			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case 44:
+		case "Error":
 			topicValue = getErrorInfo(data)
 		default:
 			inputByte = data[v.TopicBit]
@@ -198,24 +196,21 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 			} else {
 				fmt.Println("NIE MA FUNKCJI", v.TopicFunction)
 			}
-
 		}
 
-		if actData[k] != topicValue {
-			actData[k] = topicValue
+		if v.TopicValue != topicValue {
+			v.TopicValue = topicValue
 			fmt.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
 			if config.Aquarea2mqttCompatible {
 				TOP := "aquarea/state/" + fmt.Sprintf("%s/%s", config.Aquarea2mqttPumpID, v.TopicA2M)
 				value = strings.TrimSpace(topicValue)
 				value = strings.ToUpper(topicValue)
-				fmt.Println("Publikuje do ", TOP, "warosc", string(value))
 				token = mclient.Publish(TOP, byte(0), false, value)
 				if token.Wait() && token.Error() != nil {
 					fmt.Printf("Fail to publish, %v", token.Error())
 				}
 			}
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
-			fmt.Println("Publikuje do ", TOP, "warosc", string(topicValue))
 			token = mclient.Publish(TOP, byte(0), false, topicValue)
 			if token.Wait() && token.Error() != nil {
 				fmt.Printf("Fail to publish, %v", token.Error())

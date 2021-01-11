@@ -1,0 +1,17 @@
+device: "/dev/ttyUSB0"
+loghex: true
+readInterval: 1
+aquarea2mqttCompatible: false
+aquarea2mqttPumpID: ""
+mqtt_topic_base: "panasonic_heat_pump/main"
+mqtt_set_base: "panasonic_heat_pump/commands"
+forceRefreshTime: 300
+mqttServer: "127.0.0.1"
+mqttPort: "1883"
+mqttLogin: ""
+mqttPass: ""
+sleepAfterCommand: 1
+mqttClientID: "GoHeishaMon-pub"
+mqttKeepalive: 60
+enableCommand: true
+haAutoDiscover: true

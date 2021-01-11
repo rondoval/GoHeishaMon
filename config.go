@@ -4,30 +4,74 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v2"
 )
 
-func readConfig() configStruct {
+type configStruct struct {
+	Loghex                 bool   `yaml:"loghex"`
+	Device                 string `yaml:"device"`
+	ReadInterval           int    `yaml:"readInterval"`
+	MqttServer             string `yaml:"mqttServer"`
+	MqttPort               string `yaml:"mqttPort"`
+	MqttLogin              string `yaml:"mqttLogin"`
+	Aquarea2mqttCompatible bool   `yaml:"aquarea2mqttCompatible"`
+	MqttTopicBase          string `yaml:"mqtt_topic_base"`
+	MqttSetBase            string `yaml:"mqtt_set_base"`
+	Aquarea2mqttPumpID     string `yaml:"aquarea2mqttPumpID"`
+	MqttPass               string `yaml:"mqttPass"`
+	MqttClientID           string `yaml:"mqttClientID"`
+	MqttKeepalive          int    `yaml:"mqttKeepalive"`
+	ForceRefreshTime       int    `yaml:"forceRefreshTime"`
+	EnableCommand          bool   `yaml:"enableCommand"`
+	SleepAfterCommand      int    `yaml:"sleepAfterCommand"`
+	HAAutoDiscover         bool   `yaml:"haAutoDiscover"`
+}
 
-	_, err := os.Stat(configfile)
+func getConfigFile() string {
+	if runtime.GOOS != "windows" {
+		return "/etc/gh/config.yaml"
+	}
+	return "config.yaml"
+}
+
+func readConfig() configStruct {
+	var configFile = getConfigFile()
+
+	_, err := os.Stat(configFile)
 	if err != nil {
-		log.Fatal("Config file is missing: ", configfile)
+		fmt.Printf("Config file is missing: %s ", configFile)
+		updateConfig()
+	}
+
+	_, err = os.Stat(configFile)
+	if err != nil {
+		log.Fatal("Config file is missing: ", configFile)
 	}
 
 	var config configStruct
-	if _, err := toml.DecodeFile(configfile, &config); err != nil {
+
+	data, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
 		log.Fatal(err)
 	}
 	return config
 }
 
-func updateConfig(configfile string) bool {
+func updateConfig() bool {
+	var configfile = getConfigFile()
 	fmt.Printf("try to update configfile: %s", configfile)
 	out, err := exec.Command("/usr/bin/usb_mount.sh").Output()
 	if err != nil {
@@ -71,9 +115,9 @@ func getFileChecksum(f string) string {
 
 }
 
-func updateConfigLoop(configfile string) {
+func updateConfigLoop() {
 	for {
-		updateConfig(configfile)
+		updateConfig()
 		time.Sleep(time.Minute * 5)
 
 	}
