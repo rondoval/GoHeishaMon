@@ -29,7 +29,6 @@ func main() {
 
 	switchTopics = make(map[string]autoDiscoverStruct)
 	c1 := make(chan bool, 1)
-	go clearActData()
 	commandsChannel = make(chan []byte, 100)
 	go updateConfigLoop()
 

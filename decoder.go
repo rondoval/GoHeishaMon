@@ -4,23 +4,30 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func clearActData() {
-	for {
-		time.Sleep(time.Second * time.Duration(config.ForceRefreshTime))
-		for k := range allTopics {
-			allTopics[k].TopicValue = "nil" //funny i know ;)
-		}
-
-	}
+var funcMapByte = map[string]func(byte) string{
+	"getIntMinus1Div5":    getIntMinus1Div5,
+	"getIntMinus1Times50": getIntMinus1Times50,
+	"getIntMinus1Times10": getIntMinus1Times10,
+	"getIntMinus128":      getIntMinus128,
+	"getIntMinus1":        getIntMinus1,
+	"getOpMode":           getOpMode,
+	"getEnergy":           getEnergy,
+	"getRight3bits":       getRight3bits,
+	"getBit3and4and5":     getBit3and4and5,
+	"getBit7and8":         getBit7and8,
+	"getBit5and6":         getBit5and6,
+	"getBit3and4":         getBit3and4,
+	"getBit1and2":         getBit1and2,
 }
 
-func callTopicFunction(data byte, f func(data byte) string) string {
-	return f(data)
+var funcMapArray = map[string]func([]byte, int) string{
+	"getPumpFlow":  getPumpFlow,
+	"getWord":      getWord,
+	"getErrorInfo": getErrorInfo,
 }
 
 func getBit7and8(input byte) string {
@@ -41,10 +48,6 @@ func getIntMinus1Times50(input byte) string {
 	value := int(input) - 1
 	return fmt.Sprintf("%d", value*50)
 
-}
-
-func unknown(input byte) string {
-	return "-1"
 }
 
 func getIntMinus128(input byte) string {
@@ -115,14 +118,18 @@ func getBit5and6(input byte) string {
 
 }
 
-func getPumpFlow(data []byte) string { // TOP1 //
+func getWord(data []byte, index int) string {
+	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
+}
+
+func getPumpFlow(data []byte, _ int) string { // TOP1 //
 	PumpFlow1 := int(data[170])
 	PumpFlow2 := ((float64(data[169]) - 1) / 256)
 	PumpFlow := float64(PumpFlow1) + PumpFlow2
 	return fmt.Sprintf("%.2f", PumpFlow)
 }
 
-func getErrorInfo(data []byte) string { // TOP44 //
+func getErrorInfo(data []byte, _ int) string { // TOP44 //
 	errorType := int(data[113])
 	errorNumber := int(data[114]) - 17
 	var errorString string
@@ -141,73 +148,25 @@ func getErrorInfo(data []byte) string { // TOP44 //
 }
 
 func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
-
-	m := map[string]func(byte) string{
-		"getBit7and8":         getBit7and8,
-		"unknown":             unknown,
-		"getRight3bits":       getRight3bits,
-		"getIntMinus1Div5":    getIntMinus1Div5,
-		"getIntMinus1Times50": getIntMinus1Times50,
-		"getIntMinus1Times10": getIntMinus1Times10,
-		"getBit3and4and5":     getBit3and4and5,
-		"getIntMinus128":      getIntMinus128,
-		"getBit1and2":         getBit1and2,
-		"getOpMode":           getOpMode,
-		"getIntMinus1":        getIntMinus1,
-		"getEnergy":           getEnergy,
-		"getBit5and6":         getBit5and6,
-
-		"getBit3and4": getBit3and4,
-	}
-
-	for k, v := range allTopics {
-		var inputByte byte
+	for _, v := range allTopics {
 		var topicValue string
-		switch v.TopicName {
-		case "Pump_Flow":
-			topicValue = getPumpFlow(data)
-		case "Operations_Hours":
-			d := make([]byte, 2)
-			d[0] = data[183]
-			d[1] = data[182]
-			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case "Operations_Counter":
-			d := make([]byte, 2)
-			d[0] = data[180]
-			d[1] = data[179]
-			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case "Room_Heater_Operations_Hours":
-			d := make([]byte, 2)
-			d[0] = data[186]
-			d[1] = data[185]
-			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case "DHW_Heater_Operations_Hours":
-			d := make([]byte, 2)
-			d[0] = data[189]
-			d[1] = data[188]
-			topicValue = fmt.Sprintf("%d", int(binary.BigEndian.Uint16(d))-1)
-		case "Error":
-			topicValue = getErrorInfo(data)
-		default:
-			inputByte = data[v.TopicBit]
-			if _, ok := m[v.TopicFunction]; ok {
-				topicValue = callTopicFunction(inputByte, m[v.TopicFunction])
-			} else {
-				log.Println("NIE MA FUNKCJI", v.TopicFunction)
-			}
+
+		if byteOperator, ok := funcMapByte[v.TopicFunction]; ok {
+			topicValue = byteOperator(byte(data[v.TopicBit]))
+		} else if arrayOperator, ok := funcMapArray[v.TopicFunction]; ok {
+			topicValue = arrayOperator(data, v.TopicBit)
+		} else {
+			log.Println("Unknown codec function: ", v.TopicFunction)
 		}
 
 		if v.TopicValue != topicValue {
 			v.TopicValue = topicValue
-			log.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
+			log.Printf("received %s: %s \n", v.TopicName, topicValue)
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
-			token = mclient.Publish(TOP, byte(0), false, topicValue)
+			token = mclient.Publish(TOP, byte(0), true, topicValue)
 			if token.Wait() && token.Error() != nil {
 				log.Printf("Fail to publish, %v", token.Error())
 			}
-
 		}
-
 	}
-
 }
