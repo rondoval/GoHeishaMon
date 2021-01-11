@@ -11,86 +11,10 @@ var goodreads float64
 var totalreads float64
 var readpercentage float64
 
-func logMessage(a string) {
-	log.Println(a)
-}
-
-func logHex(command []byte, length int) {
-	log.Printf("% X \n", string(command))
-
-}
-
-func calcChecksum(command []byte) byte {
-	var chk byte = 0
-	for _, v := range command {
-		chk += v
-	}
-	return (chk ^ 0xFF) + 01
-}
-
-func sendCommand(command []byte, length int) bool {
-
-	var chk byte
-	chk = calcChecksum(command)
-	var bytesSent int
-
-	bytesSent, err := serialPort.Write(command) //first send command
-	_, err = serialPort.Write([]byte{chk})      //then calculcated checksum byte afterwards
-	if err != nil {
-		log.Println(err)
-	}
-	logMsg := fmt.Sprintf("sent bytes: %d with checksum: %d ", bytesSent, int(chk))
-	logMessage(logMsg)
-
-	if config.Loghex == true {
-		logHex(command, length)
-	}
-	return true
-}
-
-func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
-
-	dataLength := 203
-
-	totalreads++
-	data := make([]byte, dataLength)
-	n, err := serialPort.Read(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if n == 0 {
-		fmt.Println("\nEOF")
-
-	}
-
-	//panasonic read is always 203 on valid receive, if not yet there wait for next read
-	logMessage("Received 203 bytes data\n")
+func logHex(command []byte) {
 	if config.Loghex {
-		logHex(data, dataLength)
+		log.Printf("%X\n", command)
 	}
-	if !isValidReceiveHeader(data) {
-		logMessage("Received wrong header!\n")
-		dataLength = 0 //for next attempt;
-		return false
-	}
-	if !isValidReceiveChecksum(data) {
-		logMessage("Checksum received false!")
-		dataLength = 0 //for next attempt
-		return false
-	}
-	logMessage("Checksum and header received ok!")
-	dataLength = 0 //for next attempt
-	goodreads++
-	readpercentage = ((goodreads / totalreads) * 100)
-	logMsg := fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage)
-	logMessage(logMsg)
-	decodeHeatpumpData(data, MC, MT)
-	token := MC.Publish(fmt.Sprintf("%s/LWT", config.MqttSetBase), byte(0), false, "Online")
-	if token.Wait() && token.Error() != nil {
-		log.Printf("Fail to publish, %v", token.Error())
-	}
-	return true
-
 }
 
 func isValidReceiveHeader(data []byte) bool {
@@ -103,4 +27,58 @@ func isValidReceiveChecksum(data []byte) bool {
 		chk += v
 	}
 	return (chk == 0) //all received bytes + checksum should result in 0
+}
+
+func calcChecksum(command []byte) byte {
+	var chk byte = 0
+	for _, v := range command {
+		chk += v
+	}
+	return (chk ^ 0xFF) + 01
+}
+
+func sendCommand(command []byte) {
+	var chk = calcChecksum(command)
+
+	_, err := serialPort.Write(command) //first send command
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = serialPort.Write([]byte{chk}) //then calculcated checksum byte afterwards
+	if err != nil {
+		log.Println(err)
+	}
+	logHex(command)
+}
+
+func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
+	const dataLength = 203
+
+	totalreads++
+	data := make([]byte, dataLength)
+	n, err := serialPort.Read(data)
+	if err != nil {
+		//TODO reopen port?
+		log.Fatal(err)
+	}
+	if n != dataLength {
+		// no data received or synchornizing with the stream
+		return false
+	}
+
+	logHex(data)
+	if !isValidReceiveHeader(data) {
+		log.Println("Received wrong header!")
+		return false
+	}
+	if !isValidReceiveChecksum(data) {
+		log.Println("Checksum received false!")
+		return false
+	}
+	log.Println("Checksum and header received ok!")
+	goodreads++
+	readpercentage = ((goodreads / totalreads) * 100)
+	log.Println(fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage))
+	decodeHeatpumpData(data, MC, MT)
+	return true
 }
