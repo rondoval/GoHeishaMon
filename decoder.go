@@ -28,6 +28,7 @@ var funcMapArray = map[string]func([]byte, int) string{
 	"getPumpFlow":  getPumpFlow,
 	"getWord":      getWord,
 	"getErrorInfo": getErrorInfo,
+	"pumpModel":    pumpModel,
 }
 
 func getBit7and8(input byte) string {
@@ -122,6 +123,11 @@ func getWord(data []byte, index int) string {
 	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
 }
 
+func pumpModel(data []byte, index int) string {
+	// TODO
+	return "unknown"
+}
+
 func getPumpFlow(data []byte, _ int) string { // TOP1 //
 	PumpFlow1 := int(data[170])
 	PumpFlow2 := ((float64(data[169]) - 1) / 256)
@@ -161,7 +167,7 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 
 		if v.TopicValue != topicValue {
 			v.TopicValue = topicValue
-			log.Printf("received %s: %s \n", v.TopicName, topicValue)
+			//			log.Printf("received %s: %s \n", v.TopicName, topicValue)
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
 			token := mclient.Publish(TOP, byte(0), true, topicValue)
 			if token.Wait() && token.Error() != nil {

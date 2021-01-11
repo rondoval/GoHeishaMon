@@ -383,7 +383,7 @@
   topicBit: 188
   topicDisplayUnit: h
 - topicName: Heat_Pump_Model
-  topicFunction: unknown
+  topicFunction: pumpModel
   topicBit: 132
   topicDisplayUnit: Model
 - topicName: Pump_Duty
