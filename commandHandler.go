@@ -17,34 +17,33 @@ func makeSwitchTopic(name string, state string) {
 	t.StateTopic = config.MqttTopicBase + "/" + state
 	t.CommandTopic = config.MqttSetBase + "/" + name
 	t.UID = fmt.Sprintf("Aquarea-%s-%s", config.MqttLogin, t.Name)
-	switchTopics[name] = t
-
+	switchTopics = append(switchTopics, t)
 }
 
-func startsub(c mqtt.Client) {
-	token := c.Publish(fmt.Sprintf("%s/LWT", config.MqttSetBase), byte(0), true, "Online")
+func subscribe(mclient mqtt.Client) {
+	token := mclient.Publish(fmt.Sprintf("%s/LWT", config.MqttSetBase), byte(0), true, "Online")
 	if token.Wait() && token.Error() != nil {
 		log.Printf("Fail to publish, %v", token.Error())
 	}
 
 	var t autoDiscoverStruct
-	c.Subscribe(config.MqttSetBase+"/SetHeatpump", 2, handleSetHeatpump)
+	mclient.Subscribe(config.MqttSetBase+"/SetHeatpump", 2, handleSetHeatpump)
 	makeSwitchTopic("SetHeatpump", "Heatpump_State")
-	c.Subscribe(config.MqttSetBase+"/SetQuietMode", 2, handleSetQuietMode)
-	c.Subscribe(config.MqttSetBase+"/SetZ1HeatRequestTemperature", 2, handleSetZ1HeatRequestTemperature)
-	c.Subscribe(config.MqttSetBase+"/SetZ1CoolRequestTemperature", 2, handleSetZ1CoolRequestTemperature)
-	c.Subscribe(config.MqttSetBase+"/SetZ2HeatRequestTemperature", 2, handleSetZ2HeatRequestTemperature)
-	c.Subscribe(config.MqttSetBase+"/SetZ2CoolRequestTemperature", 2, handleSetZ2CoolRequestTemperature)
-	c.Subscribe(config.MqttSetBase+"/SetOperationMode", 2, handleSetOperationMode)
-	c.Subscribe(config.MqttSetBase+"/SetForceDHW", 2, handleSetForceDHW)
+	mclient.Subscribe(config.MqttSetBase+"/SetQuietMode", 2, handleSetQuietMode)
+	mclient.Subscribe(config.MqttSetBase+"/SetZ1HeatRequestTemperature", 2, handleSetZ1HeatRequestTemperature)
+	mclient.Subscribe(config.MqttSetBase+"/SetZ1CoolRequestTemperature", 2, handleSetZ1CoolRequestTemperature)
+	mclient.Subscribe(config.MqttSetBase+"/SetZ2HeatRequestTemperature", 2, handleSetZ2HeatRequestTemperature)
+	mclient.Subscribe(config.MqttSetBase+"/SetZ2CoolRequestTemperature", 2, handleSetZ2CoolRequestTemperature)
+	mclient.Subscribe(config.MqttSetBase+"/SetOperationMode", 2, handleSetOperationMode)
+	mclient.Subscribe(config.MqttSetBase+"/SetForceDHW", 2, handleSetForceDHW)
 	makeSwitchTopic("SetForceDHW", "Force_DHW_State")
-	c.Subscribe(config.MqttSetBase+"/SetForceDefrost", 2, handleSetForceDefrost)
+	mclient.Subscribe(config.MqttSetBase+"/SetForceDefrost", 2, handleSetForceDefrost)
 	makeSwitchTopic("SetForceDefrost", "Defrosting_State")
-	c.Subscribe(config.MqttSetBase+"/SetForceSterilization", 2, handleSetForceSterilization)
+	mclient.Subscribe(config.MqttSetBase+"/SetForceSterilization", 2, handleSetForceSterilization)
 	makeSwitchTopic("SetForceSterilization", "Sterilization_State")
-	c.Subscribe(config.MqttSetBase+"/SetHolidayMode", 2, handleSetHolidayMode)
+	mclient.Subscribe(config.MqttSetBase+"/SetHolidayMode", 2, handleSetHolidayMode)
 	makeSwitchTopic("SetHolidayMode", "Holiday_Mode_State")
-	c.Subscribe(config.MqttSetBase+"/SetPowerfulMode", 2, handleSetPowerfulMode)
+	mclient.Subscribe(config.MqttSetBase+"/SetPowerfulMode", 2, handleSetPowerfulMode)
 
 	t.Name = "TEST-SetPowerfulMode-30min"
 	t.CommandTopic = config.MqttSetBase + "/SetPowerfulMode"
@@ -54,7 +53,7 @@ func startsub(c mqtt.Client) {
 	t.StateON = "on"
 	t.StateOff = "off"
 	t.ValueTemplate = `{%- if value == "1" -%} on {%- else -%} off {%- endif -%}`
-	switchTopics["SetPowerfulMode1"] = t
+	switchTopics = append(switchTopics, t)
 	t = autoDiscoverStruct{}
 	t.Name = "TEST-SetPowerfulMode-60min"
 	t.CommandTopic = config.MqttSetBase + "/SetPowerfulMode"
@@ -64,7 +63,7 @@ func startsub(c mqtt.Client) {
 	t.StateON = "on"
 	t.StateOff = "off"
 	t.ValueTemplate = `{%- if value == "2" -%} on {%- else -%} off {%- endif -%}`
-	switchTopics["SetPowerfulMode2"] = t
+	switchTopics = append(switchTopics, t)
 	t = autoDiscoverStruct{}
 	t.Name = "TEST-SetPowerfulMode-90min"
 	t.CommandTopic = config.MqttSetBase + "/SetPowerfulMode"
@@ -74,16 +73,13 @@ func startsub(c mqtt.Client) {
 	t.StateON = "on"
 	t.StateOff = "off"
 	t.ValueTemplate = `{%- if value == "3" -%} on {%- else -%} off {%- endif -%}`
-	switchTopics["SetPowerfulMode3"] = t
-	t = autoDiscoverStruct{}
+	switchTopics = append(switchTopics, t)
 
-	c.Subscribe(config.MqttSetBase+"/SetDHWTemp", 2, handleSetDHWTemp)
-	c.Subscribe(config.MqttSetBase+"/SendRawValue", 2, handleSendRawValue)
+	mclient.Subscribe(config.MqttSetBase+"/SetDHWTemp", 2, handleSetDHWTemp)
+	mclient.Subscribe(config.MqttSetBase+"/SendRawValue", 2, handleSendRawValue)
 	if config.EnableCommand == true {
-		c.Subscribe(config.MqttSetBase+"/OSCommand", 2, handleOSCommand)
+		mclient.Subscribe(config.MqttSetBase+"/OSCommand", 2, handleOSCommand)
 	}
-
-	//Perform additional action...
 }
 
 func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {

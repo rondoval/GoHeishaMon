@@ -9,7 +9,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
+func publishTopicsToAutoDiscover(mclient mqtt.Client) {
 	for k, v := range allTopics {
 		var m autoDiscoverStruct
 		m.UID = fmt.Sprintf("Aquarea-%s-%d", config.MqttLogin, k)
@@ -39,7 +39,7 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 
 		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, v.TopicType, strings.ReplaceAll(m.Name, " ", "_"))
-		token = mclient.Publish(TOP, byte(0), true, topicValue)
+		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Fail to publish, %v", token.Error())
 		}
@@ -56,7 +56,7 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 
 		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
-		token = mclient.Publish(TOP, byte(0), true, topicValue)
+		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Fail to publish, %v", token.Error())
 		}

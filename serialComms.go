@@ -51,7 +51,7 @@ func sendCommand(command []byte) {
 	logHex(command)
 }
 
-func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
+func readSerial(mclient mqtt.Client) bool {
 	const dataLength = 203
 
 	totalreads++
@@ -79,6 +79,6 @@ func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
 	goodreads++
 	readpercentage = ((goodreads / totalreads) * 100)
 	log.Println(fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage))
-	decodeHeatpumpData(data, MC, MT)
+	decodeHeatpumpData(data, mclient)
 	return true
 }

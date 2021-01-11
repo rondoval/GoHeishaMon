@@ -147,7 +147,7 @@ func getErrorInfo(data []byte, _ int) string { // TOP44 //
 	return errorString
 }
 
-func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
+func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 	for _, v := range allTopics {
 		var topicValue string
 
@@ -163,7 +163,7 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 			v.TopicValue = topicValue
 			log.Printf("received %s: %s \n", v.TopicName, topicValue)
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
-			token = mclient.Publish(TOP, byte(0), true, topicValue)
+			token := mclient.Publish(TOP, byte(0), true, topicValue)
 			if token.Wait() && token.Error() != nil {
 				log.Printf("Fail to publish, %v", token.Error())
 			}
