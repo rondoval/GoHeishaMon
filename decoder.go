@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -194,26 +195,26 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 			if _, ok := m[v.TopicFunction]; ok {
 				topicValue = callTopicFunction(inputByte, m[v.TopicFunction])
 			} else {
-				fmt.Println("NIE MA FUNKCJI", v.TopicFunction)
+				log.Println("NIE MA FUNKCJI", v.TopicFunction)
 			}
 		}
 
 		if v.TopicValue != topicValue {
 			v.TopicValue = topicValue
-			fmt.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
+			log.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
 			if config.Aquarea2mqttCompatible {
 				TOP := "aquarea/state/" + fmt.Sprintf("%s/%s", config.Aquarea2mqttPumpID, v.TopicA2M)
 				value = strings.TrimSpace(topicValue)
 				value = strings.ToUpper(topicValue)
 				token = mclient.Publish(TOP, byte(0), false, value)
 				if token.Wait() && token.Error() != nil {
-					fmt.Printf("Fail to publish, %v", token.Error())
+					log.Printf("Fail to publish, %v", token.Error())
 				}
 			}
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
 			token = mclient.Publish(TOP, byte(0), false, topicValue)
 			if token.Wait() && token.Error() != nil {
-				fmt.Printf("Fail to publish, %v", token.Error())
+				log.Printf("Fail to publish, %v", token.Error())
 			}
 
 		}

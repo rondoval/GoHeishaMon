@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -36,11 +37,11 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 		topicValue, err := json.Marshal(m)
 		//v.TopicType = "sensor"
 
-		fmt.Println(err)
+		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, v.TopicType, strings.ReplaceAll(m.Name, " ", "_"))
 		token = mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
-			fmt.Printf("Fail to publish, %v", token.Error())
+			log.Printf("Fail to publish, %v", token.Error())
 		}
 
 	}
@@ -53,11 +54,11 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client, token mqtt.Token) {
 		vs.Optimistic = "true"
 		topicValue, err := json.Marshal(vs)
 
-		fmt.Println(err)
+		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
 		token = mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
-			fmt.Printf("Fail to publish, %v", token.Error())
+			log.Printf("Fail to publish, %v", token.Error())
 		}
 	}
 

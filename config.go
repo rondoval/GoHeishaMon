@@ -47,7 +47,7 @@ func readConfig() configStruct {
 
 	_, err := os.Stat(configFile)
 	if err != nil {
-		fmt.Printf("Config file is missing: %s ", configFile)
+		log.Printf("Config file is missing: %s ", configFile)
 		updateConfig()
 	}
 
@@ -72,23 +72,23 @@ func readConfig() configStruct {
 
 func updateConfig() bool {
 	var configfile = getConfigFile()
-	fmt.Printf("try to update configfile: %s", configfile)
+	log.Printf("try to update configfile: %s", configfile)
 	out, err := exec.Command("/usr/bin/usb_mount.sh").Output()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 	}
-	fmt.Println(out)
+	log.Println(out)
 	_, err = os.Stat("/mnt/usb/GoHeishaMonConfig.new")
 	if err != nil {
 		_, _ = exec.Command("/usr/bin/usb_umount.sh").Output()
 		return false
 	}
 	if getFileChecksum(configfile) != getFileChecksum("/mnt/usb/GoHeishaMonConfig.new") {
-		fmt.Printf("checksum of configfile and new configfile diffrent: %s ", configfile)
+		log.Printf("checksum of configfile and new configfile diffrent: %s ", configfile)
 
 		_, _ = exec.Command("/bin/cp", "/mnt/usb/GoHeishaMonConfig.new", configfile).Output()
 		if err != nil {
-			fmt.Printf("can't update configfile %s", configfile)
+			log.Printf("can't update configfile %s", configfile)
 			return false
 		}
 		_, _ = exec.Command("sync").Output()

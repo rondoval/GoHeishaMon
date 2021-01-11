@@ -12,11 +12,11 @@ var totalreads float64
 var readpercentage float64
 
 func logMessage(a string) {
-	fmt.Println(a)
+	log.Println(a)
 }
 
 func logHex(command []byte, length int) {
-	fmt.Printf("% X \n", string(command))
+	log.Printf("% X \n", string(command))
 
 }
 
@@ -37,7 +37,7 @@ func sendCommand(command []byte, length int) bool {
 	bytesSent, err := serialPort.Write(command) //first send command
 	_, err = serialPort.Write([]byte{chk})      //then calculcated checksum byte afterwards
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	logMsg := fmt.Sprintf("sent bytes: %d with checksum: %d ", bytesSent, int(chk))
 	logMessage(logMsg)
@@ -87,7 +87,7 @@ func readSerial(MC mqtt.Client, MT mqtt.Token) bool {
 	decodeHeatpumpData(data, MC, MT)
 	token := MC.Publish(fmt.Sprintf("%s/LWT", config.MqttSetBase), byte(0), false, "Online")
 	if token.Wait() && token.Error() != nil {
-		fmt.Printf("Fail to publish, %v", token.Error())
+		log.Printf("Fail to publish, %v", token.Error())
 	}
 	return true
 

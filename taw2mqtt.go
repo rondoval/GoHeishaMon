@@ -41,7 +41,7 @@ func main() {
 		log.Fatal("No serial ports found!")
 	}
 	for _, port := range ports {
-		fmt.Printf("Found port: %v\n", port)
+		log.Printf("Found port: %v\n", port)
 	}
 	mode := &serial.Mode{
 		BaudRate: 9600,
@@ -51,7 +51,7 @@ func main() {
 	}
 	serialPort, err = serial.Open(config.Device, mode)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	PoolInterval := time.Second * time.Duration(config.ReadInterval)
 	loadTopics()
@@ -85,9 +85,9 @@ func main() {
 
 		select {
 		case res := <-c1:
-			fmt.Println("read ma status", res)
+			log.Println("read ma status", res)
 		case <-time.After(5 * time.Second):
-			fmt.Println("out of time for read :(")
+			log.Println("out of time for read :(")
 		}
 
 		time.Sleep(PoolInterval)
@@ -113,13 +113,13 @@ func makeMQTTConn() (mqtt.Client, mqtt.Token) {
 
 	token := client.Connect()
 	if token.Wait() && token.Error() != nil {
-		fmt.Printf("Fail to connect broker, %v", token.Error())
+		log.Printf("Fail to connect broker, %v", token.Error())
 	}
 	return client, token
 }
 
 func connLostHandler(c mqtt.Client, err error) {
-	fmt.Printf("Connection lost, reason: %v\n", err)
+	log.Printf("Connection lost, reason: %v\n", err)
 
 	//Perform additional action...
 }
