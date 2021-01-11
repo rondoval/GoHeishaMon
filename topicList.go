@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const topicsFileOther = "/data/topics.yaml"
+const topicsFileOther = "/etc/gh/topics.yaml"
 const topicsFileWindows = "topics.yaml"
 
 var allTopics []topicData
