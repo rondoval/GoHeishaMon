@@ -23,7 +23,6 @@ func makeSwitchTopic(name string, state string) {
 
 func startsub(c mqtt.Client) {
 	var t autoDiscoverStruct
-	c.Subscribe("aquarea/+/+/set", 2, handleMSGfromMQTT)
 	c.Subscribe(config.MqttSetBase+"/SetHeatpump", 2, handleSetHeatpump)
 	makeSwitchTopic("SetHeatpump", "Heatpump_State")
 	c.Subscribe(config.MqttSetBase+"/SetQuietMode", 2, handleSetQuietMode)
@@ -80,9 +79,6 @@ func startsub(c mqtt.Client) {
 	}
 
 	//Perform additional action...
-}
-
-func handleMSGfromMQTT(mclient mqtt.Client, msg mqtt.Message) {
 }
 
 func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
