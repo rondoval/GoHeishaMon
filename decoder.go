@@ -9,7 +9,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var actData [numberOfTopics]string
+var actData []string
 
 func clearActData() {
 	for {

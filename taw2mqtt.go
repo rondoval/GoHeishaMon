@@ -19,10 +19,6 @@ var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x0
 
 const panasonicQuerySize int = 110
 
-//should be the same number
-const numberOfTopics int = 95
-
-var allTopics [numberOfTopics]topicData
 var mqttKeepalive time.Duration
 var commandsToSend map[xid.ID][]byte
 var gpio map[string]string
@@ -38,18 +34,6 @@ var switchTopics map[string]autoDiscoverStruct
 type commandStruct struct {
 	value  [128]byte
 	length int
-}
-
-type topicData struct {
-	TopicNumber        int
-	TopicName          string
-	TopicBit           int
-	TopicFunction      string
-	TopicUnit          string
-	TopicA2M           string
-	TopicType          string
-	TopicDisplayUnit   string
-	TopicValueTemplate string
 }
 
 type configStruct struct {
@@ -142,7 +126,7 @@ func main() {
 		fmt.Println(err)
 	}
 	PoolInterval := time.Second * time.Duration(config.ReadInterval)
-	parseTopicList3()
+	loadTopics()
 	mqttKeepalive = time.Second * time.Duration(config.MqttKeepalive)
 	MC, MT := makeMQTTConn()
 	if config.HAAutoDiscover == true {
