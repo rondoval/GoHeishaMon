@@ -18,11 +18,9 @@ type topicData struct {
 	TopicType          string `yaml:"topicType"`
 	TopicBit           int    `yaml:"topicBit"`
 	TopicFunction      string `yaml:"topicFunction"`
-	TopicA2M           string `yaml:"topicA2M"`
 	TopicDisplayUnit   string `yaml:"topicDisplayUnit"`
 	TopicValueTemplate string `yaml:"topicValueTemplate"`
 	TopicValue         string
-	//TODO  TopicUnit is not used - remove from yaml
 }
 
 func loadTopics() {

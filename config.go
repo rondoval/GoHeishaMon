@@ -16,23 +16,21 @@ import (
 )
 
 type configStruct struct {
-	Loghex                 bool   `yaml:"loghex"`
-	Device                 string `yaml:"device"`
-	ReadInterval           int    `yaml:"readInterval"`
-	MqttServer             string `yaml:"mqttServer"`
-	MqttPort               string `yaml:"mqttPort"`
-	MqttLogin              string `yaml:"mqttLogin"`
-	Aquarea2mqttCompatible bool   `yaml:"aquarea2mqttCompatible"`
-	MqttTopicBase          string `yaml:"mqtt_topic_base"`
-	MqttSetBase            string `yaml:"mqtt_set_base"`
-	Aquarea2mqttPumpID     string `yaml:"aquarea2mqttPumpID"`
-	MqttPass               string `yaml:"mqttPass"`
-	MqttClientID           string `yaml:"mqttClientID"`
-	MqttKeepalive          int    `yaml:"mqttKeepalive"`
-	ForceRefreshTime       int    `yaml:"forceRefreshTime"`
-	EnableCommand          bool   `yaml:"enableCommand"`
-	SleepAfterCommand      int    `yaml:"sleepAfterCommand"`
-	HAAutoDiscover         bool   `yaml:"haAutoDiscover"`
+	Loghex            bool   `yaml:"loghex"`
+	Device            string `yaml:"device"`
+	ReadInterval      int    `yaml:"readInterval"`
+	MqttServer        string `yaml:"mqttServer"`
+	MqttPort          string `yaml:"mqttPort"`
+	MqttLogin         string `yaml:"mqttLogin"`
+	MqttTopicBase     string `yaml:"mqtt_topic_base"`
+	MqttSetBase       string `yaml:"mqtt_set_base"`
+	MqttPass          string `yaml:"mqttPass"`
+	MqttClientID      string `yaml:"mqttClientID"`
+	MqttKeepalive     int    `yaml:"mqttKeepalive"`
+	ForceRefreshTime  int    `yaml:"forceRefreshTime"`
+	EnableCommand     bool   `yaml:"enableCommand"`
+	SleepAfterCommand int    `yaml:"sleepAfterCommand"`
+	HAAutoDiscover    bool   `yaml:"haAutoDiscover"`
 }
 
 func getConfigFile() string {

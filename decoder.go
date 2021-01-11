@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -164,7 +163,6 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 	for k, v := range allTopics {
 		var inputByte byte
 		var topicValue string
-		var value string
 		switch v.TopicName {
 		case "Pump_Flow":
 			topicValue = getPumpFlow(data)
@@ -202,15 +200,6 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client, token mqtt.Token) {
 		if v.TopicValue != topicValue {
 			v.TopicValue = topicValue
 			log.Printf("received TOP%d %s: %s \n", k, v.TopicName, topicValue)
-			if config.Aquarea2mqttCompatible {
-				TOP := "aquarea/state/" + fmt.Sprintf("%s/%s", config.Aquarea2mqttPumpID, v.TopicA2M)
-				value = strings.TrimSpace(topicValue)
-				value = strings.ToUpper(topicValue)
-				token = mclient.Publish(TOP, byte(0), false, value)
-				if token.Wait() && token.Error() != nil {
-					log.Printf("Fail to publish, %v", token.Error())
-				}
-			}
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
 			token = mclient.Publish(TOP, byte(0), false, topicValue)
 			if token.Wait() && token.Error() != nil {
