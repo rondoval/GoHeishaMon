@@ -154,7 +154,7 @@ func getErrorInfo(data []byte, _ int) string { // TOP44 //
 }
 
 func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
-	for _, v := range allTopics {
+	for k, v := range allTopics {
 		var topicValue string
 
 		if byteOperator, ok := funcMapByte[v.TopicFunction]; ok {
@@ -167,6 +167,7 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 
 		if v.TopicValue != topicValue {
 			v.TopicValue = topicValue
+			allTopics[k] = v
 			//			log.Printf("received %s: %s \n", v.TopicName, topicValue)
 			TOP := fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
 			token := mclient.Publish(TOP, byte(0), true, topicValue)

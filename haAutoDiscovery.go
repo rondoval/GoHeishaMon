@@ -35,9 +35,11 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client) {
 		m.StateTopic = fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
 		m.Name = fmt.Sprintf("TEST-%s", v.TopicName)
 		topicValue, err := json.Marshal(m)
+		if err != nil {
+			log.Println(err)
+		}
 		//v.TopicType = "sensor"
 
-		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, v.TopicType, strings.ReplaceAll(m.Name, " ", "_"))
 		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
@@ -53,8 +55,10 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client) {
 		}
 		vs.Optimistic = "true"
 		topicValue, err := json.Marshal(vs)
+		if err != nil {
+			log.Println(err)
+		}
 
-		log.Println(err)
 		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
 		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {

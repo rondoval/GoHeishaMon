@@ -69,12 +69,11 @@ func readConfig() configStruct {
 func updateConfig() {
 	var configfile = getConfigFile()
 	log.Printf("Attempting to update config file: %s", configfile)
-	out, err := exec.Command("/usr/bin/usb_mount.sh").Output()
+	_, err := exec.Command("/usr/bin/usb_mount.sh").Output()
 	defer exec.Command("/usr/bin/usb_umount.sh").Output()
 	if err != nil {
 		log.Println(err.Error())
 	}
-	log.Println(out)
 
 	_, err = os.Stat("/mnt/usb/GoHeishaMonConfig.new")
 	if err != nil {
