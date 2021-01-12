@@ -13,34 +13,34 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client) {
 	for k, v := range allTopics {
 		var m autoDiscoverStruct
 		m.UID = fmt.Sprintf("Aquarea-%s-%d", config.MqttLogin, k)
-		if v.TopicType == "" {
-			v.TopicType = "sensor"
+		if v.SensorType == "" {
+			v.SensorType = "sensor"
 		}
-		m.ValueTemplate = v.TopicValueTemplate
+		//m.ValueTemplate = v.TopicValueTemplate
 
-		m.UnitOfM = v.TopicDisplayUnit
+		m.UnitOfM = v.DisplayUnit
 
-		if v.TopicType == "binary_sensor" {
+		if v.SensorType == "binary_sensor" {
 			m.UnitOfM = ""
 			m.PayloadOn = "1"
 			m.PayloadOff = "0"
 			m.ValueTemplate = `{{ value }}`
 		}
-		if v.TopicDisplayUnit == "°C" {
+		if v.DisplayUnit == "°C" {
 			m.DeviceClass = "temperature"
 		}
-		if v.TopicDisplayUnit == "W" {
+		if v.DisplayUnit == "W" {
 			m.DeviceClass = "power"
 		}
-		m.StateTopic = fmt.Sprintf("%s/%s", config.MqttTopicBase, v.TopicName)
-		m.Name = fmt.Sprintf("TEST-%s", v.TopicName)
+		m.StateTopic = fmt.Sprintf("%s/%s", config.mqttValuesTopic, v.SensorName)
+		m.Name = fmt.Sprintf("TEST-%s", v.SensorName)
 		topicValue, err := json.Marshal(m)
 		if err != nil {
 			log.Println(err)
 		}
 		//v.TopicType = "sensor"
 
-		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, v.TopicType, strings.ReplaceAll(m.Name, " ", "_"))
+		TOP := fmt.Sprintf("%s/%s/%s/config", config.mqttDiscoveryTopic, v.SensorType, strings.ReplaceAll(m.Name, " ", "_"))
 		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Fail to publish, %v", token.Error())
@@ -59,7 +59,7 @@ func publishTopicsToAutoDiscover(mclient mqtt.Client) {
 			log.Println(err)
 		}
 
-		TOP := fmt.Sprintf("%s/%s/%s/config", config.MqttTopicBase, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
+		TOP := fmt.Sprintf("%s/%s/%s/config", config.mqttDiscoveryTopic, "switch", strings.ReplaceAll(vs.Name, " ", "_"))
 		token := mclient.Publish(TOP, byte(0), true, topicValue)
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Fail to publish, %v", token.Error())

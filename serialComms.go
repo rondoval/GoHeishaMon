@@ -12,7 +12,7 @@ var totalreads float64
 var readpercentage float64
 
 func logHex(command []byte) {
-	if config.Loghex {
+	if config.LogHexDump {
 		log.Printf("%X\n", command)
 	}
 }
@@ -75,9 +75,9 @@ func readSerial(mclient mqtt.Client) bool {
 		log.Println("Checksum received false!")
 		return false
 	}
-	log.Println("Checksum and header received ok!")
 	goodreads++
 	readpercentage = ((goodreads / totalreads) * 100)
+	//TODO stats over mqtt
 	log.Println(fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage))
 	decodeHeatpumpData(data, mclient)
 	return true

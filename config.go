@@ -16,20 +16,29 @@ import (
 )
 
 type configStruct struct {
-	Device            string `yaml:"device"`
-	Loghex            bool   `yaml:"loghex"`
-	ReadInterval      int    `yaml:"readInterval"`
-	MqttTopicBase     string `yaml:"mqtt_topic_base"`
-	MqttSetBase       string `yaml:"mqtt_set_base"`
-	MqttServer        string `yaml:"mqttServer"`
-	MqttPort          string `yaml:"mqttPort"`
-	MqttLogin         string `yaml:"mqttLogin"`
-	MqttPass          string `yaml:"mqttPass"`
-	MqttClientID      string `yaml:"mqttClientID"`
-	MqttKeepalive     int    `yaml:"mqttKeepalive"`
-	EnableCommand     bool   `yaml:"enableCommand"`
-	SleepAfterCommand int    `yaml:"sleepAfterCommand"`
-	HAAutoDiscover    bool   `yaml:"haAutoDiscover"`
+	Device        string `yaml:"device"`
+	ReadInterval  int    `yaml:"readInterval"`
+	OptionalPCB   bool   `yaml:"optionalPCB"` //TODO
+	MqttServer    string `yaml:"mqttServer"`
+	MqttPort      string `yaml:"mqttPort"`
+	MqttLogin     string `yaml:"mqttLogin"`
+	MqttPass      string `yaml:"mqttPass"`
+	MqttKeepalive int    `yaml:"mqttKeepalive"`
+	MqttTopicBase string `yaml:"mqttTopicBase"`
+	LogMqtt       bool   `yaml:"logmqtt"` //TODO
+	LogHexDump    bool   `yaml:"loghex"`
+	// TODO potrzebne?
+	EnableCommand     bool `yaml:"enableCommand"`
+	SleepAfterCommand int  `yaml:"sleepAfterCommand"`
+	HAAutoDiscover    bool `yaml:"haAutoDiscover"`
+
+	//topics
+	mqttWillTopic      string
+	mqttLogTopic       string
+	mqttValuesTopic    string
+	mqttPcbValuesTopic string
+	mqttCommandsTopic  string
+	mqttDiscoveryTopic string
 }
 
 func getConfigFile() string {
@@ -63,6 +72,14 @@ func readConfig() configStruct {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	config.mqttWillTopic = config.MqttTopicBase + "LWT"
+	config.mqttLogTopic = config.MqttTopicBase + "log"
+	config.mqttValuesTopic = config.MqttTopicBase + "main"
+	config.mqttPcbValuesTopic = config.MqttTopicBase + "optional"
+	config.mqttCommandsTopic = config.MqttTopicBase + "commands"
+	config.mqttDiscoveryTopic = config.MqttTopicBase + "discovery"
+
 	return config
 }
 

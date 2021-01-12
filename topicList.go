@@ -14,13 +14,13 @@ const topicsFileWindows = "topics.yaml"
 var allTopics []topicData
 
 type topicData struct {
-	TopicName          string `yaml:"topicName"`
-	TopicType          string `yaml:"topicType"`
-	TopicBit           int    `yaml:"topicBit"`
-	TopicFunction      string `yaml:"topicFunction"`
-	TopicDisplayUnit   string `yaml:"topicDisplayUnit"`
-	TopicValueTemplate string `yaml:"topicValueTemplate"`
-	TopicValue         string
+	SensorName     string   `yaml:"sensorName"`
+	SensorType     string   `yaml:"sensorType"`
+	DecodeOffset   int      `yaml:"decodeOffset"`
+	DecodeFunction string   `yaml:"decodeFunction"`
+	DisplayUnit    string   `yaml:"displayUnit"`
+	Values         []string `yaml:"values"`
+	currentValue   string
 }
 
 func loadTopics() {
