@@ -94,7 +94,7 @@ func makeMQTTConn() mqtt.Client {
 
 	opts.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
 	opts.SetAutoReconnect(true) // default, but I want it explicit
-	opts.SetOnConnectHandler(subscribe)
+	opts.SetOnConnectHandler(onMQTTConnect)
 
 	// connect to broker
 	client := mqtt.NewClient(opts)

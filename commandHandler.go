@@ -11,35 +11,48 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func subscribe(mclient mqtt.Client) {
+var commandCallbacks = map[string]func(mqtt.Client, mqtt.Message){
+	"SetHeatpump":                 handleSetHeatpump,
+	"SetForceDHW":                 handleSetForceDHW,
+	"SetForceDefrost":             handleSetForceDefrost,
+	"SetForceSterilization":       handleSetForceSterilization,
+	"SetHolidayMode":              handleSetHolidayMode,
+	"SetPowerfulMode":             handleSetPowerfulMode,
+	"SetQuietMode":                handleSetQuietMode,
+	"SetZ1HeatRequestTemperature": handleSetZ1HeatRequestTemperature,
+	"SetZ1CoolRequestTemperature": handleSetZ1CoolRequestTemperature,
+	"SetZ2HeatRequestTemperature": handleSetZ2HeatRequestTemperature,
+	"SetZ2CoolRequestTemperature": handleSetZ2CoolRequestTemperature,
+	"SetOperationMode":            handleSetOperationMode,
+	"SetDHWTemp":                  handleSetDHWTemp,
+	"SendRawValue":                handleSendRawValue,
+	"OSCommand":                   handleOSCommand,
+}
+
+func onCommand(mclient mqtt.Client, msg mqtt.Message) {
+	topicPieces := strings.Split(msg.Topic(), "/")
+	function := topicPieces[len(topicPieces)-1]
+
+	if callback, ok := commandCallbacks[function]; ok {
+		callback(mclient, msg)
+	} else {
+		log.Println("Unknown callback function: ", function)
+	}
+}
+
+func onMQTTConnect(mclient mqtt.Client) {
 	token := mclient.Publish(config.mqttWillTopic, byte(0), true, "online")
 	if token.Wait() && token.Error() != nil {
 		log.Printf("Fail to publish, %v", token.Error())
 	}
-	// binary
-	mclient.Subscribe(getCommandTopic("SetHeatpump"), 2, handleSetHeatpump)
-	mclient.Subscribe(getCommandTopic("SetForceDHW"), 2, handleSetForceDHW)
-	mclient.Subscribe(getCommandTopic("SetForceDefrost"), 2, handleSetForceDefrost)
-	mclient.Subscribe(getCommandTopic("SetForceSterilization"), 2, handleSetForceSterilization)
-	mclient.Subscribe(getCommandTopic("SetHolidayMode"), 2, handleSetHolidayMode)
 
-	mclient.Subscribe(getCommandTopic("SetPowerfulMode"), 2, handleSetPowerfulMode)
-
-	// not binary
-	mclient.Subscribe(getCommandTopic("SetQuietMode"), 2, handleSetQuietMode)
-	mclient.Subscribe(getCommandTopic("SetZ1HeatRequestTemperature"), 2, handleSetZ1HeatRequestTemperature)
-	mclient.Subscribe(getCommandTopic("SetZ1CoolRequestTemperature"), 2, handleSetZ1CoolRequestTemperature)
-	mclient.Subscribe(getCommandTopic("SetZ2HeatRequestTemperature"), 2, handleSetZ2HeatRequestTemperature)
-	mclient.Subscribe(getCommandTopic("SetZ2CoolRequestTemperature"), 2, handleSetZ2CoolRequestTemperature)
-	mclient.Subscribe(getCommandTopic("SetOperationMode"), 2, handleSetOperationMode)
-	mclient.Subscribe(getCommandTopic("SetDHWTemp"), 2, handleSetDHWTemp)
-	mclient.Subscribe(getCommandTopic("SendRawValue"), 2, handleSendRawValue)
-	if config.EnableCommand == true {
-		mclient.Subscribe(getCommandTopic("OSCommand"), 2, handleOSCommand)
-	}
+	mclient.Subscribe(getCommandTopic("+"), 2, onCommand)
 }
 
 func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
+	if config.EnableCommand == false {
+		return
+	}
 	var cmd *exec.Cmd
 	var out2 string
 	s := strings.Split(string(msg.Payload()), " ")
