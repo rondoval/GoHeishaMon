@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/md5"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,17 +17,20 @@ import (
 )
 
 type configStruct struct {
-	Device        string `yaml:"device"`
-	ReadInterval  int    `yaml:"readInterval"`
-	OptionalPCB   bool   `yaml:"optionalPCB"` //TODO
+	DeviceName   string `yaml:"deviceName"` // for HA discovery
+	Device       string `yaml:"device"`
+	ReadInterval int    `yaml:"readInterval"`
+	OptionalPCB  bool   `yaml:"optionalPCB"` //TODO
+
 	MqttServer    string `yaml:"mqttServer"`
 	MqttPort      string `yaml:"mqttPort"`
 	MqttLogin     string `yaml:"mqttLogin"`
 	MqttPass      string `yaml:"mqttPass"`
 	MqttKeepalive int    `yaml:"mqttKeepalive"`
 	MqttTopicBase string `yaml:"mqttTopicBase"`
-	LogMqtt       bool   `yaml:"logmqtt"` //TODO
-	LogHexDump    bool   `yaml:"loghex"`
+
+	LogMqtt    bool `yaml:"logmqtt"` //TODO
+	LogHexDump bool `yaml:"loghex"`
 	// TODO potrzebne?
 	EnableCommand     bool `yaml:"enableCommand"`
 	SleepAfterCommand int  `yaml:"sleepAfterCommand"`
@@ -38,7 +42,18 @@ type configStruct struct {
 	mqttValuesTopic    string
 	mqttPcbValuesTopic string
 	mqttCommandsTopic  string
-	mqttDiscoveryTopic string
+}
+
+func getStatusTopic(name string) string {
+	return fmt.Sprintf("%s/%s", config.mqttValuesTopic, name)
+}
+
+func getCommandTopic(name string) string {
+	return fmt.Sprintf("%s/%s", config.mqttCommandsTopic, name)
+}
+
+func getPcbStatusTopic(name string) string {
+	return fmt.Sprintf("%s/%s", config.mqttPcbValuesTopic, name)
 }
 
 func getConfigFile() string {
@@ -78,7 +93,6 @@ func readConfig() configStruct {
 	config.mqttValuesTopic = config.MqttTopicBase + "main"
 	config.mqttPcbValuesTopic = config.MqttTopicBase + "optional"
 	config.mqttCommandsTopic = config.MqttTopicBase + "commands"
-	config.mqttDiscoveryTopic = config.MqttTopicBase + "discovery"
 
 	return config
 }

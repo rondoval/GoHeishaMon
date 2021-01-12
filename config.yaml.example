@@ -1,3 +1,4 @@
+deviceName: "B121679621"
 device: "/dev/ttyUSB0"
 readInterval: 1
 optionalPCB: true
@@ -9,6 +10,6 @@ mqttKeepalive: 60
 mqttTopicBase: "panasonic_heat_pump"
 logmqtt: true
 loghex: false
-enableCommand: true
+enableCommand: false
 sleepAfterCommand: 1
 haAutoDiscover: true

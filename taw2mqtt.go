@@ -13,13 +13,11 @@ var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x0
 var optionalPCBQuery []byte = []byte{0xF1, 0x11, 0x01, 0x50, 0x00, 0x00, 0x40, 0xFF, 0xFF, 0xE5, 0xFF, 0xFF, 0x00, 0xFF, 0xEB, 0xFF, 0xFF, 0x00, 0x00}
 var config configStruct
 var serialPort serial.Port
-var switchTopics []autoDiscoverStruct
 var commandsChannel chan []byte
 
 func main() {
 	config = readConfig()
 
-	switchTopics = make([]autoDiscoverStruct, 0, 50)
 	commandsChannel = make(chan []byte, 100)
 	timeoutChannel := make(chan bool)
 
@@ -50,7 +48,7 @@ func main() {
 	loadTopics()
 	mclient := makeMQTTConn()
 	if config.HAAutoDiscover == true {
-		publishTopicsToAutoDiscover(mclient)
+		publishDiscoveryTopics(mclient)
 	}
 
 	for {
@@ -91,7 +89,7 @@ func makeMQTTConn() mqtt.Client {
 	opts.SetPassword(config.MqttPass)
 	opts.SetUsername(config.MqttLogin)
 	opts.SetClientID("GoHeishaMon-pub")
-	opts.SetWill(config.mqttWillTopic, "Offline", 1, true)
+	opts.SetWill(config.mqttWillTopic, "offline", 1, true)
 	opts.SetKeepAlive(time.Second * time.Duration(config.MqttKeepalive))
 
 	opts.SetCleanSession(true)  // don't want to receive entire backlog of setting changes

@@ -2,10 +2,10 @@
 - sensorName: Heatpump_State
   decodeFunction: getBit7and8
   decodeOffset: 4
-  sensorType: binary_sensor
   values:
     - 'Off'
     - 'On'
+  command: SetHeatpump
 - sensorName: Pump_Flow
   decodeFunction: getPumpFlow
   decodeOffset: 0
@@ -13,14 +13,13 @@
 - sensorName: Force_DHW_State
   decodeFunction: getBit1and2
   decodeOffset: 4
-  sensorType: binary_sensor
   values:
     - Disabled
     - Enabled
+  command: SetForceDHW
 - sensorName: Quiet_Mode_Schedule
   decodeFunction: getBit1and2
   decodeOffset: 7
-  sensorType: binary_sensor
   values:
     - Disabled
     - Enabled
@@ -64,7 +63,7 @@
 - sensorName: Operations_Hours
   decodeFunction: getWord
   decodeOffset: 182
-  displayUnit: hours
+  displayUnit: h
 - sensorName: Operations_Counter
   decodeFunction: getWord
   decodeOffset: 179
@@ -72,7 +71,6 @@
 - sensorName: Main_Schedule_State
   decodeFunction: getBit1and2
   decodeOffset: 5
-  sensorType: binary_sensor
   values:
     - Disabled
     - Enabled
@@ -107,11 +105,11 @@
 - sensorName: Holiday_Mode_State
   decodeFunction: getBit3and4
   decodeOffset: 5
-  sensorType: binary_sensor
   values:
     - 'Off'
     - Scheduled
     - Active
+  command: SetHolidayMode
 - sensorName: ThreeWay_Valve_State
   decodeFunction: getBit7and8
   decodeOffset: 111
@@ -141,10 +139,10 @@
 - sensorName: Defrosting_State
   decodeFunction: getBit5and6
   decodeOffset: 111
-  sensorType: binary_sensor
   values:
     - Disabled
     - Enabled
+  command: SetForceDefrost
 - sensorName: Z1_Heat_Request_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 38
@@ -271,29 +269,24 @@
 - sensorName: DHW_Heater_State
   decodeFunction: getBit5and6
   decodeOffset: 9
-  sensorType: binary_sensor
   values:
     - Blocked
     - Free
-  displayUnit: BlockedFree
 - sensorName: Room_Heater_State
   decodeFunction: getBit7and8
   decodeOffset: 9
-  sensorType: binary_sensor
   values:
     - Blocked
     - Free
 - sensorName: Internal_Heater_State
   decodeFunction: getBit7and8
   decodeOffset: 112
-  sensorType: binary_sensor
   values:
     - Inactive
     - Active
 - sensorName: External_Heater_State
   decodeFunction: getBit5and6
   decodeOffset: 112
-  sensorType: binary_sensor
   values:
     - Inactive
     - Active
@@ -324,17 +317,16 @@
 - sensorName: Force_Heater_State
   decodeFunction: getBit5and6
   decodeOffset: 5
-  sensorType: binary_sensor
   values:
     - Inactive
     - Active
 - sensorName: Sterilization_State
   decodeFunction: getBit5and6
   decodeOffset: 117
-  sensorType: binary_sensor
   values:
     - Inactive
     - Active
+  command: SetForceSterilization
 - sensorName: Sterilization_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 100
@@ -365,7 +357,6 @@
   values:
     - Comp. Curve
     - Direct
-  displayUnit: HeatCoolModeDesc
 - sensorName: Heating_Off_Outdoor_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 83
@@ -447,7 +438,6 @@
     - 'IDU:WH-ADC0309J3E5, ODU:WH-UD09JE5'
     - 'IDU:WH-ADC0916H9E8, ODU:WH-UX12HE8'
     - 'IDU:WH-SQC09H3E8, ODU:WH-UQ09HE8'
-  displayUnit: Model
 - sensorName: Pump_Duty
   decodeFunction: getIntMinus1
   decodeOffset: 172

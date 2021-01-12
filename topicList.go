@@ -15,11 +15,11 @@ var allTopics []topicData
 
 type topicData struct {
 	SensorName     string   `yaml:"sensorName"`
-	SensorType     string   `yaml:"sensorType"`
-	DecodeOffset   int      `yaml:"decodeOffset"`
 	DecodeFunction string   `yaml:"decodeFunction"`
+	DecodeOffset   int      `yaml:"decodeOffset"`
 	DisplayUnit    string   `yaml:"displayUnit"`
 	Values         []string `yaml:"values"`
+	Command        string   `yaml:"command"`
 	currentValue   string
 }
 
