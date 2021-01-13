@@ -88,11 +88,11 @@ func readConfig() configStruct {
 		log.Fatal(err)
 	}
 
-	config.mqttWillTopic = config.MqttTopicBase + "LWT"
-	config.mqttLogTopic = config.MqttTopicBase + "log"
-	config.mqttValuesTopic = config.MqttTopicBase + "main"
-	config.mqttPcbValuesTopic = config.MqttTopicBase + "optional"
-	config.mqttCommandsTopic = config.MqttTopicBase + "commands"
+	config.mqttWillTopic = config.MqttTopicBase + "/LWT"
+	config.mqttLogTopic = config.MqttTopicBase + "/log"
+	config.mqttValuesTopic = config.MqttTopicBase + "/main"
+	config.mqttPcbValuesTopic = config.MqttTopicBase + "/optional"
+	config.mqttCommandsTopic = config.MqttTopicBase + "/commands"
 
 	return config
 }
