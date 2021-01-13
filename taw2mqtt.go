@@ -33,7 +33,7 @@ func main() {
 	// for _, port := range ports {
 	// 	log.Printf("Found port: %v\n", port)
 	// }
-	serialConfig := &serial.Config{Name: config.Device, Baud: 9600, ReadTimeout: 5 * time.Second}
+	serialConfig := &serial.Config{Name: config.Device, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: 5 * time.Second}
 	var err error
 	serialPort, err = serial.OpenPort(serialConfig)
 	// mode := &serial.Mode{
