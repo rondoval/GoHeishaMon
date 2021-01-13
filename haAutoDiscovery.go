@@ -152,11 +152,7 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 			continue
 		}
 
-		token := mclient.Publish(topic, 0, true, data)
-		if token.Wait() && token.Error() != nil {
-			log.Printf("Failed to publish, %v", token.Error())
-			continue
-		}
+		mqttPublish(mclient, topic, data, 0)
 
 		// OK, we have a sensor. Now check if there's an associated command
 		if value.Command != "" {
@@ -166,10 +162,7 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 				continue
 			}
 
-			token = mclient.Publish(topic, 0, true, data)
-			if token.Wait() && token.Error() != nil {
-				log.Printf("Fail to publish, %v", token.Error())
-			}
+			mqttPublish(mclient, topic, data, 0)
 		}
 	}
 }

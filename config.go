@@ -103,7 +103,7 @@ func updateConfig() {
 	_, err := exec.Command("/usr/bin/usb_mount.sh").Output()
 	defer exec.Command("/usr/bin/usb_umount.sh").Output()
 	if err != nil {
-		log.Println(err.Error())
+		return
 	}
 
 	_, err = os.Stat("/mnt/usb/GoHeishaMonConfig.new")

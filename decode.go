@@ -158,16 +158,13 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 		if v.currentValue != topicValue {
 			v.currentValue = topicValue
 			allTopics[k] = v
-			token := mclient.Publish(getStatusTopic(v.SensorName), byte(0), true, topicValue)
-			if token.Wait() && token.Error() != nil {
-				log.Printf("Fail to publish, %v", token.Error())
-			}
+			mqttPublish(mclient, getStatusTopic(v.SensorName), topicValue, 0)
 		}
 	}
 }
 
 func decodeOptionalHeatpumpData(data []byte, mclient mqtt.Client) {
-	for topicNumber := 0; topicNumber > numberOfOptionalTopics; topicNumber++ {
+	for topicNumber := 0; topicNumber < numberOfOptionalTopics; topicNumber++ {
 		var value, name string
 
 		switch topicNumber {
@@ -196,10 +193,7 @@ func decodeOptionalHeatpumpData(data []byte, mclient mqtt.Client) {
 
 		if optionalData[topicNumber] != value {
 			optionalData[topicNumber] = value
-			token := mclient.Publish(getPcbStatusTopic(name), byte(0), true, value)
-			if token.Wait() && token.Error() != nil {
-				log.Printf("Fail to publish, %v", token.Error())
-			}
+			mqttPublish(mclient, getPcbStatusTopic(name), value, 0)
 		}
 	}
 	//response to heatpump should contain the data from heatpump on byte 4 and 5

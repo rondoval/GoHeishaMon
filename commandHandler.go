@@ -40,15 +40,6 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 	}
 }
 
-func onMQTTConnect(mclient mqtt.Client) {
-	token := mclient.Publish(config.mqttWillTopic, byte(0), true, "online")
-	if token.Wait() && token.Error() != nil {
-		log.Printf("Fail to publish, %v", token.Error())
-	}
-
-	mclient.Subscribe(getCommandTopic("+"), 2, onCommand)
-}
-
 func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
 	if config.EnableCommand == false {
 		return
@@ -69,10 +60,7 @@ func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
 	}
 	comout := fmt.Sprintf("%s - %s", out, out2)
 	TOP := fmt.Sprintf("%s/out", getCommandTopic(("OSCommand")))
-	token := mclient.Publish(TOP, byte(0), false, comout)
-	if token.Wait() && token.Error() != nil {
-		log.Printf("Fail to publish, %v", token.Error())
-	}
+	mqttPublish(mclient, TOP, comout, 0)
 }
 
 func handleSendRawValue(mclient mqtt.Client, msg mqtt.Message) {

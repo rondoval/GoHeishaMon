@@ -1,6 +1,6 @@
 deviceName: "B121679621"
 device: "/dev/ttyUSB0"
-readInterval: 1
+readInterval: 5
 optionalPCB: true
 mqttServer: "127.0.0.1"
 mqttPort: "1883"
