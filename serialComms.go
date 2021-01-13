@@ -7,9 +7,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var goodreads int
-var totalreads int
-var readpercentage float64
+var goodreads, totalreads, readpercentage float64
 
 func isValidReceiveHeader(data []byte) bool {
 	return ((data[0] == 0x71) && (data[1] == 0xC8) && (data[2] == 0x01) && (data[3] == 0x10))
