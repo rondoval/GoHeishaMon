@@ -17,24 +17,25 @@ import (
 )
 
 type configStruct struct {
-	DeviceName   string `yaml:"deviceName"` // for HA discovery
-	Device       string `yaml:"device"`
-	ReadInterval int    `yaml:"readInterval"`
-	OptionalPCB  bool   `yaml:"optionalPCB"` //TODO
+	DeviceName      string `yaml:"deviceName"`      // for HA discovery
+	Device          string `yaml:"device"`          // serial port
+	ReadInterval    int    `yaml:"readInterval"`    // HP query interval
+	ListenOnly      bool   `yaml:"listenOnly"`      // no commands at all
+	OptionalPCB     bool   `yaml:"optionalPCB"`     // enable optional PCB emulation
+	EnableOSCommand bool   `yaml:"enableOSCommand"` // enable OS commands
 
-	MqttServer    string `yaml:"mqttServer"`
-	MqttPort      string `yaml:"mqttPort"`
-	MqttLogin     string `yaml:"mqttLogin"`
-	MqttPass      string `yaml:"mqttPass"`
-	MqttKeepalive int    `yaml:"mqttKeepalive"`
-	MqttTopicBase string `yaml:"mqttTopicBase"`
+	MqttServer     string `yaml:"mqttServer"`
+	MqttPort       string `yaml:"mqttPort"`
+	MqttLogin      string `yaml:"mqttLogin"`
+	MqttPass       string `yaml:"mqttPass"`
+	MqttKeepalive  int    `yaml:"mqttKeepalive"`
+	MqttTopicBase  string `yaml:"mqttTopicBase"`
+	HAAutoDiscover bool   `yaml:"haAutoDiscover"`
 
 	LogMqtt    bool `yaml:"logmqtt"` //TODO
 	LogHexDump bool `yaml:"loghex"`
 	// TODO potrzebne?
-	EnableCommand     bool `yaml:"enableCommand"`
-	SleepAfterCommand int  `yaml:"sleepAfterCommand"`
-	HAAutoDiscover    bool `yaml:"haAutoDiscover"`
+	SleepAfterCommand int `yaml:"sleepAfterCommand"`
 
 	//topics
 	mqttWillTopic      string
