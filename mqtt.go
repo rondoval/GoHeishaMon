@@ -18,6 +18,7 @@ func mqttPublish(mclient mqtt.Client, topic string, data interface{}, qos byte) 
 func onMQTTConnect(mclient mqtt.Client) {
 	mqttPublish(mclient, config.mqttWillTopic, "online", 0)
 	mclient.Subscribe(getCommandTopic("+"), 2, onCommand)
+	//TODO  shall we re post all data?
 }
 
 func makeMQTTConn() mqtt.Client {

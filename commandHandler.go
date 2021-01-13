@@ -34,7 +34,10 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 	function := topicPieces[len(topicPieces)-1]
 
 	if callback, ok := commandCallbacks[function]; ok {
+		//TODO if optional true
+		// TODO if commands enabled
 		callback(mclient, msg)
+		//TODO send raw command + encode command?
 	} else {
 		log.Println("Unknown callback function: ", function)
 	}
