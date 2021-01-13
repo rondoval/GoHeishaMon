@@ -122,8 +122,8 @@ func encodeSwitch(commandName, deviceID, sensorName string, values []string) (to
 	b.CommandTopic = getCommandTopic(commandName)
 	b.StateTopic = getStatusTopic(sensorName)
 	b.AvailabilityTopic = config.mqttWillTopic
-	b.PayloadOn = values[1]
-	b.PayloadOff = values[2]
+	b.PayloadOn = values[0]
+	b.PayloadOff = values[1]
 	b.UniqueID = deviceID + "_" + commandName
 	b.Device.Manufacturer = "Panasonic"
 	b.Device.Model = "Aquarea"
