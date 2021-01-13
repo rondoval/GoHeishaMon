@@ -110,7 +110,7 @@ func encodeBinarySensor(sensorName, deviceID, stateTopic, payloadOn, payloadOff 
 	s.Device.Identifiers = deviceID
 	s.Device.Name = "Aquarea " + deviceID
 
-	topic = fmt.Sprintf("homeassistant/sensor/%s/%s/config", deviceID, sensorName)
+	topic = fmt.Sprintf("homeassistant/binary_sensor/%s/%s/config", deviceID, sensorName)
 	data, err = json.Marshal(s)
 
 	return topic, data, err
@@ -122,8 +122,8 @@ func encodeSwitch(commandName, deviceID, sensorName string, values []string) (to
 	b.CommandTopic = getCommandTopic(commandName)
 	b.StateTopic = getStatusTopic(sensorName)
 	b.AvailabilityTopic = config.mqttWillTopic
-	b.PayloadOn = values[0]
-	b.PayloadOff = values[1]
+	b.PayloadOn = values[1]
+	b.PayloadOff = values[0]
 	b.UniqueID = deviceID + "_" + commandName
 	b.Device.Manufacturer = "Panasonic"
 	b.Device.Model = "Aquarea"
