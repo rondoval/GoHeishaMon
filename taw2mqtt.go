@@ -40,7 +40,7 @@ func main() {
 	queryTicker := time.NewTicker(time.Second * time.Duration(config.ReadInterval))
 	optionPCBSaveTicker := time.NewTicker(optionalPCBSaveTime)
 	for {
-		readSerial(mclient)
+		readSerialNew(mclient)
 
 		var queueLen = len(commandsChannel)
 		if queueLen > 50 {
