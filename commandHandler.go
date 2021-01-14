@@ -14,6 +14,7 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 	topicPieces := strings.Split(msg.Topic(), "/")
 	function := topicPieces[len(topicPieces)-1]
 	value := string(msg.Payload())
+	log.Printf("Command received - set %s to %s\n", function, value)
 
 	if function == "OSCommand" {
 		handleOSCommand(mclient, msg)
@@ -47,8 +48,6 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 }
 
 func prepMainCommand(name, msg string) ([setCmdLen]byte, error) {
-	log.Println("set ", name, " to ", msg)
-
 	if name == "SetCurves" {
 		return setCurves(msg)
 	}

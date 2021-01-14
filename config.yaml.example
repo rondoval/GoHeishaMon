@@ -13,4 +13,3 @@ mqttTopicBase: "panasonic_heat_pump"
 haAutoDiscover: true
 logmqtt: true
 loghex: false
-sleepAfterCommand: 1

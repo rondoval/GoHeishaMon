@@ -1,6 +1,22 @@
 package main
 
-import "log"
+import (
+	"io"
+	"log"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+)
+
+type mLogger struct {
+	mclient mqtt.Client
+}
+
+var logger mLogger
+
+func (m mLogger) Write(p []byte) (n int, err error) {
+	mqttPublish(m.mclient, config.mqttLogTopic, p, 0)
+	return len(p), nil
+}
 
 func logHex(command []byte) {
 	if config.LogHexDump {
@@ -8,36 +24,11 @@ func logHex(command []byte) {
 	}
 }
 
-// void log_message(char* string)
-// {
-//   if (heishamonSettings.logSerial1) {
-//     Serial1.print(millis());
-//     Serial1.print(": ");
-//     Serial1.println(string);
-//   }
-//   if (heishamonSettings.logMqtt && mqtt_client.connected())
-//   {
-//     char log_topic[256];
-//     sprintf(log_topic, "%s/%s", heishamonSettings.mqtt_topic_base, mqtt_logtopic);
+func redirectLog(mclient mqtt.Client) {
+	logger.mclient = mclient
 
-//     if (!mqtt_client.publish(log_topic, string)) {
-//       Serial1.print(millis());
-//       Serial1.print(": ");
-//       Serial1.println("MQTT publish log message failed!");
-//       mqtt_client.disconnect();
-//     }
-//   }
-// }
-
-// void logHex(char *hex, byte hex_len) {
-// #define LOGHEXBYTESPERLINE 32  // please be aware of max mqtt message size - 32 bytes per line does not work
-//   for (int i = 0; i < hex_len; i += LOGHEXBYTESPERLINE) {
-//     char buffer [(LOGHEXBYTESPERLINE * 3) + 1];
-//     buffer[LOGHEXBYTESPERLINE * 3] = '\0';
-//     for (int j = 0; ((j < LOGHEXBYTESPERLINE) && ((i + j) < hex_len)); j++) {
-//       sprintf(&buffer[3 * j], "%02X ", hex[i + j]);
-//     }
-//     sprintf(log_msg, "data: %s", buffer ); log_message(log_msg);
-//   }
-
-// }
+	if config.LogMqtt == true {
+		log.Println("Enabling logging to MQTT")
+		log.SetOutput(io.MultiWriter(log.Writer(), logger))
+	}
+}

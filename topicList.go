@@ -24,6 +24,7 @@ type topicData struct {
 }
 
 func loadTopics() {
+	log.Print("Loading topic data...")
 	var topicFile string
 	if runtime.GOOS == "windows" {
 		topicFile = topicsFileWindows
@@ -33,11 +34,12 @@ func loadTopics() {
 
 	data, err := ioutil.ReadFile(topicFile)
 	if err != nil {
-		log.Fatal(err)
+		logErrorPause(err)
 	}
 
 	err = yaml.Unmarshal(data, &allTopics)
 	if err != nil {
-		log.Fatal(err)
+		logErrorPause(err)
 	}
+	log.Println(" loaded.")
 }

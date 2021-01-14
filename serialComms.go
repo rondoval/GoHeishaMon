@@ -2,16 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os/exec"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var goodreads, totalreads, readpercentage float64
-
-func isValidReceiveHeader(data []byte) bool {
-	return ((data[0] == 0x71) && (data[1] == 0xC8) && (data[2] == 0x01) && (data[3] == 0x10))
-}
+var goodreads, totalreads int64
 
 func isValidReceiveChecksum(data []byte) bool {
 	var chk byte = 0
@@ -43,52 +42,24 @@ func sendCommand(command []byte) {
 	logHex(command)
 }
 
-func readSerial(mclient mqtt.Client) bool {
-	const dataLength = 203
-
-	totalreads++
-	data := make([]byte, dataLength)
-	n, err := serialPort.Read(data)
-	if err != nil {
-		//TODO reopen port?
-		log.Fatal(err)
-	}
-	if n != dataLength {
-		// no data received or synchornizing with the stream
-		return false
-	}
-
-	logHex(data)
-	if !isValidReceiveHeader(data) {
-		log.Println("Received wrong header!")
-		return false
-	}
-	if !isValidReceiveChecksum(data) {
-		log.Println("Checksum received false!")
-		return false
-	}
-	goodreads++
-	readpercentage = ((goodreads / totalreads) * 100)
-	//TODO stats over mqtt
-	log.Println(fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage))
-	decodeHeatpumpData(data, mclient)
-	return true
-}
-
-func readSerialNew(mclient mqtt.Client) {
+func readSerial(mclient mqtt.Client) {
 	const maxDataLength = 255
 
-	totalreads++
 	data := make([]byte, maxDataLength)
 	n, err := serialPort.Read(data)
 	if err != nil {
-		//TODO reopen port?
-		log.Fatal(err)
+		if err != io.EOF {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			exec.Command("reboot").Run()
+		}
+		return
 	}
 	if n == 0 {
 		//no data
 		return
 	}
+	totalreads++
 
 	if data[0] != 113 { //wrong header received!
 		log.Println("Received bad header. Ignoring this data!")
@@ -105,16 +76,17 @@ func readSerialNew(mclient mqtt.Client) {
 		}
 
 		if n == int(data[1]+3) { //we received all data (data[1] is header length field)
-			log.Printf("Received %d bytes data", n)
-			logHex(data[:n])
+			if config.LogHexDump == true {
+				log.Printf("Received %d bytes data", n)
+				logHex(data[:n])
+			}
 			if !isValidReceiveChecksum(data[:n]) {
 				log.Println("Checksum received false!")
 				return
 			}
-			log.Println("Checksum and header received ok!")
 			goodreads++
-			readpercentage = goodreads / totalreads * 100
-			log.Println(fmt.Sprintf("Total reads : %f and total good reads : %f (%.2f %%)", totalreads, goodreads, readpercentage))
+			readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
+			log.Println(fmt.Sprintf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage))
 
 			if n == 203 { //for now only return true for this datagram because we can not decode the shorter datagram yet
 				decodeHeatpumpData(data[:n], mclient)

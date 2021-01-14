@@ -137,6 +137,7 @@ func encodeSwitch(commandName, deviceID, sensorName string, values []string) (to
 }
 
 func publishDiscoveryTopics(mclient mqtt.Client) {
+	log.Print("Publishing Home Assistant discovery topics...")
 	for _, value := range allTopics {
 		stateTopic := getStatusTopic(value.SensorName)
 		var topic string
@@ -165,4 +166,5 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 			mqttPublish(mclient, topic, data, 0)
 		}
 	}
+	log.Println(" done.")
 }

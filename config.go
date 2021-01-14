@@ -32,10 +32,8 @@ type configStruct struct {
 	MqttTopicBase  string `yaml:"mqttTopicBase"`
 	HAAutoDiscover bool   `yaml:"haAutoDiscover"`
 
-	LogMqtt    bool `yaml:"logmqtt"` //TODO
+	LogMqtt    bool `yaml:"logmqtt"`
 	LogHexDump bool `yaml:"loghex"`
-	// TODO potrzebne?
-	SleepAfterCommand int `yaml:"sleepAfterCommand"`
 
 	//topics
 	mqttWillTopic      string
@@ -64,6 +62,14 @@ func getConfigFile() string {
 	return "config.yaml"
 }
 
+func logErrorPause(msg error) {
+	log.Println(msg)
+	log.Println("Cannot continue - awaiting new config")
+	for {
+		time.Sleep(10 * time.Second)
+	}
+}
+
 func readConfig() configStruct {
 	var configFile = getConfigFile()
 
@@ -81,12 +87,12 @@ func readConfig() configStruct {
 
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		log.Fatal(err)
+		logErrorPause(err)
 	}
 
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		log.Fatal(err)
+		logErrorPause(err)
 	}
 
 	config.mqttWillTopic = config.MqttTopicBase + "/LWT"
@@ -94,18 +100,19 @@ func readConfig() configStruct {
 	config.mqttValuesTopic = config.MqttTopicBase + "/main"
 	config.mqttPcbValuesTopic = config.MqttTopicBase + "/optional"
 	config.mqttCommandsTopic = config.MqttTopicBase + "/commands"
+	log.Println("Config file loaded")
 
 	return config
 }
 
 func updateConfig() {
 	var configfile = getConfigFile()
-	log.Printf("Attempting to update config file: %s", configfile)
-	_, err := exec.Command("/usr/bin/usb_mount.sh").Output()
-	defer exec.Command("/usr/bin/usb_umount.sh").Output()
+	log.Println("Config updater - checking USB media")
+	err := exec.Command("/usr/bin/usb_mount.sh").Run()
 	if err != nil {
 		return
 	}
+	defer exec.Command("/usr/bin/usb_umount.sh").Run()
 
 	_, err = os.Stat("/mnt/usb/GoHeishaMonConfig.new")
 	if err != nil {
@@ -114,14 +121,14 @@ func updateConfig() {
 	if !bytes.Equal(getFileChecksum(configfile), getFileChecksum("/mnt/usb/GoHeishaMonConfig.new")) {
 		log.Println("Updated configuration detected on USB media... will reboot")
 
-		_, err = exec.Command("/bin/cp", "/mnt/usb/GoHeishaMonConfig.new", configfile).Output()
+		err = exec.Command("/bin/cp", "/mnt/usb/GoHeishaMonConfig.new", configfile).Run()
 		if err != nil {
 			log.Printf("Can't update config file %s", configfile)
 			return
 		}
-		_, _ = exec.Command("sync").Output()
-		_, _ = exec.Command("/usr/bin/usb_umount.sh").Output()
-		_, _ = exec.Command("reboot").Output()
+		exec.Command("sync").Run()
+		exec.Command("/usr/bin/usb_umount.sh").Run()
+		exec.Command("reboot").Run()
 	}
 }
 
@@ -130,7 +137,7 @@ func getFileChecksum(f string) []byte {
 
 	hash := md5.New()
 	if _, err := io.Copy(hash, input); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return hash.Sum(nil)
 }
