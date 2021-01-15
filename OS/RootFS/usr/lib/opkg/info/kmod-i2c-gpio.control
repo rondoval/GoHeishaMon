@@ -6,6 +6,6 @@ License: GPLv2
 Section: kernel
 Status: unknown hold not-installed
 Architecture: ar71xx
-Installed-Size: 105
+Installed-Size: 104
 Description:  Kernel modules for a very simple bitbanging I2C driver utilizing the
  arch-neutral GPIO API to control the SCL and SDA lines.
