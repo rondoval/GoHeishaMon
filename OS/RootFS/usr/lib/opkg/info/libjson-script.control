@@ -6,5 +6,5 @@ License: ISC BSD-3c
 Section: utils
 Maintainer: Felix Fietkau <nbd@openwrt.org>
 Architecture: ar71xx
-Installed-Size: 4451
+Installed-Size: 4449
 Description:  Minimalistic JSON based scripting engine

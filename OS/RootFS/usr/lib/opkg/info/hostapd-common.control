@@ -5,5 +5,5 @@ Source: package/network/services/hostapd
 Section: net
 Maintainer: Felix Fietkau <nbd@openwrt.org>
 Architecture: ar71xx
-Installed-Size: 4703
+Installed-Size: 4702
 Description:  hostapd/wpa_supplicant common support files

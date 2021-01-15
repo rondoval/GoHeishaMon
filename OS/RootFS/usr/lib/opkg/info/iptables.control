@@ -4,7 +4,7 @@ Depends: libc, kmod-ipt-core, libip4tc, libip6tc, libxtables
 Source: package/network/utils/iptables
 Section: net
 Architecture: ar71xx
-Installed-Size: 49704
+Installed-Size: 49705
 Description:  IP firewall administration tool.
  
  Matches:
