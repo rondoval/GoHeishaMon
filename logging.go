@@ -29,6 +29,6 @@ func redirectLog(mclient mqtt.Client) {
 
 	if config.LogMqtt == true {
 		log.Println("Enabling logging to MQTT")
-		log.SetOutput(io.MultiWriter(log.Writer(), logger))
+		log.SetOutput(io.MultiWriter(logger, log.Writer()))
 	}
 }

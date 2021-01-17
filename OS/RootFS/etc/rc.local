@@ -10,6 +10,6 @@ echo 1 > /proc/sys/kernel/panic_on_oops
 echo "" > /etc/gh/nextboot.sh
 echo "START GoHeishaMon APL=====" > /dev/ttyS0
 
-/usr/bin/GoHeishaMon_MIPSUPX > /dev/ttyS0
+/usr/bin/GoHeishaMon_MIPSUPX 2> /dev/ttyS0 &
 #/usr/bin/a2wmain > /dev/ttyS0
 #exit 0

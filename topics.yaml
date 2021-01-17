@@ -36,6 +36,7 @@
     - Auto(heat)+DHW
     - Auto(cool)
     - Auto(cool)+DHW
+  command: SetOperationMode
 - sensorName: Main_Inlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 143
@@ -94,6 +95,7 @@
     - 30min
     - 60min
     - 90min
+  command: SetPowerfulMode
 - sensorName: Quiet_Mode_Level
   decodeFunction: getBit3and4and5
   decodeOffset: 7
@@ -102,6 +104,7 @@
     - Level 1
     - Level 2
     - Level 3
+  command: SetQuietMode
 - sensorName: Holiday_Mode_State
   decodeFunction: getBit3and4
   decodeOffset: 5
@@ -109,7 +112,6 @@
     - 'Off'
     - Scheduled
     - Active
-  command: SetHolidayMode
 - sensorName: ThreeWay_Valve_State
   decodeFunction: getBit7and8
   decodeOffset: 111
@@ -449,3 +451,4 @@
     - Zone1 active
     - Zone2 active
     - Zone1 and zone2 active
+  command: SetZones

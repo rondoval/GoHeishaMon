@@ -136,6 +136,18 @@ func encodeSwitch(commandName, deviceID, sensorName string, values []string) (to
 	return topic, data, err
 }
 
+func publishSwitch(mclient mqtt.Client, value topicData) {
+	// OK, we have a sensor. Now check if there's an associated command
+	if value.Command != "" {
+		topic, data, err := encodeSwitch(value.Command, config.DeviceName, value.SensorName, value.Values)
+		if err != nil {
+			log.Println(err)
+		} else {
+			mqttPublish(mclient, topic, data, 0)
+		}
+	}
+}
+
 func publishDiscoveryTopics(mclient mqtt.Client) {
 	log.Print("Publishing Home Assistant discovery topics...")
 	for _, value := range allTopics {
@@ -143,10 +155,11 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 		var topic string
 		var data []byte
 		var err error
-		if len(value.Values) != 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled") {
+		if len(value.Values) != 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 			topic, data, err = encodeSensor(value.SensorName, config.DeviceName, stateTopic, value.DisplayUnit)
 		} else {
 			topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, stateTopic, value.Values[1], value.Values[0])
+			publishSwitch(mclient, value)
 		}
 		if err != nil {
 			log.Println(err)
@@ -154,17 +167,6 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 		}
 
 		mqttPublish(mclient, topic, data, 0)
-
-		// OK, we have a sensor. Now check if there's an associated command
-		if value.Command != "" {
-			topic, data, err = encodeSwitch(value.Command, config.DeviceName, value.SensorName, value.Values)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			mqttPublish(mclient, topic, data, 0)
-		}
 	}
 	log.Println(" done.")
 }

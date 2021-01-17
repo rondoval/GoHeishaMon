@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -47,6 +48,19 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 	}
 }
 
+func verboseToNumber(command, value string) (int, error) {
+	for _, topic := range allTopics {
+		if topic.Command == command {
+			for valueKey, valueName := range topic.Values {
+				if value == valueName {
+					return valueKey, nil
+				}
+			}
+		}
+	}
+	return 0, errors.New("Can't convert literal to number")
+}
+
 func prepMainCommand(name, msg string) ([setCmdLen]byte, error) {
 	if name == "SetCurves" {
 		return setCurves(msg)
@@ -55,7 +69,10 @@ func prepMainCommand(name, msg string) ([setCmdLen]byte, error) {
 	command := panasonicSetCommand
 	v, err := strconv.Atoi(msg)
 	if err != nil {
-		return command, err
+		v, err = verboseToNumber(name, msg)
+		if err != nil {
+			return command, err
+		}
 	}
 
 	if handler, ok := mainCommandMap[name]; ok {
