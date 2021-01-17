@@ -1,6 +1,0 @@
-TopicNumber = 45
-TopicName = "Room_Holiday_Shift_Temp"
-TopicBit = 43
-TopicFunction = "getIntMinus128"
-TopicUnit = "Kelvin"
-TopicA2M = ""

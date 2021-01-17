@@ -1,6 +1,0 @@
-TopicNumber = 16
-TopicName = "Heat_Energy_Consumption"
-TopicBit = 193
-TopicFunction = "getEnergy"
-TopicUnit = "Watt"
-TopicA2M = ""

@@ -1,6 +1,0 @@
-TopicNumber = 18
-TopicName = "Quiet_Mode_Level"
-TopicBit = 7
-TopicFunction = "getBit3and4and5"
-TopicUnit = "Quietmode"
-TopicA2M = ""

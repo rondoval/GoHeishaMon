@@ -1,6 +1,0 @@
-TopicNumber = 8
-TopicName = "Compressor_Freq"
-TopicBit = 166
-TopicFunction = "getIntMinus1"
-TopicUnit = "Hertz"
-TopicA2M = ""

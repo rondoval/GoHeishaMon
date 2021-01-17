@@ -1,6 +1,0 @@
-TopicNumber = 67
-TopicName = "Compressor_Current"
-TopicBit = 165
-TopicFunction = "getIntMinus1Div5"
-TopicUnit = "Ampere"
-TopicA2M = ""
