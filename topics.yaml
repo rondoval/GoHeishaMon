@@ -112,6 +112,7 @@
     - 'Off'
     - Scheduled
     - Active
+  command: SetHolidayMode
 - sensorName: ThreeWay_Valve_State
   decodeFunction: getBit7and8
   decodeOffset: 111
@@ -272,14 +273,14 @@
   decodeFunction: getBit5and6
   decodeOffset: 9
   values:
-    - Blocked
-    - Free
+    - 'Off'
+    - 'On'
 - sensorName: Room_Heater_State
   decodeFunction: getBit7and8
   decodeOffset: 9
   values:
-    - Blocked
-    - Free
+    - 'Off'
+    - 'On'
 - sensorName: Internal_Heater_State
   decodeFunction: getBit7and8
   decodeOffset: 112
