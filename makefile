@@ -32,6 +32,6 @@ upx:
 	upx -f --brute -o dist/$(BINARY_MIPSUPX) dist/$(BINARY_MIPS)
 compilesquash:
 	cp dist/$(BINARY_MIPSUPX) OS/RootFS/usr/bin/$(BINARY_MIPSUPX)
-	cp config.yaml.exampple OS/RootFS/etc/gh/config.yaml
+	cp config.yaml.example OS/RootFS/etc/gh/config.yaml
 	cp topics.yaml OS/RootFS/etc/gh/topics.yaml
 	mksquashfs OS/RootFS dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin -comp xz -noappend -always-use-fragments
