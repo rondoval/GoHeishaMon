@@ -45,5 +45,6 @@ jobs:
         path: |
           dist/GoHeishaMon_MIPSUPX
           dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin
+          OS/Kernel/openwrt-ar71xx-generic-cus531-16M-kernel.bin
           
   
