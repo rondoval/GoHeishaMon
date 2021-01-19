@@ -34,7 +34,7 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 			}
 			handler(temp)
 		} else if handler, ok := optionCommandMapByte[function]; ok {
-			v, err := strconv.Atoi(value)
+			v, err := strconv.ParseInt(value, 10, 8)
 			if err != nil {
 				log.Printf("%s: %s value conversion error", function, value)
 				return
@@ -48,12 +48,12 @@ func onCommand(mclient mqtt.Client, msg mqtt.Message) {
 	}
 }
 
-func verboseToNumber(command, value string) (int, error) {
+func verboseToNumber(command, value string) (int64, error) {
 	for _, topic := range allTopics {
 		if topic.Command == command {
 			for valueKey, valueName := range topic.Values {
 				if value == valueName {
-					return valueKey, nil
+					return int64(valueKey), nil
 				}
 			}
 		}
@@ -67,7 +67,7 @@ func prepMainCommand(name, msg string) ([setCmdLen]byte, error) {
 	}
 
 	command := panasonicSetCommand
-	v, err := strconv.Atoi(msg)
+	v, err := strconv.ParseInt(msg, 10, 8)
 	if err != nil {
 		v, err = verboseToNumber(name, msg)
 		if err != nil {
