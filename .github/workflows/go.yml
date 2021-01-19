@@ -31,9 +31,19 @@ jobs:
         # Arguments to pass to UPX
         args: -f --brute -o dist/GoHeishaMon_MIPSUPX
         
-    - run: |
+    - name: Make squashfs
+      run: |
         cp dist/GoHeishaMon_MIPSUPX OS/RootFS/usr/bin/GoHeishaMon_MIPSUPX
         cp config.yaml.example OS/RootFS/etc/gh/config.yaml
         cp topics.yaml OS/RootFS/etc/gh/topics.yaml
         mksquashfs OS/RootFS dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin -comp xz -noappend -always-use-fragments
       
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: GoHeishaMon
+        path: |
+          dist/GoHeishaMon_MIPSUPX
+          dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin
+          
+  
