@@ -17,6 +17,11 @@
 ## 1.2.0 (17-05-2020)
 ##   Fixed
 ##   - New/changed topics
+##
+## 2.0.0 (20-01-2021)
+##   Added
+##   - Adjusted to GoHeishaMon
+##   - HA Discovery enabled sensors removed
 
 
 # Automations #
@@ -30,7 +35,7 @@ automation:
     action:
       service: input_select.select_option
       data_template:
-        entity_id: input_select.heishamon_quietmode
+        entity_id: input_select.aquarea_quiet_mode
         option: "{{ trigger.payload }}"
   #Sets quiet level to the selected value
   - alias: Set quiet level
@@ -42,7 +47,7 @@ automation:
       data_template:
         topic: panasonic_heat_pump/commands/SetQuietMode
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
-        payload_template: "{{ states('input_select.heishamon_quietmode') }}"
+        payload_template: "{{ states('input_select.aquarea_quiet_mode') }}"
   
   #Fetches powerful level from status and sets the selector accordingly
   - alias: Set powerful level selector
