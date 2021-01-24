@@ -54,26 +54,6 @@ enable() {
 enabled() {
 	name="$(basename "${initscript}")"
 	[ -x "$IPKG_INSTROOT/etc/rc.d/S${START}${name##S[0-9][0-9]}" ]
-        
-        echo "PS Watch=====" > /dev/ttyS0
-
-#flag=1
-#while [ $flag -eq 1 ];
-#do
-#	RUNNING=`ps | grep /a2wmain | grep -v "grep /a2wmain"`
-#
-#	if [ "${RUNNING}" = ""]; then
-#	   echo "PROCESS DOWN RESTART" > /dev/ttyS0
-#          reboot
-#	    
-#	fi
-#	
-#	
-#done
-
-
-
-
 }
 
 depends() {

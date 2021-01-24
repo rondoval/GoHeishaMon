@@ -49,7 +49,6 @@
 /usr/bin/eth_init.sh
 /usr/bin/wifi_enable.sh
 /etc/shadow
-/etc/rc.common_old
 /etc/rc.common
 /etc/uci-defaults/10_migrate-shadow
 /etc/uci-defaults/01_leds
