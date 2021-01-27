@@ -22,6 +22,11 @@
 ##   Added
 ##   - Adjusted to GoHeishaMon
 ##   - HA Discovery enabled sensors removed
+##
+## 2.1.0 (27-01-2021)
+##   - New selectors added
+##   - MQTT command topic naming scheme change
+##   - Debounce commands
 
 
 # Automations #
@@ -42,6 +47,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_select.aquarea_quiet_mode
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -64,6 +70,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_select.aquarea_powerful_mode
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -86,6 +93,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_select.aquarea_operating_mode
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -106,6 +114,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_select.aquarea_zones
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -129,6 +138,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_heat_offset
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -153,6 +163,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_tank_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -177,6 +188,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_cool_offset
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -201,6 +213,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_heat_delta
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -225,6 +238,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_cool_delta
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -249,6 +263,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_dhw_delta
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -272,6 +287,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_dhw_holiday_shift_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -294,6 +310,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_room_holiday_shift_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -316,6 +333,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sterilization_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -338,6 +356,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sterlization_max_time
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -360,6 +379,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_heating_off_outdoor_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -382,6 +402,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_heater_on_outdoor_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -404,6 +425,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_heat_to_cool_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -426,6 +448,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_cool_to_heat_temp
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -448,6 +471,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sgready_capacity1_heat
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -470,6 +494,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sgready_capacity1_dhw
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -492,6 +517,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sgready_capacity2_heat
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -514,6 +540,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_sgready_capacity2_dhw
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -536,6 +563,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_dhw_heatup_time
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -558,6 +586,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_room_max_time
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
@@ -580,6 +609,7 @@ automation:
     trigger:
       platform: state
       entity_id: input_number.aquarea_maximum_pump_speed
+      for: "00:00:05"
     action:
       service: mqtt.publish
       data_template:
