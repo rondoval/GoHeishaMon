@@ -520,3 +520,17 @@
   values:
     - 'Off'
     - 'On'
+- sensorName: SG_Ready_Control
+  decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
+  decodeOffset: 27
+  values:
+    - Disabled
+    - Enabled
+- sensorName: Demand_Control
+  decodeFunction: getBit7and8
+  encodeFunction: setBit7and8
+  decodeOffset: 27
+  values:
+    - Disabled
+    - Enabled
