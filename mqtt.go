@@ -18,7 +18,8 @@ func mqttPublish(mclient mqtt.Client, topic string, data interface{}, qos byte) 
 func onMQTTConnect(mclient mqtt.Client) {
 	mqttPublish(mclient, config.mqttWillTopic, "online", 0)
 	if config.ListenOnly == false {
-		mclient.Subscribe(getCommandTopic("+"), 2, onCommand)
+		mclient.Subscribe(getCommandTopic("+"), 0, onGenericCommand)
+		mclient.Subscribe(getStatusTopic("+/set"), 0, onAquareaCommand)
 	}
 	log.Println("MQTT connected")
 	//TODO  shall we re post all data?

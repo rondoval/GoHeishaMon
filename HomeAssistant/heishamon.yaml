@@ -45,7 +45,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetQuietMode
+        topic: panasonic_heat_pump/main/Quiet_Mode_Level/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_quiet_mode') }}"
   
@@ -67,7 +67,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetPowerfulMode
+        topic: panasonic_heat_pump/main/Powerful_Mode_Time/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_powerful_mode') }}"
   
@@ -89,7 +89,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetOperationMode
+        topic: panasonic_heat_pump/main/Operating_Mode_State/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_operating_mode') }}"
   
@@ -109,7 +109,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetZones
+        topic: panasonic_heat_pump/main/Zones_State/set
         retain: false
         payload_template: "{{ states('input_select.aquarea_zones') }}"
   
@@ -132,7 +132,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetZ1HeatRequestTemperature
+        topic: panasonic_heat_pump/main/Z1_Heat_Request_Temp/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_offset') | int) }}
@@ -156,7 +156,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetDHWTemp
+        topic: panasonic_heat_pump/main/DHW_Target_Temp/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_tank_temp') | int) }}
@@ -180,7 +180,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetZ1CoolRequestTemperature
+        topic: panasonic_heat_pump/main/Z1_Cool_Request_Temp/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_offset') | int) }}
@@ -204,7 +204,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetFloorHeatDelta
+        topic: panasonic_heat_pump/main/Heat_Delta/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_delta') | int) }}
@@ -228,7 +228,7 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetFloorCoolDelta
+        topic: panasonic_heat_pump/main/Cool_Delta/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_delta') | int) }}
@@ -252,24 +252,355 @@ automation:
     action:
       service: mqtt.publish
       data_template:
-        topic: panasonic_heat_pump/commands/SetDHWHeatDelta
+        topic: panasonic_heat_pump/main/DHW_Heat_Delta/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_dhw_delta') | int) }}
+
+# new automations
+  - alias: Set tank holiday shift temperature selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/DHW_Holiday_Shift_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_dhw_holiday_shift_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set tank holiday shift temperature
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_dhw_holiday_shift_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/DHW_Holiday_Shift_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_dhw_holiday_shift_temp') | int) }}
+
+  - alias: Set room holiday shift temperature selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Room_Holiday_Shift_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_room_holiday_shift_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set room holiday shift temperature
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_room_holiday_shift_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Room_Holiday_Shift_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_room_holiday_shift_temp') | int) }}
+
+  - alias: Set sterilization temperature selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Sterilization_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sterilization_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set sterilization temperature
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sterilization_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Sterilization_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sterilization_temp') | int) }}
+
+  - alias: Set sterilization max time selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Sterilization_Max_Time"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sterlization_max_time
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set sterilization max time
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sterlization_max_time
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Sterilization_Max_Time/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sterlization_max_time') | int) }}
+
+  - alias: Set heating off outdoor temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Heating_Off_Outdoor_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_heating_off_outdoor_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set heating off outdoor temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_heating_off_outdoor_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Heating_Off_Outdoor_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_heating_off_outdoor_temp') | int) }}
+
+  - alias: Set heater on outdoor temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Heater_On_Outdoor_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_heater_on_outdoor_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set heater on outdoor temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_heater_on_outdoor_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Heater_On_Outdoor_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_heater_on_outdoor_temp') | int) }}
+
+  - alias: Set heat to cool temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Heat_To_Cool_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_heat_to_cool_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set heat to cool temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_heat_to_cool_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Heat_To_Cool_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_heat_to_cool_temp') | int) }}
+
+  - alias: Set cool to heat temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Cool_To_Heat_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_cool_to_heat_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set cool to heat temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_cool_to_heat_temp
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Cool_To_Heat_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_cool_to_heat_temp') | int) }}
+
+  - alias: Set SG ready capacity 1 heat selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/SGReady_Capacity1_Heat"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sgready_capacity1_heat
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set SG ready capacity 1 heat
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sgready_capacity1_heat
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/SGReady_Capacity1_Heat/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sgready_capacity1_heat') | int) }}
+
+  - alias: Set SG ready capacity 1 DHW selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/SGReady_Capacity1_DHW"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sgready_capacity1_dhw
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set SG ready capacity 1 DHW
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sgready_capacity1_dhw
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/SGReady_Capacity1_DHW/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sgready_capacity1_dhw') | int) }}
+
+  - alias: Set SG ready capacity 2 heat selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/SGReady_Capacity2_Heat"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sgready_capacity2_heat
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set SG ready capacity 2 heat
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sgready_capacity2_heat
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/SGReady_Capacity2_Heat/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sgready_capacity2_heat') | int) }}
+
+  - alias: Set SG ready capacity 2 DHW selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/SGReady_Capacity2_DHW"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_sgready_capacity2_dhw
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set SG ready capacity 2 DHW
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_sgready_capacity2_dhw
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/SGReady_Capacity2_DHW/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_sgready_capacity2_dhw') | int) }}
+
+  - alias: Set DHW heatup time selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/DHW_Heatup_Time"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_dhw_heatup_time
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set DHW heatup time
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_dhw_heatup_time
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/DHW_Heatup_Time/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_dhw_heatup_time') | int) }}
+
+  - alias: Set DHW room max time selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/DHW_Room_Max_Time"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_room_max_time
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set DHW room max time
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_room_max_time
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/DHW_Room_Max_Time/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_room_max_time') | int) }}
+
+  - alias: Set maximum pump speed selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Maximum_Pump_Speed"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_maximum_pump_speed
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set maximum pump speed
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_maximum_pump_speed
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Maximum_Pump_Speed/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_maximum_pump_speed') | int) }}
 
 # input_number #
 ################
 input_number:
   aquarea_tank_temp:
-    name: Set Tank Temperature
+    name: Tank Target Temperature
     unit_of_measurement: °C
     mode: box
     min: 40
-    max: 75
+    max: 65
     step: 1
 
   aquarea_heat_offset:
-    name: Set Heat Request Temperature
+    name: Heat Request Temperature
     unit_of_measurement: °C
     mode: box
     min: -5
@@ -277,7 +608,7 @@ input_number:
     step: 1
 
   aquarea_cool_offset:
-    name: Set Cool Request Temperature
+    name: Cool Request Temperature
     unit_of_measurement: °C
     mode: box
     min: -5
@@ -285,34 +616,154 @@ input_number:
     step: 1
 
   aquarea_heat_delta:
-    name: Set Heating Delta
+    name: Heating Delta
     unit_of_measurement: °C
     mode: box
-    min: 0
-    max: 10
+    min: 1
+    max: 15
     step: 1
 
   aquarea_cool_delta:
-    name: Set Cooling Delta
+    name: Cooling Delta
     unit_of_measurement: °C
     mode: box
-    min: 0
-    max: 10
+    min: 1
+    max: 15
     step: 1
 
   aquarea_dhw_delta:
-    name: Set DHW Delta
+    name: DHW Delta
     unit_of_measurement: °C
     mode: box
-    min: -10
-    max: 0
+    min: -12
+    max: -2
+    step: 1
+
+  # new-------------------
+  aquarea_dhw_holiday_shift_temp:
+    name: DHW Holiday Shift Temp
+    unit_of_measurement: °C
+    mode: box
+    min: -25
+    max: 15
+    step: 1
+
+  aquarea_room_holiday_shift_temp:
+    name: Room Holiday Shift Temp
+    unit_of_measurement: °C
+    mode: box
+    min: -25
+    max: 15
+    step: 1
+
+  aquarea_sterilization_temp:
+    name: Sterilization Temp
+    unit_of_measurement: °C
+    mode: box
+    min: 55
+    max: 75
+    step: 1
+
+  aquarea_sterlization_max_time:
+    name: Sterilization Max Time
+    unit_of_measurement: min
+    mode: box
+    min: 5
+    max: 60
+    step: 5
+
+  aquarea_heating_off_outdoor_temp:
+    name: Heating Off Outdoor Temp
+    unit_of_measurement: °C
+    mode: box
+    min: 5
+    max: 35
+    step: 1
+
+  aquarea_heater_on_outdoor_temp:
+    name: Heater On Outdoor Temp
+    unit_of_measurement: °C
+    mode: box
+    min: -15
+    max: 20
+    step: 1
+
+  aquarea_heat_to_cool_temp:
+    name: Heat to Cool Temp
+    unit_of_measurement: °C
+    mode: box
+    min: 5
+    max: 25
+    step: 1
+
+  aquarea_cool_to_heat_temp:
+    name: Cool to Heat Temp
+    unit_of_measurement: °C
+    mode: box
+    min: 5
+    max: 25
+    step: 1
+
+  aquarea_sgready_capacity1_heat:
+    name: SGReady Capacity1 Heat
+    unit_of_measurement: '%'
+    mode: box
+    min: 50
+    max: 150
+    step: 5
+
+  aquarea_sgready_capacity1_dhw:
+    name: SGReady Capacity1 DHW
+    unit_of_measurement: '%'
+    mode: box
+    min: 50
+    max: 150
+    step: 5
+
+  aquarea_sgready_capacity2_heat:
+    name: SGReady Capacity2 Heat
+    unit_of_measurement: '%'
+    mode: box
+    min: 50
+    max: 150
+    step: 5
+
+  aquarea_sgready_capacity2_dhw:
+    name: SGReady Capacity2 DHW
+    unit_of_measurement: '%'
+    mode: box
+    min: 50
+    max: 150
+    step: 5
+
+  aquarea_dhw_heatup_time:
+    name: DHW Heatup Time
+    unit_of_measurement: min
+    mode: box
+    min: 5
+    max: 240
+    step: 5
+
+  aquarea_room_max_time:
+    name: DHW Room Max Time
+    unit_of_measurement: min
+    mode: box
+    min: 30
+    max: 600
+    step: 30
+    
+  aquarea_maximum_pump_speed:
+    name: Maximum Pump Speed
+    mode: box
+    min: 64
+    max: 254
     step: 1
 
 # input_select #
 ################
 input_select:
   aquarea_quiet_mode:
-    name: Set Quiet Mode
+    name: Quiet Mode
     options:
       - "Off"
       - "Level 1"
@@ -320,7 +771,7 @@ input_select:
       - "Level 3"
 
   aquarea_powerful_mode:
-    name: Set Powerful Mode
+    name: Powerful Mode
     options:
       - "Off"
       - "30 min"
@@ -328,7 +779,7 @@ input_select:
       - "90 min"
 
   aquarea_operating_mode:
-    name: Set Operating Mode
+    name: Operating Mode
     options:
       - "Heat"
       - "Cool"
@@ -339,7 +790,7 @@ input_select:
       - "Auto(heat)+DHW"
 
   aquarea_zones:
-    name: Set Zones State
+    name: Zones State
     options:
       - "Zone1 active"
       - "Zone2 active"
@@ -396,9 +847,9 @@ sensor:
 switch:
 #Turn on/off holiday mode
   - platform: mqtt
-    name: SetHolidayMode
+    name: Set Holiday Mode
     availability_topic: "panasonic_heat_pump/LWT"
-    command_topic: "panasonic_heat_pump/commands/SetHolidayMode"
+    command_topic: "panasonic_heat_pump/main/Holiday_Mode_State/set"
     state_topic: "panasonic_heat_pump/main/Holiday_Mode_State"
     qos: 0
     payload_on: "1"

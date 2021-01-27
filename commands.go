@@ -11,42 +11,22 @@ const setCmdLen = 110
 
 var panasonicSetCommand = [setCmdLen]byte{0xf1, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
-var mainCommandMap = map[string]func(byte) (byte, int){
-	// set heatpump state to on by sending 1
-	"SetHeatpump": func(val byte) (byte, int) { return val + 1, 4 },
-	// set pump state to on by sending 1
-	"SetPump": func(val byte) (byte, int) { return (val + 1) << 4, 4 },
-	// set pump speed
-	"SetPumpSpeed": func(val byte) (byte, int) { return val + 1, 45 },
-	// set 0 for Off mode, set 1 for Quiet mode 1, set 2 for Quiet mode 2, set 3 for Quiet mode 3
-	"SetQuietMode": func(val byte) (byte, int) { return (val + 1) * 8, 7 },
-	// z1 heat request temp -  set from -5 to 5 to get same temperature shift point or set direct temp
-	"SetZ1HeatRequestTemperature": func(val byte) (byte, int) { return val + 128, 38 },
-	// z1 cool request temp -  set from -5 to 5 to get same temperature shift point or set direct temp
-	"SetZ1CoolRequestTemperature": func(val byte) (byte, int) { return val + 128, 39 },
-	// z2 heat request temp -  set from -5 to 5 to get same temperature shift point or set direct temp
-	"SetZ2HeatRequestTemperature": func(val byte) (byte, int) { return val + 128, 40 },
-	// z2 cool request temp -  set from -5 to 5 to get same temperature shift point or set direct temp
-	"SetZ2CoolRequestTemperature": func(val byte) (byte, int) { return val + 128, 41 },
-	// set mode to force DHW by sending 1
-	"SetForceDHW": func(val byte) (byte, int) { return (val + 1) << 6, 4 },
-	// set mode to force defrost  by sending 1
-	"SetForceDefrost": func(val byte) (byte, int) { return (val & 1) << 1, 8 },
-	// set mode to force sterilization by sending 1
-	"SetForceSterilization": func(val byte) (byte, int) { return (val & 1) << 2, 8 },
-	// set Holiday mode by sending 1, off will be 0
-	"SetHolidayMode": func(val byte) (byte, int) { return (val + 1) << 4, 5 },
-	// set Powerful mode by sending 0 = off, 1 for 30min, 2 for 60min, 3 for 90 min
-	"SetPowerfulMode": func(val byte) (byte, int) { return val + 73, 7 },
-	// set Heat pump operation mode  0 = heat only, 1 = cool only, 2 = Auto, 3 = DHW only, 4 = Heat+DHW, 5 = Cool+DHW, 6 = Auto + DHW
-	"SetOperationMode": setOperationMode,
-	// set DHW temperature by sending desired temperature between 40C-75C
-	"SetDHWTemp": func(val byte) (byte, int) { return val + 128, 42 },
-	// set zones to active
-	"SetZones":          func(val byte) (byte, int) { return (val + 1) << 6, 6 },
-	"SetFloorHeatDelta": func(val byte) (byte, int) { return val + 128, 84 },
-	"SetFloorCoolDelta": func(val byte) (byte, int) { return val + 128, 94 },
-	"SetDHWHeatDelta":   func(val byte) (byte, int) { return val + 128, 99 },
+var encodeInt = map[string]func(int) byte{
+	"setIntDiv50Plus1": func(input int) byte { return byte(input/50) + 1 },
+	"setIntDiv30Plus1": func(input int) byte { return byte(input/30) + 1 },
+	"setIntDiv10Plus1": func(input int) byte { return byte(input/10) + 1 },
+	"setIntPlus128":    func(input int) byte { return byte(input) + 128 },
+	"setIntPlus1":      func(input int) byte { return byte(input) + 1 },
+	"setRight3bits":    func(input int) byte { return byte(input+1) & 7 },
+	"setLeft5bits":     func(input int) byte { return byte(input+1) & 31 << 3 },
+	"setBit3and4and5":  func(input int) byte { return byte(input+1) & 7 << 3 },
+	"setBit7and8":      func(input int) byte { return byte(input+1) & 3 },
+	"setBit5and6":      func(input int) byte { return byte(input+1) & 3 << 2 },
+	"setBit3and4":      func(input int) byte { return byte(input+1) & 3 << 4 },
+	"setBit1and2":      func(input int) byte { return byte(input+1) & 3 << 6 },
+	"setBit7":          func(input int) byte { return byte(input) & 1 << 1 },
+	"setBit6":          func(input int) byte { return byte(input) & 1 << 2 },
+	"setOpMode":        setOperationMode,
 }
 
 var optionCommandMapByte = map[string]func(byte){
@@ -88,7 +68,7 @@ func temp2hex(temp float64) byte {
 	return hextemp
 }
 
-func setOperationMode(val byte) (data byte, index int) {
+func setOperationMode(val int) (data byte) {
 	switch val {
 	case 0:
 		data = 18
@@ -107,7 +87,7 @@ func setOperationMode(val byte) (data byte, index int) {
 	default:
 		data = 0
 	}
-	return data, 6
+	return data
 }
 
 func setCurves(msg string) ([110]byte, error) {

@@ -1,30 +1,32 @@
 ---
 - sensorName: Heatpump_State
   decodeFunction: getBit7and8
+  encodeFunction: setBit7and8
   decodeOffset: 4
   values:
     - 'Off'
     - 'On'
-  command: SetHeatpump
 - sensorName: Pump_Flow
   decodeFunction: getPumpFlow
   decodeOffset: 0
   displayUnit: l/min
 - sensorName: Force_DHW_State
   decodeFunction: getBit1and2
+  encodeFunction: setBit1and2
   decodeOffset: 4
   values:
     - Disabled
     - Enabled
-  command: SetForceDHW
 - sensorName: Quiet_Mode_Schedule
   decodeFunction: getBit1and2
+  encodeFunction: setBit1and2
   decodeOffset: 7
   values:
     - Disabled
     - Enabled
 - sensorName: Operating_Mode_State
   decodeFunction: getOpMode
+  encodeFunction: setOpMode
   decodeOffset: 6
   values:
     - Heat
@@ -36,7 +38,6 @@
     - Auto(heat)+DHW
     - Auto(cool)
     - Auto(cool)+DHW
-  command: SetOperationMode
 - sensorName: Main_Inlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 143
@@ -55,6 +56,7 @@
   displayUnit: Hz
 - sensorName: DHW_Target_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 42
   displayUnit: °C
 - sensorName: DHW_Temp
@@ -71,6 +73,7 @@
   displayUnit: Counter
 - sensorName: Main_Schedule_State
   decodeFunction: getBit1and2
+  encodeFunction: setBit1and2
   decodeOffset: 5
   values:
     - Disabled
@@ -89,30 +92,30 @@
   displayUnit: W
 - sensorName: Powerful_Mode_Time
   decodeFunction: getRight3bits
+  encodeFunction: setRight3bits
   decodeOffset: 7
   values:
     - 'Off'
     - 30min
     - 60min
     - 90min
-  command: SetPowerfulMode
 - sensorName: Quiet_Mode_Level
   decodeFunction: getBit3and4and5
+  encodeFunction: setBit3and4and5
   decodeOffset: 7
   values:
     - 'Off'
     - Level 1
     - Level 2
     - Level 3
-  command: SetQuietMode
 - sensorName: Holiday_Mode_State
   decodeFunction: getBit3and4
+  encodeFunction: setBit3and4
   decodeOffset: 5
   values:
     - 'Off'
     - Scheduled
     - Active
-  command: SetHolidayMode
 - sensorName: ThreeWay_Valve_State
   decodeFunction: getBit7and8
   decodeOffset: 111
@@ -125,18 +128,22 @@
   displayUnit: °C
 - sensorName: DHW_Heat_Delta
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 99
   displayUnit: °C
 - sensorName: Heat_Delta
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 84
   displayUnit: °C
 - sensorName: Cool_Delta
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 94
   displayUnit: °C
 - sensorName: DHW_Holiday_Shift_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 44
   displayUnit: °C
 - sensorName: Defrosting_State
@@ -145,13 +152,14 @@
   values:
     - Disabled
     - Enabled
-  command: SetForceDefrost
 - sensorName: Z1_Heat_Request_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 38
   displayUnit: °C
 - sensorName: Z1_Cool_Request_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 39
   displayUnit: °C
 - sensorName: Z1_Heat_Curve_Target_High_Temp
@@ -176,10 +184,12 @@
   displayUnit: °C
 - sensorName: Z2_Heat_Request_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 40
   displayUnit: °C
 - sensorName: Z2_Cool_Request_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 41
   displayUnit: °C
 - sensorName: Z1_Water_Temp
@@ -219,6 +229,7 @@
   displayUnit: ErrorState
 - sensorName: Room_Holiday_Shift_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 43
   displayUnit: °C
 - sensorName: Buffer_Temp
@@ -271,12 +282,14 @@
   displayUnit: °C
 - sensorName: DHW_Heater_State
   decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
   decodeOffset: 9
   values:
     - 'Off'
     - 'On'
 - sensorName: Room_Heater_State
   decodeFunction: getBit7and8
+  encodeFunction: setBit7and8
   decodeOffset: 9
   values:
     - 'Off'
@@ -319,6 +332,7 @@
   displayUnit: A
 - sensorName: Force_Heater_State
   decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
   decodeOffset: 5
   values:
     - Inactive
@@ -329,13 +343,14 @@
   values:
     - Inactive
     - Active
-  command: SetForceSterilization
 - sensorName: Sterilization_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 100
   displayUnit: °C
 - sensorName: Sterilization_Max_Time
   decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
   decodeOffset: 101
   displayUnit: min
 - sensorName: Z1_Cool_Curve_Target_High_Temp
@@ -362,18 +377,22 @@
     - Direct
 - sensorName: Heating_Off_Outdoor_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 83
   displayUnit: °C
 - sensorName: Heater_On_Outdoor_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 85
   displayUnit: °C
 - sensorName: Heat_To_Cool_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 95
   displayUnit: °C
 - sensorName: Cool_To_Heat_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 96
   displayUnit: °C
 - sensorName: Cooling_Mode
@@ -447,9 +466,57 @@
   displayUnit: Duty
 - sensorName: Zones_State
   decodeFunction: getBit1and2
+  encodeFunction: setBit1and2
   decodeOffset: 6
   values:
     - Zone1 active
     - Zone2 active
     - Zone1 and zone2 active
-  command: SetZones
+- sensorName: SGReady_Capacity1_Heat
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 71
+  displayUnit: '%'
+- sensorName: SGReady_Capacity1_DHW
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 72
+  displayUnit: '%'
+- sensorName: SGReady_Capacity2_Heat
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 73
+  displayUnit: '%'
+- sensorName: SGReady_Capacity2_DHW
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 74
+  displayUnit: '%'
+- sensorName: DHW_Heatup_Time
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 98
+  displayUnit: min
+- sensorName: DHW_Room_Max_Time
+  decodeFunction: getIntMinus1Times30
+  encodeFunction: setIntDiv30Plus1
+  decodeOffset: 97
+  displayUnit: min
+- sensorName: Maximum_Pump_Speed
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 45
+- sensorName: Force_Sterilization
+  decodeFunction: getBit7
+  encodeFunction: setBit7
+  decodeOffset: 8
+  values:
+    - 'Off'
+    - 'On'
+- sensorName: Force_Defrost
+  decodeFunction: getBit6
+  encodeFunction: setBit6
+  decodeOffset: 8
+  values:
+    - 'Off'
+    - 'On'

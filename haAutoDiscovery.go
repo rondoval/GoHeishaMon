@@ -116,36 +116,24 @@ func encodeBinarySensor(sensorName, deviceID, stateTopic, payloadOn, payloadOff 
 	return topic, data, err
 }
 
-func encodeSwitch(commandName, deviceID, sensorName string, values []string) (topic string, data []byte, err error) {
+func encodeSwitch(sensorName, deviceID string, values []string) (topic string, data []byte, err error) {
 	var b mqttSwitch
-	b.Name = commandName
-	b.CommandTopic = getCommandTopic(commandName)
+	b.Name = strings.ReplaceAll(sensorName, "_", " ")
 	b.StateTopic = getStatusTopic(sensorName)
+	b.CommandTopic = b.StateTopic + "/set"
 	b.AvailabilityTopic = config.mqttWillTopic
 	b.PayloadOn = values[1]
 	b.PayloadOff = values[0]
-	b.UniqueID = deviceID + "_" + commandName
+	b.UniqueID = deviceID + "_" + sensorName
 	b.Device.Manufacturer = "Panasonic"
 	b.Device.Model = "Aquarea"
 	b.Device.Identifiers = deviceID
 	b.Device.Name = "Aquarea " + deviceID
 
-	topic = fmt.Sprintf("homeassistant/switch/%s/%s/config", deviceID, commandName)
+	topic = fmt.Sprintf("homeassistant/switch/%s/%s/config", deviceID, sensorName)
 	data, err = json.Marshal(b)
 
 	return topic, data, err
-}
-
-func publishSwitch(mclient mqtt.Client, value topicData) {
-	// OK, we have a sensor. Now check if there's an associated command
-	if value.Command != "" {
-		topic, data, err := encodeSwitch(value.Command, config.DeviceName, value.SensorName, value.Values)
-		if err != nil {
-			log.Println(err)
-		} else {
-			mqttPublish(mclient, topic, data, 0)
-		}
-	}
 }
 
 func publishDiscoveryTopics(mclient mqtt.Client) {
@@ -157,9 +145,10 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 		var err error
 		if len(value.Values) != 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 			topic, data, err = encodeSensor(value.SensorName, config.DeviceName, stateTopic, value.DisplayUnit)
-		} else {
+		} else if value.EncodeFunction == "" {
 			topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, stateTopic, value.Values[1], value.Values[0])
-			publishSwitch(mclient, value)
+		} else {
+			topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Values)
 		}
 		if err != nil {
 			log.Println(err)

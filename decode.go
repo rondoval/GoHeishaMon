@@ -12,8 +12,9 @@ const numberOfOptionalTopics = 7
 
 var optionalData []string = make([]string, numberOfOptionalTopics)
 
-var funcMapToInt = map[string]func(byte) int{
+var decodeToInt = map[string]func(byte) int{
 	"getIntMinus1Times50": func(input byte) int { return (int(input) - 1) * 50 },
+	"getIntMinus1Times30": func(input byte) int { return (int(input) - 1) * 30 },
 	"getIntMinus1Times10": func(input byte) int { return (int(input) - 1) * 10 },
 	"getIntMinus128":      func(input byte) int { return int(input) - 128 },
 	"getIntMinus1":        func(input byte) int { return int(input) - 1 },
@@ -24,12 +25,14 @@ var funcMapToInt = map[string]func(byte) int{
 	"getBit5and6":         func(input byte) int { return int(((input >> 2) & 0b11) - 1) },
 	"getBit3and4":         func(input byte) int { return int(((input >> 4) & 0b11) - 1) },
 	"getBit1and2":         func(input byte) int { return int((input >> 6) - 1) },
+	"getBit7":             func(input byte) int { return int((input & 0b10) >> 1) },
+	"getBit6":             func(input byte) int { return int((input & 0b100) >> 2) },
 	"getOpMode":           getOpMode,
 	"getModel":            getModel,
 	"getEnergy":           func(input byte) int { return (int(input) - 1) * 200 },
 }
 
-var funcMapToString = map[string]func([]byte, int) string{
+var decodeToString = map[string]func([]byte, int) string{
 	"getIntMinus1Div5": getIntMinus1Div5,
 	"getPumpFlow":      getPumpFlow,
 	"getWord":          getWord,
@@ -132,7 +135,7 @@ func getWord(data []byte, index int) string {
 	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
 }
 
-func convert(value int, topic topicData) string {
+func convertIntToEnum(value int, topic topicData) string {
 	numItems := len(topic.Values)
 	if numItems > 0 {
 		if value >= 0 && value < numItems {
@@ -147,9 +150,9 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 	for k, v := range allTopics {
 		var topicValue string
 
-		if byteOperator, ok := funcMapToInt[v.DecodeFunction]; ok {
-			topicValue = convert(byteOperator(data[v.DecodeOffset]), v)
-		} else if arrayOperator, ok := funcMapToString[v.DecodeFunction]; ok {
+		if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
+			topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), v)
+		} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
 			topicValue = arrayOperator(data, v.DecodeOffset)
 		} else {
 			log.Println("Unknown codec function: ", v.DecodeFunction)

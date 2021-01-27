@@ -12,14 +12,15 @@ const topicsFileOther = "/etc/gh/topics.yaml"
 const topicsFileWindows = "topics.yaml"
 
 var allTopics []topicData
+var topicNameLookup map[string]topicData
 
 type topicData struct {
 	SensorName     string   `yaml:"sensorName"`
 	DecodeFunction string   `yaml:"decodeFunction"`
+	EncodeFunction string   `yaml:"encodeFunction"`
 	DecodeOffset   int      `yaml:"decodeOffset"`
 	DisplayUnit    string   `yaml:"displayUnit"`
 	Values         []string `yaml:"values"`
-	Command        string   `yaml:"command"`
 	currentValue   string
 }
 
@@ -40,6 +41,11 @@ func loadTopics() {
 	err = yaml.Unmarshal(data, &allTopics)
 	if err != nil {
 		logErrorPause(err)
+	}
+
+	topicNameLookup = make(map[string]topicData)
+	for _, val := range allTopics {
+		topicNameLookup[val.SensorName] = val
 	}
 	log.Println(" loaded.")
 }
