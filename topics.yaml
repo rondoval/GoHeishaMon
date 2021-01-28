@@ -534,3 +534,42 @@
   values:
     - Disabled
     - Enabled
+- sensorName: DHW_Heater
+  decodeFunction: getBit7and8
+  encodeFunction: getBit7and8
+  decodeOffset: 25
+  values:
+    - Internal
+    - External
+- sensorName: Internal_Heater_Power
+  decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
+  decodeOffset: 25
+  values:
+    - 3kW
+    - 6kW
+    - 9kW
+- sensorName: Pad_Heater
+  decodeFunction: getBit3and4
+  encodeFunction: setBit3and4
+  decodeOffset: 25
+  values:
+    - No pad heater
+    - Type A
+    - Type B
+- sensorName: Pool_Delta
+  decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
+  decodeOffset: 58
+  displayUnit: °C
+- sensorName: Buffer_Delta
+  decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
+  decodeOffset: 59
+  displayUnit: °C
+- sensorName: External_Heater_Time
+  decodeFunction: getIntMinus1
+  encodeFunction: setIntPlus1
+  decodeOffset: 60
+  displayUnit: min
+  
