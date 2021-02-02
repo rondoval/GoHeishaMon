@@ -164,18 +164,22 @@
   displayUnit: °C
 - sensorName: Z1_Heat_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 75
   displayUnit: °C
 - sensorName: Z1_Heat_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 76
   displayUnit: °C
 - sensorName: Z1_Heat_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 78
   displayUnit: °C
 - sensorName: Z1_Heat_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 77
   displayUnit: °C
 - sensorName: Room_Thermostat_Temp
@@ -355,22 +359,27 @@
   displayUnit: min
 - sensorName: Z1_Cool_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 86
   displayUnit: °C
 - sensorName: Z1_Cool_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 87
   displayUnit: °C
 - sensorName: Z1_Cool_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 89
   displayUnit: °C
 - sensorName: Z1_Cool_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 88
   displayUnit: °C
 - sensorName: Heating_Mode
   decodeFunction: getBit7and8
+  encodeFunction: setBit7and8
   decodeOffset: 28
   values:
     - Comp. Curve
@@ -397,40 +406,49 @@
   displayUnit: °C
 - sensorName: Cooling_Mode
   decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
   decodeOffset: 28
   values:
     - Comp. Curve
     - Direct
 - sensorName: Z2_Heat_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 79
   displayUnit: °C
 - sensorName: Z2_Heat_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 80
   displayUnit: °C
 - sensorName: Z2_Heat_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 82
   displayUnit: °C
 - sensorName: Z2_Heat_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 81
   displayUnit: °C
 - sensorName: Z2_Cool_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 90
   displayUnit: °C
 - sensorName: Z2_Cool_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 91
   displayUnit: °C
 - sensorName: Z2_Cool_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 93
   displayUnit: °C
 - sensorName: Z2_Cool_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
+  encodeFunction: setIntPlus128
   decodeOffset: 92
   displayUnit: °C
 - sensorName: Room_Heater_Operations_Hours

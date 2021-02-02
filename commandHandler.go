@@ -52,10 +52,6 @@ func verboseToNumber(function, value string) (int64, error) {
 }
 
 func prepMainCommand(function, msg string) ([setCmdLen]byte, error) {
-	if function == "SetCurves" {
-		return setCurves(msg)
-	}
-
 	command := panasonicSetCommand
 	v, err := strconv.ParseInt(msg, 10, 16)
 	if err != nil {

@@ -27,12 +27,14 @@
 ##   - New selectors added
 ##   - MQTT command topic naming scheme change
 ##   - Debounce commands
+##
+## 2.2.0 (02-02-2021)
+##   - Rework Heat/Cool Curve setting to input_number
 
 
 # Automations #
 ###############
 automation:
-  #Fetches quiet level from status and sets the selector accordingly
   - alias: Set quiet level selector
     trigger:
       platform: mqtt
@@ -42,7 +44,6 @@ automation:
       data_template:
         entity_id: input_select.aquarea_quiet_mode
         option: "{{ trigger.payload }}"
-  #Sets quiet level to the selected value
   - alias: Set quiet level
     trigger:
       platform: state
@@ -55,7 +56,6 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_quiet_mode') }}"
   
-  #Fetches powerful level from status and sets the selector accordingly
   - alias: Set powerful level selector
     trigger:
       platform: mqtt
@@ -65,7 +65,6 @@ automation:
       data_template:
         entity_id: input_select.aquarea_powerful_mode
         option: "{{ trigger.payload }}"
-  #Sets powerful level to the selected value
   - alias: Set powerful level
     trigger:
       platform: state
@@ -78,7 +77,6 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_powerful_mode') }}"
   
-  #Fetches operating mode from status and sets the selector accordingly
   - alias: Set operating mode selector
     trigger:
       platform: mqtt
@@ -88,7 +86,6 @@ automation:
       data_template:
         entity_id: input_select.aquarea_operating_mode
         option: "{{ trigger.payload }}"
-  #Sets heatmode to the selected value
   - alias: Set operating mode
     trigger:
       platform: state
@@ -122,7 +119,48 @@ automation:
         retain: false
         payload_template: "{{ states('input_select.aquarea_zones') }}"
   
-  #Fetches heatshift temperature from status and sets the selector accordingly
+  - alias: Set heating mode selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Heating_Mode"
+    action:
+      service: input_select.select_option
+      data_template:
+        entity_id: input_select.aquarea_heating_mode
+        option: "{{ trigger.payload }}"
+  - alias: Set heating mode
+    trigger:
+      platform: state
+      entity_id: input_select.aquarea_heating_mode
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Heating_Mode/set
+        retain: false
+        payload_template: "{{ states('input_select.aquarea_heating_mode') }}"
+
+  - alias: Set cooling mode selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Cooling_Mode"
+    action:
+      service: input_select.select_option
+      data_template:
+        entity_id: input_select.aquarea_cooling_mode
+        option: "{{ trigger.payload }}"
+  - alias: Set cooling mode
+    trigger:
+      platform: state
+      entity_id: input_select.aquarea_cooling_mode
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Cooling_Mode/set
+        retain: false
+        payload_template: "{{ states('input_select.aquarea_cooling_mode') }}"
+
   - alias: Set heat offset selector
     trigger:
       platform: mqtt
@@ -133,7 +171,6 @@ automation:
         entity_id: input_number.aquarea_heat_offset
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets heatshift temperature to the selected value
   - alias: Set heat offset
     trigger:
       platform: state
@@ -147,7 +184,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_offset') | int) }}
   
-  #Fetches tank target temperature from status and sets the selector accordingly
   - alias: Set tank target temperature selector
     trigger:
       platform: mqtt
@@ -158,7 +194,6 @@ automation:
         entity_id: input_number.aquarea_tank_temp
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets tank target temperature to the selected value
   - alias: Set tank target temperature
     trigger:
       platform: state
@@ -172,7 +207,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_tank_temp') | int) }}
   
-  #Fetches cooling offset temperature from status and sets the selector accordingly
   - alias: Set cooling offset temperature selector
     trigger:
       platform: mqtt
@@ -183,7 +217,6 @@ automation:
         entity_id: input_number.aquarea_cool_offset
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets cooling offset temperature to the selected value
   - alias: Set cooling offset temperature
     trigger:
       platform: state
@@ -197,7 +230,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_offset') | int) }}
   
-  #Fetches heating delta temperature from status and sets the selector accordingly
   - alias: Set heating delta temperature selector
     trigger:
       platform: mqtt
@@ -208,7 +240,6 @@ automation:
         entity_id: input_number.aquarea_heat_delta
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets heating delta temperature to the selected value
   - alias: Set heating delta temperature
     trigger:
       platform: state
@@ -222,7 +253,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_delta') | int) }}
   
-  #Fetches cooling delta temperature from status and sets the selector accordingly
   - alias: Set cooling delta temperature selector
     trigger:
       platform: mqtt
@@ -233,7 +263,6 @@ automation:
         entity_id: input_number.aquarea_cool_delta
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets cooling delta temperature to the selected value
   - alias: Set cooling delta temperature
     trigger:
       platform: state
@@ -247,7 +276,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_delta') | int) }}
   
-  #Fetches tank delta temperature from status and sets the selector accordingly
   - alias: Set tank delta temperature selector
     trigger:
       platform: mqtt
@@ -258,7 +286,6 @@ automation:
         entity_id: input_number.aquarea_dhw_delta
         value: >-
           {{ "%.1f" % (trigger.payload | int) }}
-  #Sets tank delta temperature to the selected value
   - alias: Set tank delta temperature
     trigger:
       platform: state
@@ -272,7 +299,6 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_dhw_delta') | int) }}
 
-# new automations
   - alias: Set tank holiday shift temperature selector
     trigger:
       platform: mqtt
@@ -618,6 +644,190 @@ automation:
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_maximum_pump_speed') | int) }}
 
+  - alias: Set Z1 Heat Curve Target High Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Heat_Curve_Target_High_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_heat_curve_target_high_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Heat Curve Target High Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_heat_curve_target_high_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Heat_Curve_Target_High_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_heat_curve_target_high_temp') | int) }}
+
+  - alias: Set Z1 Heat Curve Target Low Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Heat_Curve_Target_Low_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_heat_curve_target_low_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Heat Curve Target Low Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_heat_curve_target_low_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Heat_Curve_Target_Low_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_heat_curve_target_low_temp') | int) }}
+
+  - alias: Set Z1 Heat Curve Outside High Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Heat_Curve_Outside_High_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_heat_curve_outside_high_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Heat Curve Outside High Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_heat_curve_outside_high_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Heat_Curve_Outside_High_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_heat_curve_outside_high_temp') | int) }}
+
+  - alias: Set Z1 Heat Curve Outside Low Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Heat_Curve_Outside_Low_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_heat_curve_outside_low_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Heat Curve Outside Low Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_heat_curve_outside_low_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Heat_Curve_Outside_Low_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_heat_curve_outside_low_temp') | int) }}
+
+  - alias: Set Z1 Cool Curve Target High Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Cool_Curve_Target_High_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_cool_curve_target_high_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Cool Curve Target High Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_cool_curve_target_high_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Cool_Curve_Target_High_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_cool_curve_target_high_temp') | int) }}
+
+  - alias: Set Z1 Cool Curve Target Low Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Cool_Curve_Target_Low_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_cool_curve_target_low_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Cool Curve Target Low Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_cool_curve_target_low_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Cool_Curve_Target_Low_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_cool_curve_target_low_temp') | int) }}
+
+  - alias: Set Z1 Cool Curve Outside High Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Cool_Curve_Outside_High_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_cool_curve_outside_high_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Cool Curve Outside High Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_cool_curve_outside_high_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Cool_Curve_Outside_High_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_cool_curve_outside_high_temp') | int) }}
+
+  - alias: Set Z1 Cool Curve Outside Low Temp selector
+    trigger:
+      platform: mqtt
+      topic: "panasonic_heat_pump/main/Z1_Cool_Curve_Outside_Low_Temp"
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.aquarea_z1_cool_curve_outside_low_temp
+        value: >-
+          {{ "%.1f" % (trigger.payload | int) }}
+  - alias: Set Z1 Cool Curve Outside Low Temp
+    trigger:
+      platform: state
+      entity_id: input_number.aquarea_z1_cool_curve_outside_low_temp
+      for: "00:00:05"
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: panasonic_heat_pump/main/Z1_Cool_Curve_Outside_Low_Temp/set
+        retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
+        payload_template: >-
+          {{ "%.0f" % (states('input_number.aquarea_z1_cool_curve_outside_low_temp') | int) }}
+
 # input_number #
 ################
 input_number:
@@ -669,7 +879,6 @@ input_number:
     max: -2
     step: 1
 
-  # new-------------------
   aquarea_dhw_holiday_shift_temp:
     name: DHW Holiday Shift Temp
     unit_of_measurement: °C
@@ -722,7 +931,7 @@ input_number:
     name: Heat to Cool Temp
     unit_of_measurement: °C
     mode: box
-    min: 5
+    min: 11
     max: 25
     step: 1
 
@@ -731,7 +940,7 @@ input_number:
     unit_of_measurement: °C
     mode: box
     min: 5
-    max: 25
+    max: 14
     step: 1
 
   aquarea_sgready_capacity1_heat:
@@ -789,6 +998,63 @@ input_number:
     max: 254
     step: 1
 
+## Heat/Cool curves
+  aquarea_z1_heat_curve_target_high_temp:
+    name: Z1 Heat Curve Target High Temp
+    mode: box
+    min: 20
+    max: 60
+    step: 1
+
+  aquarea_z1_heat_curve_target_low_temp:
+    name: Z1 Heat Curve Target Low Temp
+    mode: box
+    min: 20
+    max: 60
+    step: 1
+
+  aquarea_z1_heat_curve_outside_high_temp:
+    name: Z1 Heat Curve Outside High Temp
+    mode: box
+    min: -15
+    max: 15
+    step: 1
+
+  aquarea_z1_heat_curve_outside_low_temp:
+    name: Z1 Heat Curve Outside Low Temp
+    mode: box
+    min: -15
+    max: 15
+    step: 1
+
+  aquarea_z1_cool_curve_target_high_temp:
+    name: Z1 Cool Curve Target High Temp
+    mode: box
+    min: 5
+    max: 20
+    step: 1
+
+  aquarea_z1_cool_curve_target_low_temp:
+    name: Z1 Cool Curve Target Low Temp
+    mode: box
+    min: 5
+    max: 20
+    step: 1
+
+  aquarea_z1_cool_curve_outside_high_temp:
+    name: Z1 Cool Curve Outside High Temp
+    mode: box
+    min: 15
+    max: 30
+    step: 1
+    
+  aquarea_z1_cool_curve_outside_low_temp:
+    name: Z1 Cool Curve Outside Low Temp
+    mode: box
+    min: 15
+    max: 30
+    step: 1
+
 # input_select #
 ################
 input_select:
@@ -825,6 +1091,18 @@ input_select:
       - "Zone1 active"
       - "Zone2 active"
       - "Zone1 and zone2 active"
+
+  aquarea_heating_mode:
+    name: Heating Mode
+    options:
+    - "Comp. Curve"
+    - "Direct"
+    
+  aquarea_cooling_mode:
+    name: Cooling Mode
+    options:
+    - "Comp. Curve"
+    - "Direct"
 
 # sensor #
 ##########

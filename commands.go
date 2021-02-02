@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"math"
-	"strconv"
 )
 
 const setCmdLen = 110
@@ -88,102 +85,4 @@ func setOperationMode(val int) (data byte) {
 		data = 0
 	}
 	return data
-}
-
-func setCurves(msg string) ([110]byte, error) {
-	type tempRange struct {
-		high string
-		low  string
-	}
-	type tempCurve struct {
-		target  tempRange
-		outside tempRange
-	}
-	type curves struct {
-		zone1 struct {
-			heat tempCurve
-			cool tempCurve
-		}
-		zone2 struct {
-			heat tempCurve
-			cool tempCurve
-		}
-	}
-
-	command := panasonicSetCommand
-	var n curves
-
-	err := json.Unmarshal([]byte(msg), &n)
-	if err != nil {
-		log.Println("SetCurves JSON decode failed!")
-		return command, err
-	}
-
-	log.Println("SetCurves JSON received ok")
-
-	if n.zone1.heat.target.high != "" {
-		v, _ := strconv.Atoi(n.zone1.heat.target.high)
-		command[75] = byte(v + 128)
-	}
-	if n.zone1.heat.target.low != "" {
-		v, _ := strconv.Atoi(n.zone1.heat.target.low)
-		command[76] = byte(v + 128)
-	}
-	if n.zone1.heat.outside.low != "" {
-		v, _ := strconv.Atoi(n.zone1.heat.outside.low)
-		command[77] = byte(v + 128)
-	}
-	if n.zone1.heat.outside.high != "" {
-		v, _ := strconv.Atoi(n.zone1.heat.outside.high)
-		command[78] = byte(v + 128)
-	}
-	if n.zone2.heat.target.high != "" {
-		v, _ := strconv.Atoi(n.zone2.heat.target.high)
-		command[79] = byte(v + 128)
-	}
-	if n.zone2.heat.target.low != "" {
-		v, _ := strconv.Atoi(n.zone2.heat.target.low)
-		command[80] = byte(v + 128)
-	}
-	if n.zone2.heat.outside.low != "" {
-		v, _ := strconv.Atoi(n.zone2.heat.outside.low)
-		command[81] = byte(v + 128)
-	}
-	if n.zone2.heat.outside.high != "" {
-		v, _ := strconv.Atoi(n.zone2.heat.target.high)
-		command[82] = byte(v + 128)
-	}
-	if n.zone1.cool.target.high != "" {
-		v, _ := strconv.Atoi(n.zone1.cool.target.high)
-		command[86] = byte(v + 128)
-	}
-	if n.zone1.cool.target.low != "" {
-		v, _ := strconv.Atoi(n.zone1.cool.target.low)
-		command[87] = byte(v + 128)
-	}
-	if n.zone1.cool.outside.low != "" {
-		v, _ := strconv.Atoi(n.zone1.cool.outside.low)
-		command[88] = byte(v + 128)
-	}
-	if n.zone1.cool.outside.high != "" {
-		v, _ := strconv.Atoi(n.zone1.cool.outside.high)
-		command[89] = byte(v + 128)
-	}
-	if n.zone2.cool.target.high != "" {
-		v, _ := strconv.Atoi(n.zone2.cool.target.high)
-		command[90] = byte(v + 128)
-	}
-	if n.zone2.cool.target.low != "" {
-		v, _ := strconv.Atoi(n.zone2.cool.target.low)
-		command[91] = byte(v + 128)
-	}
-	if n.zone2.cool.outside.low != "" {
-		v, _ := strconv.Atoi(n.zone2.cool.outside.low)
-		command[92] = byte(v + 128)
-	}
-	if n.zone2.cool.outside.high != "" {
-		v, _ := strconv.Atoi(n.zone2.cool.outside.high)
-		command[93] = byte(v + 128)
-	}
-	return command, nil
 }
