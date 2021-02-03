@@ -554,7 +554,7 @@
     - Enabled
 - sensorName: DHW_Heater
   decodeFunction: getBit7and8
-  encodeFunction: getBit7and8
+  encodeFunction: setBit7and8
   decodeOffset: 25
   values:
     - Internal
