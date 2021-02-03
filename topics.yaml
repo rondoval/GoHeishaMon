@@ -525,15 +525,15 @@
   encodeFunction: setIntPlus1
   decodeOffset: 45
 - sensorName: Force_Sterilization
-  decodeFunction: getBit7
-  encodeFunction: setBit7
+  decodeFunction: getBit6
+  encodeFunction: setBit6
   decodeOffset: 8
   values:
     - 'Off'
     - 'On'
 - sensorName: Force_Defrost
-  decodeFunction: getBit6
-  encodeFunction: setBit6
+  decodeFunction: getBit7
+  encodeFunction: setBit7
   decodeOffset: 8
   values:
     - 'Off'
