@@ -19,9 +19,11 @@ func onGenericCommand(mclient mqtt.Client, msg mqtt.Message) {
 
 	if function == "OSCommand" {
 		handleOSCommand(mclient, msg)
-		return
+	} else if config.OptionalPCB == true {
+		handlePCBCommand(function, value)
+	} else {
+		log.Printf("Unknown command %s", function)
 	}
-	log.Printf("Unknown command %s", function)
 }
 
 func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
@@ -33,8 +35,6 @@ func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 	command, err := prepMainCommand(function, value)
 	if err == nil {
 		commandsChannel <- command[:]
-	} else if config.OptionalPCB == true {
-		handlePCBCommand(function, value)
 	} else {
 		log.Println(err)
 	}

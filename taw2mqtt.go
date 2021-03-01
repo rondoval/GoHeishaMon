@@ -55,7 +55,7 @@ func main() {
 		readSerial(mclient)
 
 		var queueLen = len(commandsChannel)
-		if queueLen > 50 {
+		if queueLen > 10 {
 			log.Println("Command queue length: ", len(commandsChannel))
 		}
 

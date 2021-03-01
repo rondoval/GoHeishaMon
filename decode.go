@@ -29,7 +29,7 @@ var decodeToInt = map[string]func(byte) int{
 	"getBit6":             func(input byte) int { return int((input & 0b100) >> 2) },
 	"getOpMode":           getOpMode,
 	"getModel":            getModel,
-	"getEnergy":           func(input byte) int { return (int(input) - 1) * 200 },
+	"getPower":            func(input byte) int { return (int(input) - 1) * 200 },
 }
 
 var decodeToString = map[string]func([]byte, int) string{

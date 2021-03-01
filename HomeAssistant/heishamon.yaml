@@ -31,7 +31,6 @@
 ## 2.2.0 (02-02-2021)
 ##   - Rework Heat/Cool Curve setting to input_number
 
-
 # Automations #
 ###############
 automation:
@@ -55,7 +54,7 @@ automation:
         topic: panasonic_heat_pump/main/Quiet_Mode_Level/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_quiet_mode') }}"
-  
+
   - alias: Set powerful level selector
     trigger:
       platform: mqtt
@@ -76,7 +75,7 @@ automation:
         topic: panasonic_heat_pump/main/Powerful_Mode_Time/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_powerful_mode') }}"
-  
+
   - alias: Set operating mode selector
     trigger:
       platform: mqtt
@@ -97,7 +96,7 @@ automation:
         topic: panasonic_heat_pump/main/Operating_Mode_State/set
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: "{{ states('input_select.aquarea_operating_mode') }}"
-  
+
   - alias: Set zones state selector
     trigger:
       platform: mqtt
@@ -118,7 +117,7 @@ automation:
         topic: panasonic_heat_pump/main/Zones_State/set
         retain: false
         payload_template: "{{ states('input_select.aquarea_zones') }}"
-  
+
   - alias: Set heating mode selector
     trigger:
       platform: mqtt
@@ -183,7 +182,7 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_offset') | int) }}
-  
+
   - alias: Set tank target temperature selector
     trigger:
       platform: mqtt
@@ -206,7 +205,7 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_tank_temp') | int) }}
-  
+
   - alias: Set cooling offset temperature selector
     trigger:
       platform: mqtt
@@ -229,7 +228,7 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_offset') | int) }}
-  
+
   - alias: Set heating delta temperature selector
     trigger:
       platform: mqtt
@@ -252,7 +251,7 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_heat_delta') | int) }}
-  
+
   - alias: Set cooling delta temperature selector
     trigger:
       platform: mqtt
@@ -275,7 +274,7 @@ automation:
         retain: false #IMPORTANT! ALWAYS set retain flag false for commands!
         payload_template: >-
           {{ "%.0f" % (states('input_number.aquarea_cool_delta') | int) }}
-  
+
   - alias: Set tank delta temperature selector
     trigger:
       platform: mqtt
@@ -843,16 +842,24 @@ input_number:
     name: Heat Request Temperature
     unit_of_measurement: °C
     mode: box
-    min: -5
-    max: 5
+    # No thermostat
+    #    min: -5
+    #    max: 5
+    # With thermostat
+    min: 10
+    max: 30
     step: 1
 
   aquarea_cool_offset:
     name: Cool Request Temperature
     unit_of_measurement: °C
     mode: box
-    min: -5
-    max: 5
+    # No thermostat
+    #   min: -5
+    #   max: 5
+    # With thermostat
+    min: 18
+    max: 35
     step: 1
 
   aquarea_heat_delta:
@@ -945,7 +952,7 @@ input_number:
 
   aquarea_sgready_capacity1_heat:
     name: SGReady Capacity1 Heat
-    unit_of_measurement: '%'
+    unit_of_measurement: "%"
     mode: box
     min: 50
     max: 150
@@ -953,7 +960,7 @@ input_number:
 
   aquarea_sgready_capacity1_dhw:
     name: SGReady Capacity1 DHW
-    unit_of_measurement: '%'
+    unit_of_measurement: "%"
     mode: box
     min: 50
     max: 150
@@ -961,7 +968,7 @@ input_number:
 
   aquarea_sgready_capacity2_heat:
     name: SGReady Capacity2 Heat
-    unit_of_measurement: '%'
+    unit_of_measurement: "%"
     mode: box
     min: 50
     max: 150
@@ -969,7 +976,7 @@ input_number:
 
   aquarea_sgready_capacity2_dhw:
     name: SGReady Capacity2 DHW
-    unit_of_measurement: '%'
+    unit_of_measurement: "%"
     mode: box
     min: 50
     max: 150
@@ -990,7 +997,7 @@ input_number:
     min: 30
     max: 600
     step: 30
-    
+
   aquarea_maximum_pump_speed:
     name: Maximum Pump Speed
     mode: box
@@ -998,7 +1005,7 @@ input_number:
     max: 254
     step: 1
 
-## Heat/Cool curves
+  ## Heat/Cool curves
   aquarea_z1_heat_curve_target_high_temp:
     name: Z1 Heat Curve Target High Temp
     mode: box
@@ -1047,7 +1054,7 @@ input_number:
     min: 15
     max: 30
     step: 1
-    
+
   aquarea_z1_cool_curve_outside_low_temp:
     name: Z1 Cool Curve Outside Low Temp
     mode: box
@@ -1095,43 +1102,43 @@ input_select:
   aquarea_heating_mode:
     name: Heating Mode
     options:
-    - "Comp. Curve"
-    - "Direct"
-    
+      - "Comp. Curve"
+      - "Direct"
+
   aquarea_cooling_mode:
     name: Cooling Mode
     options:
-    - "Comp. Curve"
-    - "Direct"
+      - "Comp. Curve"
+      - "Direct"
 
 # sensor #
 ##########
 sensor:
   #### SENSORS BELOW ARE NOT IN FIRMWARE ####
-  #Energy use/production
+  #Power use/production
   - platform: template
     sensors:
-      aquarea_energy_production:
-        friendly_name: "Aquarea Energy Production"
+      aquarea_power_production:
+        friendly_name: "Aquarea Power Production"
         unit_of_measurement: "W"
         value_template: >-
-          {% if states('sensor.dhw_energy_production') != "0" %}
-            {{ states('sensor.dhw_energy_production') }}
-          {% elif states('sensor.cool_energy_production') != "0" %}
-            {{ states('sensor.cool_energy_production') }}
+          {% if states('sensor.dhw_power_production') != "0" %}
+            {{ states('sensor.dhw_power_production') }}
+          {% elif states('sensor.cool_power_production') != "0" %}
+            {{ states('sensor.cool_power_production') }}
           {% else %}
-            {{ states('sensor.heat_energy_production') }}
+            {{ states('sensor.heat_power_production') }}
           {% endif %}
-      aquarea_energy_consumption:
-        friendly_name: "Aquarea Energy Consumption"
+      aquarea_power_consumption:
+        friendly_name: "Aquarea Power Consumption"
         unit_of_measurement: "W"
         value_template: >-
-          {% if states('sensor.dhw_energy_consumption') != "0" %}
-            {{ states('sensor.dhw_energy_consumption') }}
-          {% elif states('sensor.cool_energy_consumption') != "0" %}
-            {{ states('sensor.cool_energy_consumption') }}
+          {% if states('sensor.dhw_power_consumption') != "0" %}
+            {{ states('sensor.dhw_power_consumption') }}
+          {% elif states('sensor.cool_power_consumption') != "0" %}
+            {{ states('sensor.cool_power_consumption') }}
           {% else %}
-            {{ states('sensor.heat_energy_consumption') }}
+            {{ states('sensor.heat_power_consumption') }}
           {% endif %}
   #COP Calculations
   - platform: template
@@ -1140,9 +1147,9 @@ sensor:
         friendly_name: "Aquarea COP"
         unit_of_measurement: "x"
         value_template: >-
-          {% if states('sensor.aquarea_energy_production') != "Unknown" %}
-            {% if states('sensor.aquarea_energy_consumption') > "0" %}
-              {{ '%0.1f' % ((states('sensor.aquarea_energy_production') | float ) / (states('sensor.aquarea_energy_consumption') | float)) }}
+          {% if states('sensor.aquarea_power_production') != "Unknown" %}
+            {% if states('sensor.aquarea_power_consumption') > "0" %}
+              {{ '%0.1f' % ((states('sensor.aquarea_power_production') | float ) / (states('sensor.aquarea_power_consumption') | float)) }}
             {% else %}
               0.0
             {% endif %}
@@ -1153,7 +1160,7 @@ sensor:
 # switch #
 ##########
 switch:
-#Turn on/off holiday mode
+  #Turn on/off holiday mode
   - platform: mqtt
     name: Set Holiday Mode
     availability_topic: "panasonic_heat_pump/LWT"

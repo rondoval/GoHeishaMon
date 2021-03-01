@@ -82,12 +82,12 @@
   decodeFunction: getIntMinus128
   decodeOffset: 142
   displayUnit: °C
-- sensorName: Heat_Energy_Production
-  decodeFunction: getEnergy
+- sensorName: Heat_Power_Production
+  decodeFunction: getPower
   decodeOffset: 194
   displayUnit: W
-- sensorName: Heat_Energy_Consumption
-  decodeFunction: getEnergy
+- sensorName: Heat_Power_Consumption
+  decodeFunction: getPower
   decodeOffset: 193
   displayUnit: W
 - sensorName: Powerful_Mode_Time
@@ -204,20 +204,20 @@
   decodeFunction: getIntMinus128
   decodeOffset: 146
   displayUnit: °C
-- sensorName: Cool_Energy_Production
-  decodeFunction: getEnergy
+- sensorName: Cool_Power_Production
+  decodeFunction: getPower
   decodeOffset: 196
   displayUnit: W
-- sensorName: Cool_Energy_Consumption
-  decodeFunction: getEnergy
+- sensorName: Cool_Power_Consumption
+  decodeFunction: getPower
   decodeOffset: 195
   displayUnit: W
-- sensorName: DHW_Energy_Production
-  decodeFunction: getEnergy
+- sensorName: DHW_Power_Production
+  decodeFunction: getPower
   decodeOffset: 198
   displayUnit: W
-- sensorName: DHW_Energy_Consumption
-  decodeFunction: getEnergy
+- sensorName: DHW_Power_Consumption
+  decodeFunction: getPower
   decodeOffset: 197
   displayUnit: W
 - sensorName: Z1_Water_Target_Temp
@@ -567,12 +567,12 @@
     - 3kW
     - 6kW
     - 9kW
-- sensorName: Pad_Heater
+- sensorName: Pan_Heater
   decodeFunction: getBit3and4
   encodeFunction: setBit3and4
   decodeOffset: 25
   values:
-    - No pad heater
+    - No pan heater
     - Type A
     - Type B
 - sensorName: Pool_Delta
@@ -590,4 +590,31 @@
   encodeFunction: setIntPlus1
   decodeOffset: 60
   displayUnit: min
-  
+- sensorName: Circulation_Liquid
+  decodeFunction: getBit1and2
+  encodeFunction: setBit1and2
+  decodeOffset: 20
+  values:
+    - Glycol
+    - Water
+- sensorName: Alternative_Outdoor_Sensor
+  decodeFunction: getBit3and4
+  encodeFunction: setBit3and4
+  decodeOffset: 20
+  values:
+    - Built in
+    - External
+- sensorName: Antifreezing
+  decodeFunction: getBit5and6
+  encodeFunction: setBit5and6
+  decodeOffset: 20
+  values:
+    - 'Off'
+    - 'On'
+- sensorName: Optional_PCB
+  decodeFunction: getBit7and8
+  encodeFunction: setBit7and8
+  decodeOffset: 20
+  values:
+    - 'Off'
+    - 'On'
