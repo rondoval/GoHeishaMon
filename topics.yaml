@@ -590,13 +590,6 @@
   encodeFunction: setIntPlus1
   decodeOffset: 60
   displayUnit: min
-- sensorName: Circulation_Liquid
-  decodeFunction: getBit1and2
-  encodeFunction: setBit1and2
-  decodeOffset: 20
-  values:
-    - Glycol
-    - Water
 - sensorName: Alternative_Outdoor_Sensor
   decodeFunction: getBit3and4
   encodeFunction: setBit3and4

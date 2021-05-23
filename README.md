@@ -1,5 +1,3 @@
-# -!!!!!!! Latest checked release is 1.0.159 !!!!! Others are tests ,and some of them can brick CZ-TAW1.!!!!!!!-
-
 
 This project is to modify Panasonic CZ-TAW1 Firmware to send data from heat pump to MQTT instead to Aquarea Cloud (there is some POC work proving there is a posiblity to send data concurently to Aquarea Cloud and MQTT host using only modified CZ-TAW1 ,but it's not yet implemented in this project )
 
@@ -49,25 +47,3 @@ After reboot you should be able to connect to ssh and via web with user: root an
 
 Screenshot from Homeassistant:
 ![Screenshot from Homeassistant](PompaCieplaScreen.PNG)
-
-
-
-Changes:
--
-1.1.159 comparing to1.1.150 :
-- removed a2wmain watch
-- start ssh and www from script
-- Home Assistant MQTT Discovery https://www.home-assistant.io/docs/mqtt/discovery/
-
-1.1.150 comparing to 1.1.135 : 
-- moved buttons handling from GoHeishaMon to separate script ( in this way , if GoHeishaMon will crash it is still possible to go back to orginal via 3 buttons)
-
-
-Todo:
-
-- queue command from a2wmain 
-- flag to point to config file
-- manuals 
-- tests 
-
-..... more....
