@@ -68,19 +68,27 @@ func temp2hex(temp float64) byte {
 func setOperationMode(val int) (data byte) {
 	switch val {
 	case 0:
-		data = 18
+		data = 18 // Heat
 	case 1:
-		data = 19
+		data = 19 // Cool
 	case 2:
-		data = 24
+		data = 24 // Auto(heat) -> Auto
 	case 3:
-		data = 33
+		data = 33 // DHW
 	case 4:
-		data = 34
+		data = 34 // Heat+DHW
 	case 5:
-		data = 35
+		data = 35 // Cool+DHW
 	case 6:
-		data = 40
+		data = 40 // Auto(heat)+DHW -> Auto+DHW
+	case 7:
+		data = 24 // Auto(cool) -> Auto
+	case 8:
+		data = 40 // Auto(cool)+DHW -> Auto+DHW
+	case 9:
+		data = 24 // Auto
+	case 10:
+		data = 40 // Auto+DHW
 	default:
 		data = 0
 	}

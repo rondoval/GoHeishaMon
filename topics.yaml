@@ -38,6 +38,8 @@
     - Auto(heat)+DHW
     - Auto(cool)
     - Auto(cool)+DHW
+    - Auto
+    - Auto+DHW
 - sensorName: Main_Inlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 143

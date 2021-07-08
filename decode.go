@@ -42,23 +42,27 @@ var decodeToString = map[string]func([]byte, int) string{
 func getOpMode(input byte) int {
 	switch int(input & 0b111111) {
 	case 18:
-		return 0
+		return 0 // Heat
 	case 19:
-		return 1
+		return 1 // Cool
 	case 25:
-		return 2
+		return 2 // Auto(heat)
 	case 33:
-		return 3
+		return 3 // DHW
 	case 34:
-		return 4
+		return 4 // Heat+DHW
 	case 35:
-		return 5
+		return 5 // Cool+DHW
 	case 41:
-		return 6
+		return 6 // Auto(heat)+DHW
 	case 26:
-		return 7
+		return 7 // Auto(cool)
 	case 42:
-		return 8
+		return 8 // Auto(cool)+DHW
+	case 24:
+		return 9 // Auto
+	case 40:
+		return 10 // Auto+DHW
 	default:
 		return -1
 	}

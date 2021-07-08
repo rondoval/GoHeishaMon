@@ -1091,6 +1091,8 @@ input_select:
       - "Heat+DHW"
       - "Cool+DHW"
       - "Auto(heat)+DHW"
+      - "Auto(cool)"
+      - "Auto(cool)+DHW"
 
   aquarea_zones:
     name: Zones State
