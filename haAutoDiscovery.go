@@ -213,12 +213,12 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 
 		if value.EncodeFunction != "" {
 			// Read-Write value
-			if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+			if len(value.Values) == 0 {
+				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step)
+			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				topic, data, err = encodeSelect(value.SensorName, config.DeviceName, value.Values)
 			} else if len(value.Values) == 2 {
 				topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Values)
-			} else if len(value.Values) == 0 {
-				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step)
 			} else {
 				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
