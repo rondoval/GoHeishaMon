@@ -190,6 +190,7 @@ func encodeSelect(sensorName, deviceID string, values []string) (topic string, d
 func encodeNumber(sensorName, deviceID string, min, max, step int) (topic string, data []byte, err error) {
 	var s mqttNumber
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
+	s.CommandTopic = s.StateTopic + "/set"
 	s.StateTopic = getStatusTopic(sensorName)
 	s.AvailabilityTopic = config.mqttWillTopic
 	s.Min = min
