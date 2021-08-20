@@ -192,6 +192,9 @@ func encodeNumber(sensorName, deviceID string, min, max, step int) (topic string
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
 	s.StateTopic = getStatusTopic(sensorName)
 	s.AvailabilityTopic = config.mqttWillTopic
+	s.Min = min
+	s.Max = max
+	s.Step = step
 	s.UniqueID = deviceID + "_" + sensorName
 	s.Device.Manufacturer = "Panasonic"
 	s.Device.Model = "Aquarea"
