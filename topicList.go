@@ -21,6 +21,9 @@ type topicData struct {
 	DecodeOffset   int      `yaml:"decodeOffset"`
 	DisplayUnit    string   `yaml:"displayUnit"`
 	Values         []string `yaml:"values"`
+	Min            int      `yaml:"min"`
+	Max            int      `yaml:"max"`
+	Step           int      `yaml:"step"`
 	currentValue   string
 }
 

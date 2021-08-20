@@ -33,7 +33,7 @@ func makeMQTTConn() mqtt.Client {
 	opts.SetUsername(config.MqttLogin)
 	opts.SetClientID("GoHeishaMon-pub")
 	opts.SetWill(config.mqttWillTopic, "offline", 1, true)
-	opts.SetKeepAlive(time.Second * time.Duration(config.MqttKeepalive))
+	opts.SetKeepAlive(time.Duration(config.MqttKeepalive) * time.Second)
 
 	opts.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
 	opts.SetAutoReconnect(true) // default, but I want it explicit

@@ -25,6 +25,38 @@ type mqttSwitch struct {
 	} `json:"device"`
 }
 
+type mqttSelect struct {
+	Name              string   `json:"name,omitempty"`
+	CommandTopic      string   `json:"command_topic,omitempty"`
+	StateTopic        string   `json:"state_topic,omitempty"`
+	AvailabilityTopic string   `json:"availability_topic,omitempty"`
+	Options           []string `json:"options,omitempty"`
+	UniqueID          string   `json:"unique_id,omitempty"`
+	Device            struct {
+		Manufacturer string `json:"manufacturer,omitempty"`
+		Model        string `json:"model,omitempty"`
+		Name         string `json:"name,omitempty"`
+		Identifiers  string `json:"identifiers,omitempty"`
+	} `json:"device"`
+}
+
+type mqttNumber struct {
+	Name              string `json:"name,omitempty"`
+	CommandTopic      string `json:"command_topic,omitempty"`
+	StateTopic        string `json:"state_topic,omitempty"`
+	AvailabilityTopic string `json:"availability_topic,omitempty"`
+	Min               int    `json:"min,omitempty"`
+	Max               int    `json:"max,omitempty"`
+	Step              int    `json:"step,omitempty"`
+	UniqueID          string `json:"unique_id,omitempty"`
+	Device            struct {
+		Manufacturer string `json:"manufacturer,omitempty"`
+		Model        string `json:"model,omitempty"`
+		Name         string `json:"name,omitempty"`
+		Identifiers  string `json:"identifiers,omitempty"`
+	} `json:"device"`
+}
+
 type mqttSensor struct {
 	Name              string `json:"name,omitempty"`
 	StateTopic        string `json:"state_topic"`
@@ -78,10 +110,10 @@ func getDeviceClass(unit string) string {
 	return ""
 }
 
-func encodeSensor(sensorName, deviceID, stateTopic, unit string) (topic string, data []byte, err error) {
+func encodeSensor(sensorName, deviceID, unit string) (topic string, data []byte, err error) {
 	var s mqttSensor
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
-	s.StateTopic = stateTopic
+	s.StateTopic = getStatusTopic(sensorName)
 	s.AvailabilityTopic = config.mqttWillTopic
 	s.UnitOfMeasurement = unit
 	s.DeviceClass = getDeviceClass(unit)
@@ -97,10 +129,10 @@ func encodeSensor(sensorName, deviceID, stateTopic, unit string) (topic string, 
 	return topic, data, err
 }
 
-func encodeBinarySensor(sensorName, deviceID, stateTopic, payloadOn, payloadOff string) (topic string, data []byte, err error) {
+func encodeBinarySensor(sensorName, deviceID, payloadOn, payloadOff string) (topic string, data []byte, err error) {
 	var s mqttBinarySensor
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
-	s.StateTopic = stateTopic
+	s.StateTopic = getStatusTopic(sensorName)
 	s.AvailabilityTopic = config.mqttWillTopic
 	s.PayloadOff = payloadOff
 	s.PayloadOn = payloadOn
@@ -136,19 +168,67 @@ func encodeSwitch(sensorName, deviceID string, values []string) (topic string, d
 	return topic, data, err
 }
 
+func encodeSelect(sensorName, deviceID string, values []string) (topic string, data []byte, err error) {
+	var b mqttSelect
+	b.Name = strings.ReplaceAll(sensorName, "_", " ")
+	b.StateTopic = getStatusTopic(sensorName)
+	b.CommandTopic = b.StateTopic + "/set"
+	b.AvailabilityTopic = config.mqttWillTopic
+	b.Options = values
+	b.UniqueID = deviceID + "_" + sensorName
+	b.Device.Manufacturer = "Panasonic"
+	b.Device.Model = "Aquarea"
+	b.Device.Identifiers = deviceID
+	b.Device.Name = "Aquarea " + deviceID
+
+	topic = fmt.Sprintf("homeassistant/select/%s/%s/config", deviceID, sensorName)
+	data, err = json.Marshal(b)
+
+	return topic, data, err
+}
+
+func encodeNumber(sensorName, deviceID string, min, max, step int) (topic string, data []byte, err error) {
+	var s mqttNumber
+	s.Name = strings.ReplaceAll(sensorName, "_", " ")
+	s.StateTopic = getStatusTopic(sensorName)
+	s.AvailabilityTopic = config.mqttWillTopic
+	s.UniqueID = deviceID + "_" + sensorName
+	s.Device.Manufacturer = "Panasonic"
+	s.Device.Model = "Aquarea"
+	s.Device.Identifiers = deviceID
+	s.Device.Name = "Aquarea " + deviceID
+
+	topic = fmt.Sprintf("homeassistant/number/%s/%s/config", deviceID, sensorName)
+	data, err = json.Marshal(s)
+
+	return topic, data, err
+}
+
 func publishDiscoveryTopics(mclient mqtt.Client) {
 	log.Print("Publishing Home Assistant discovery topics...")
 	for _, value := range allTopics {
-		stateTopic := getStatusTopic(value.SensorName)
 		var topic string
 		var data []byte
 		var err error
-		if len(value.Values) != 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-			topic, data, err = encodeSensor(value.SensorName, config.DeviceName, stateTopic, value.DisplayUnit)
-		} else if value.EncodeFunction == "" {
-			topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, stateTopic, value.Values[1], value.Values[0])
+
+		if value.EncodeFunction != "" {
+			// Read-Write value
+			if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+				topic, data, err = encodeSelect(value.SensorName, config.DeviceName, value.Values)
+			} else if len(value.Values) == 2 {
+				topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Values)
+			} else if len(value.Values) == 0 {
+				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step)
+			} else {
+				log.Println("Warning: Don't know how to encode " + value.SensorName)
+			}
 		} else {
-			topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Values)
+			// Read only value
+			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+				topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, value.Values[1], value.Values[0])
+			} else {
+				topic, data, err = encodeSensor(value.SensorName, config.DeviceName, value.DisplayUnit)
+			}
 		}
 		if err != nil {
 			log.Println(err)

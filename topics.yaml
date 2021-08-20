@@ -61,6 +61,9 @@
   encodeFunction: setIntPlus128
   decodeOffset: 42
   displayUnit: °C
+  min: 40
+  max: 65
+  step: 1
 - sensorName: DHW_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 141
@@ -133,21 +136,33 @@
   encodeFunction: setIntPlus128
   decodeOffset: 99
   displayUnit: °C
+  min: -12
+  max: -2
+  step: 1
 - sensorName: Heat_Delta
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 84
   displayUnit: °C
+  min: 1
+  max: 15
+  step: 1
 - sensorName: Cool_Delta
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 94
   displayUnit: °C
+  min: 1
+  max: 15
+  step: 1
 - sensorName: DHW_Holiday_Shift_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 44
   displayUnit: °C
+  min: -25
+  max: 15
+  step: 1
 - sensorName: Defrosting_State
   decodeFunction: getBit5and6
   decodeOffset: 111
@@ -159,31 +174,57 @@
   encodeFunction: setIntPlus128
   decodeOffset: 38
   displayUnit: °C
+# No thermostat
+#    min: -5
+#    max: 5
+# With thermostat
+  min: 10
+  max: 30
+  step: 1
 - sensorName: Z1_Cool_Request_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 39
   displayUnit: °C
+# No thermostat
+#   min: -5
+#   max: 5
+# With thermostat
+  min: 18
+  max: 35
+  step: 1
 - sensorName: Z1_Heat_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 75
   displayUnit: °C
+  min: 20
+  max: 60
+  step: 1
 - sensorName: Z1_Heat_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 76
   displayUnit: °C
+  min: 20
+  max: 60
+  step: 1
 - sensorName: Z1_Heat_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 78
   displayUnit: °C
+  min: -15
+  max: 15
+  step: 1
 - sensorName: Z1_Heat_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 77
   displayUnit: °C
+  min: -15
+  max: 15
+  step: 1
 - sensorName: Room_Thermostat_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 156
@@ -238,6 +279,9 @@
   encodeFunction: setIntPlus128
   decodeOffset: 43
   displayUnit: °C
+  min: -25
+  max: 15
+  step: 1
 - sensorName: Buffer_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 149
@@ -354,31 +398,49 @@
   encodeFunction: setIntPlus128
   decodeOffset: 100
   displayUnit: °C
+  min: 55
+  max: 75
+  step: 1
 - sensorName: Sterilization_Max_Time
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 101
   displayUnit: min
+  min: 5
+  max: 60
+  step: 5
 - sensorName: Z1_Cool_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 86
   displayUnit: °C
+  min: 5
+  max: 20
+  step: 1
 - sensorName: Z1_Cool_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 87
   displayUnit: °C
+  min: 5
+  max: 20
+  step: 1
 - sensorName: Z1_Cool_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 89
   displayUnit: °C
+  min: 15
+  max: 30
+  step: 1
 - sensorName: Z1_Cool_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 88
   displayUnit: °C
+  min: 15
+  max: 30
+  step: 1
 - sensorName: Heating_Mode
   decodeFunction: getBit7and8
   encodeFunction: setBit7and8
@@ -391,21 +453,33 @@
   encodeFunction: setIntPlus128
   decodeOffset: 83
   displayUnit: °C
+  min: 5
+  max: 35
+  step: 1
 - sensorName: Heater_On_Outdoor_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 85
   displayUnit: °C
+  min: -15
+  max: 20
+  step: 1
 - sensorName: Heat_To_Cool_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 95
   displayUnit: °C
+  min: 11
+  max: 25
+  step: 1
 - sensorName: Cool_To_Heat_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 96
   displayUnit: °C
+  min: 5
+  max: 14
+  step: 1
 - sensorName: Cooling_Mode
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
@@ -497,35 +571,56 @@
   encodeFunction: setIntPlus1
   decodeOffset: 71
   displayUnit: '%'
+  min: 50
+  max: 150
+  step: 5
 - sensorName: SGReady_Capacity1_DHW
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 72
   displayUnit: '%'
+  min: 50
+  max: 150
+  step: 5
 - sensorName: SGReady_Capacity2_Heat
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 73
   displayUnit: '%'
+  min: 50
+  max: 150
+  step: 5
 - sensorName: SGReady_Capacity2_DHW
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 74
   displayUnit: '%'
+  min: 50
+  max: 150
+  step: 5
 - sensorName: DHW_Heatup_Time
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 98
   displayUnit: min
+  min: 5
+  max: 240
+  step: 5
 - sensorName: DHW_Room_Max_Time
   decodeFunction: getIntMinus1Times30
   encodeFunction: setIntDiv30Plus1
   decodeOffset: 97
   displayUnit: min
+  min: 30
+  max: 600
+  step: 30
 - sensorName: Maximum_Pump_Speed
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 45
+  min: 64
+  max: 254
+  step: 1
 - sensorName: Force_Sterilization
   decodeFunction: getBit6
   encodeFunction: setBit6
