@@ -22,7 +22,6 @@ func onMQTTConnect(mclient mqtt.Client) {
 		mclient.Subscribe(getStatusTopic("+/set"), 0, onAquareaCommand)
 	}
 	log.Println("MQTT connected")
-	//TODO  shall we re post all data?
 }
 
 func makeMQTTConn() mqtt.Client {
@@ -32,7 +31,7 @@ func makeMQTTConn() mqtt.Client {
 	opts.SetPassword(config.MqttPass)
 	opts.SetUsername(config.MqttLogin)
 	opts.SetClientID("GoHeishaMon-pub")
-	opts.SetWill(config.mqttWillTopic, "offline", 1, true)
+	opts.SetWill(config.mqttWillTopic, "offline", 0, true)
 	opts.SetKeepAlive(time.Duration(config.MqttKeepalive) * time.Second)
 
 	opts.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
