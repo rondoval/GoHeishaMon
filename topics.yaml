@@ -234,11 +234,25 @@
   encodeFunction: setIntPlus128
   decodeOffset: 40
   displayUnit: °C
+# No thermostat
+#    min: -5
+#    max: 5
+# With thermostat
+  min: 10
+  max: 30
+  step: 1
 - sensorName: Z2_Cool_Request_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 41
   displayUnit: °C
+# No thermostat
+#   min: -5
+#   max: 5
+# With thermostat
+  min: 18
+  max: 35
+  step: 1
 - sensorName: Z1_Water_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 145
@@ -492,41 +506,65 @@
   encodeFunction: setIntPlus128
   decodeOffset: 79
   displayUnit: °C
+  min: 20
+  max: 60
+  step: 1
 - sensorName: Z2_Heat_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 80
   displayUnit: °C
+  min: 20
+  max: 60
+  step: 1
 - sensorName: Z2_Heat_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 82
   displayUnit: °C
+  min: -15
+  max: 15
+  step: 1
 - sensorName: Z2_Heat_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 81
   displayUnit: °C
+  min: -15
+  max: 15
+  step: 1
 - sensorName: Z2_Cool_Curve_Target_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 90
   displayUnit: °C
+  min: 5
+  max: 20
+  step: 1
 - sensorName: Z2_Cool_Curve_Target_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 91
   displayUnit: °C
+  min: 5
+  max: 20
+  step: 1
 - sensorName: Z2_Cool_Curve_Outside_High_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 93
   displayUnit: °C
+  min: 15
+  max: 30
+  step: 1
 - sensorName: Z2_Cool_Curve_Outside_Low_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 92
   displayUnit: °C
+  min: 15
+  max: 30
+  step: 1
 - sensorName: Room_Heater_Operations_Hours
   decodeFunction: getWord
   decodeOffset: 185
