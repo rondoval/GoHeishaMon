@@ -45,6 +45,7 @@ type mqttNumber struct {
 	CommandTopic      string `json:"command_topic,omitempty"`
 	StateTopic        string `json:"state_topic,omitempty"`
 	AvailabilityTopic string `json:"availability_topic,omitempty"`
+	UnitOfMeasurement string `json:"unit_of_measurement,omitempty"`
 	Min               int    `json:"min,omitempty"`
 	Max               int    `json:"max,omitempty"`
 	Step              int    `json:"step,omitempty"`
@@ -187,12 +188,13 @@ func encodeSelect(sensorName, deviceID string, values []string) (topic string, d
 	return topic, data, err
 }
 
-func encodeNumber(sensorName, deviceID string, min, max, step int) (topic string, data []byte, err error) {
+func encodeNumber(sensorName, deviceID string, min, max, step int, unit string) (topic string, data []byte, err error) {
 	var s mqttNumber
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
 	s.StateTopic = getStatusTopic(sensorName)
 	s.CommandTopic = s.StateTopic + "/set"
 	s.AvailabilityTopic = config.mqttWillTopic
+	s.UnitOfMeasurement = unit
 	s.Min = min
 	s.Max = max
 	s.Step = step
@@ -218,7 +220,7 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 		if value.EncodeFunction != "" {
 			// Read-Write value
 			if len(value.Values) == 0 {
-				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step)
+				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step, value.DisplayUnit)
 			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				topic, data, err = encodeSelect(value.SensorName, config.DeviceName, value.Values)
 			} else if len(value.Values) == 2 {
