@@ -44,18 +44,22 @@
   decodeFunction: getIntMinus128
   decodeOffset: 143
   displayUnit: °C
+  category: diagnostic
 - sensorName: Main_Outlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 144
   displayUnit: °C
+  category: diagnostic
 - sensorName: Main_Target_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 153
   displayUnit: °C
+  category: diagnostic
 - sensorName: Compressor_Freq
   decodeFunction: getIntMinus1
   decodeOffset: 166
   displayUnit: Hz
+  category: diagnostic
 - sensorName: DHW_Target_Temp
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
@@ -72,10 +76,12 @@
   decodeFunction: getWord
   decodeOffset: 182
   displayUnit: h
+  category: diagnostic
 - sensorName: Operations_Counter
   decodeFunction: getWord
   decodeOffset: 179
   displayUnit: Counter
+  category: diagnostic
 - sensorName: Main_Schedule_State
   decodeFunction: getBit1and2
   encodeFunction: setBit1and2
@@ -131,11 +137,13 @@
   decodeFunction: getIntMinus128
   decodeOffset: 158
   displayUnit: °C
+  category: diagnostic
 - sensorName: DHW_Heat_Delta
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 99
   displayUnit: °C
+  category: config
   min: -12
   max: -2
   step: 1
@@ -144,6 +152,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 84
   displayUnit: °C
+  category: config
   min: 1
   max: 15
   step: 1
@@ -152,6 +161,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 94
   displayUnit: °C
+  category: config
   min: 1
   max: 15
   step: 1
@@ -198,6 +208,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 75
   displayUnit: °C
+  category: config
   min: 20
   max: 60
   step: 1
@@ -206,6 +217,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 76
   displayUnit: °C
+  category: config
   min: 20
   max: 60
   step: 1
@@ -214,6 +226,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 78
   displayUnit: °C
+  category: config
   min: -15
   max: 15
   step: 1
@@ -222,6 +235,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 77
   displayUnit: °C
+  category: config
   min: -15
   max: 15
   step: 1
@@ -312,30 +326,37 @@
   decodeFunction: getIntMinus128
   decodeOffset: 154
   displayUnit: °C
+  category: diagnostic
 - sensorName: Discharge_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 155
   displayUnit: °C
+  category: diagnostic
 - sensorName: Inside_Pipe_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 157
   displayUnit: °C
+  category: diagnostic
 - sensorName: Defrost_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 159
   displayUnit: °C
+  category: diagnostic
 - sensorName: Eva_Outlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 160
   displayUnit: °C
+  category: diagnostic
 - sensorName: Bypass_Outlet_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 161
   displayUnit: °C
+  category: diagnostic
 - sensorName: Ipm_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 162
   displayUnit: °C
+  category: diagnostic
 - sensorName: Z1_Temp
   decodeFunction: getIntMinus128
   decodeOffset: 139
@@ -374,26 +395,32 @@
   decodeFunction: getIntMinus1Times10
   decodeOffset: 173
   displayUnit: RPM
+  category: diagnostic
 - sensorName: Fan2_Motor_Speed
   decodeFunction: getIntMinus1Times10
   decodeOffset: 174
   displayUnit: RPM
+  category: diagnostic
 - sensorName: High_Pressure
   decodeFunction: getIntMinus1Div5
   decodeOffset: 163
   displayUnit: Kgf/cm2
+  category: diagnostic
 - sensorName: Pump_Speed
   decodeFunction: getIntMinus1Times50
   decodeOffset: 171
   displayUnit: RPM
+  category: diagnostic
 - sensorName: Low_Pressure
   decodeFunction: getIntMinus1
   decodeOffset: 164
   displayUnit: Kgf/cm2
+  category: diagnostic
 - sensorName: Compressor_Current
   decodeFunction: getIntMinus1Div5
   decodeOffset: 165
   displayUnit: A
+  category: diagnostic
 - sensorName: Force_Heater_State
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
@@ -412,6 +439,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 100
   displayUnit: °C
+  category: config
   min: 55
   max: 75
   step: 1
@@ -420,6 +448,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 101
   displayUnit: min
+  category: config
   min: 5
   max: 60
   step: 5
@@ -428,6 +457,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 86
   displayUnit: °C
+  category: config
   min: 5
   max: 20
   step: 1
@@ -436,6 +466,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 87
   displayUnit: °C
+  category: config
   min: 5
   max: 20
   step: 1
@@ -444,6 +475,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 89
   displayUnit: °C
+  category: config
   min: 15
   max: 30
   step: 1
@@ -452,6 +484,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 88
   displayUnit: °C
+  category: config
   min: 15
   max: 30
   step: 1
@@ -459,6 +492,7 @@
   decodeFunction: getBit7and8
   encodeFunction: setBit7and8
   decodeOffset: 28
+  category: config
   values:
     - Comp. Curve
     - Direct
@@ -467,6 +501,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 83
   displayUnit: °C
+  category: config
   min: 5
   max: 35
   step: 1
@@ -475,6 +510,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 85
   displayUnit: °C
+  category: config
   min: -15
   max: 20
   step: 1
@@ -483,6 +519,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 95
   displayUnit: °C
+  category: config
   min: 11
   max: 25
   step: 1
@@ -491,6 +528,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 96
   displayUnit: °C
+  category: config
   min: 5
   max: 14
   step: 1
@@ -498,6 +536,7 @@
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
   decodeOffset: 28
+  category: config
   values:
     - Comp. Curve
     - Direct
@@ -506,6 +545,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 79
   displayUnit: °C
+  category: config
   min: 20
   max: 60
   step: 1
@@ -514,6 +554,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 80
   displayUnit: °C
+  category: config
   min: 20
   max: 60
   step: 1
@@ -522,6 +563,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 82
   displayUnit: °C
+  category: config
   min: -15
   max: 15
   step: 1
@@ -530,6 +572,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 81
   displayUnit: °C
+  category: config
   min: -15
   max: 15
   step: 1
@@ -538,6 +581,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 90
   displayUnit: °C
+  category: config
   min: 5
   max: 20
   step: 1
@@ -546,6 +590,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 91
   displayUnit: °C
+  category: config
   min: 5
   max: 20
   step: 1
@@ -554,6 +599,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 93
   displayUnit: °C
+  category: config
   min: 15
   max: 30
   step: 1
@@ -562,6 +608,7 @@
   encodeFunction: setIntPlus128
   decodeOffset: 92
   displayUnit: °C
+  category: config
   min: 15
   max: 30
   step: 1
@@ -569,13 +616,16 @@
   decodeFunction: getWord
   decodeOffset: 185
   displayUnit: h
+  category: diagnostic
 - sensorName: DHW_Heater_Operations_Hours
   decodeFunction: getWord
   decodeOffset: 188
   displayUnit: h
+  category: diagnostic
 - sensorName: Heat_Pump_Model
   decodeFunction: getModel
   decodeOffset: 132
+  category: diagnostic
   values:
     - WH-MDC05H3E5
     - WH-MDC07H3E5
@@ -596,6 +646,7 @@
   decodeFunction: getIntMinus1
   decodeOffset: 172
   displayUnit: Duty
+  category: diagnostic
 - sensorName: Zones_State
   decodeFunction: getBit1and2
   encodeFunction: setBit1and2
@@ -609,6 +660,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 71
   displayUnit: '%'
+  category: config
   min: 50
   max: 150
   step: 5
@@ -617,6 +669,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 72
   displayUnit: '%'
+  category: config
   min: 50
   max: 150
   step: 5
@@ -625,6 +678,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 73
   displayUnit: '%'
+  category: config
   min: 50
   max: 150
   step: 5
@@ -633,6 +687,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 74
   displayUnit: '%'
+  category: config
   min: 50
   max: 150
   step: 5
@@ -641,6 +696,7 @@
   encodeFunction: setIntPlus1
   decodeOffset: 98
   displayUnit: min
+  category: config
   min: 5
   max: 240
   step: 5
@@ -649,6 +705,7 @@
   encodeFunction: setIntDiv30Plus1
   decodeOffset: 97
   displayUnit: min
+  category: config
   min: 30
   max: 600
   step: 30
@@ -656,6 +713,7 @@
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 45
+  category: config
   min: 64
   max: 254
   step: 1
@@ -677,6 +735,7 @@
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
   decodeOffset: 27
+  category: config
   values:
     - Disabled
     - Enabled
@@ -684,6 +743,7 @@
   decodeFunction: getBit7and8
   encodeFunction: setBit7and8
   decodeOffset: 27
+  category: config
   values:
     - Disabled
     - Enabled
@@ -691,6 +751,7 @@
   decodeFunction: getBit7and8
   encodeFunction: setBit7and8
   decodeOffset: 25
+  category: config
   values:
     - Internal
     - External
@@ -698,6 +759,7 @@
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
   decodeOffset: 25
+  category: config
   values:
     - 3kW
     - 6kW
@@ -706,6 +768,7 @@
   decodeFunction: getBit3and4
   encodeFunction: setBit3and4
   decodeOffset: 25
+  category: config
   values:
     - No pan heater
     - Type A
@@ -715,20 +778,24 @@
   encodeFunction: setIntPlus128
   decodeOffset: 58
   displayUnit: °C
+  category: config
 - sensorName: Buffer_Delta
   decodeFunction: getIntMinus128
   encodeFunction: setIntPlus128
   decodeOffset: 59
   displayUnit: °C
+  category: config
 - sensorName: External_Heater_Time
   decodeFunction: getIntMinus1
   encodeFunction: setIntPlus1
   decodeOffset: 60
   displayUnit: min
+  category: config
 - sensorName: Alternative_Outdoor_Sensor
   decodeFunction: getBit3and4
   encodeFunction: setBit3and4
   decodeOffset: 20
+  category: config
   values:
     - Built in
     - External
@@ -736,6 +803,7 @@
   decodeFunction: getBit5and6
   encodeFunction: setBit5and6
   decodeOffset: 20
+  category: config
   values:
     - 'Off'
     - 'On'
@@ -743,6 +811,7 @@
   decodeFunction: getBit7and8
   encodeFunction: setBit7and8
   decodeOffset: 20
+  category: config
   values:
     - 'Off'
     - 'On'

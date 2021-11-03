@@ -20,6 +20,7 @@ type topicData struct {
 	EncodeFunction string   `yaml:"encodeFunction"`
 	DecodeOffset   int      `yaml:"decodeOffset"`
 	DisplayUnit    string   `yaml:"displayUnit"`
+	Category       string   `yaml:"category"`
 	Values         []string `yaml:"values"`
 	Min            int      `yaml:"min"`
 	Max            int      `yaml:"max"`

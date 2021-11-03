@@ -17,6 +17,7 @@ type mqttSwitch struct {
 	PayloadOn         string `json:"payload_on,omitempty"`
 	PayloadOff        string `json:"payload_off,omitempty"`
 	UniqueID          string `json:"unique_id,omitempty"`
+	EntityCategory    string `json:"entity_category,omitempty"`
 	Device            struct {
 		Manufacturer string `json:"manufacturer,omitempty"`
 		Model        string `json:"model,omitempty"`
@@ -32,6 +33,7 @@ type mqttSelect struct {
 	AvailabilityTopic string   `json:"availability_topic,omitempty"`
 	Options           []string `json:"options,omitempty"`
 	UniqueID          string   `json:"unique_id,omitempty"`
+	EntityCategory    string   `json:"entity_category,omitempty"`
 	Device            struct {
 		Manufacturer string `json:"manufacturer,omitempty"`
 		Model        string `json:"model,omitempty"`
@@ -50,6 +52,7 @@ type mqttNumber struct {
 	Max               int    `json:"max,omitempty"`
 	Step              int    `json:"step,omitempty"`
 	UniqueID          string `json:"unique_id,omitempty"`
+	EntityCategory    string `json:"entity_category,omitempty"`
 	Device            struct {
 		Manufacturer string `json:"manufacturer,omitempty"`
 		Model        string `json:"model,omitempty"`
@@ -67,6 +70,7 @@ type mqttSensor struct {
 	ForceUpdate       bool   `json:"force_update,omitempty"`
 	ExpireAfter       int    `json:"expire_after,omitempty"`
 	UniqueID          string `json:"unique_id,omitempty"`
+	EntityCategory    string `json:"entity_category,omitempty"`
 	Device            struct {
 		Manufacturer string `json:"manufacturer,omitempty"`
 		Model        string `json:"model,omitempty"`
@@ -85,6 +89,7 @@ type mqttBinarySensor struct {
 	ForceUpdate       bool   `json:"force_update,omitempty"`
 	ExpireAfter       int    `json:"expire_after,omitempty"`
 	UniqueID          string `json:"unique_id,omitempty"`
+	EntityCategory    string `json:"entity_category,omitempty"`
 	Device            struct {
 		Manufacturer string `json:"manufacturer,omitempty"`
 		Model        string `json:"model,omitempty"`
@@ -111,7 +116,7 @@ func getDeviceClass(unit string) string {
 	return ""
 }
 
-func encodeSensor(sensorName, deviceID, unit string) (topic string, data []byte, err error) {
+func encodeSensor(sensorName, deviceID, unit, category string) (topic string, data []byte, err error) {
 	var s mqttSensor
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
 	s.StateTopic = getStatusTopic(sensorName)
@@ -119,6 +124,7 @@ func encodeSensor(sensorName, deviceID, unit string) (topic string, data []byte,
 	s.UnitOfMeasurement = unit
 	s.DeviceClass = getDeviceClass(unit)
 	s.UniqueID = deviceID + "_" + sensorName
+	s.EntityCategory = category
 	s.Device.Manufacturer = "Panasonic"
 	s.Device.Model = "Aquarea"
 	s.Device.Identifiers = deviceID
@@ -130,7 +136,7 @@ func encodeSensor(sensorName, deviceID, unit string) (topic string, data []byte,
 	return topic, data, err
 }
 
-func encodeBinarySensor(sensorName, deviceID, payloadOn, payloadOff string) (topic string, data []byte, err error) {
+func encodeBinarySensor(sensorName, deviceID, category, payloadOn, payloadOff string) (topic string, data []byte, err error) {
 	var s mqttBinarySensor
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
 	s.StateTopic = getStatusTopic(sensorName)
@@ -138,6 +144,7 @@ func encodeBinarySensor(sensorName, deviceID, payloadOn, payloadOff string) (top
 	s.PayloadOff = payloadOff
 	s.PayloadOn = payloadOn
 	s.UniqueID = deviceID + "_" + sensorName
+	s.EntityCategory = category
 	s.Device.Manufacturer = "Panasonic"
 	s.Device.Model = "Aquarea"
 	s.Device.Identifiers = deviceID
@@ -149,7 +156,7 @@ func encodeBinarySensor(sensorName, deviceID, payloadOn, payloadOff string) (top
 	return topic, data, err
 }
 
-func encodeSwitch(sensorName, deviceID string, values []string) (topic string, data []byte, err error) {
+func encodeSwitch(sensorName, deviceID, category string, values []string) (topic string, data []byte, err error) {
 	var b mqttSwitch
 	b.Name = strings.ReplaceAll(sensorName, "_", " ")
 	b.StateTopic = getStatusTopic(sensorName)
@@ -158,6 +165,7 @@ func encodeSwitch(sensorName, deviceID string, values []string) (topic string, d
 	b.PayloadOn = values[1]
 	b.PayloadOff = values[0]
 	b.UniqueID = deviceID + "_" + sensorName
+	b.EntityCategory = category
 	b.Device.Manufacturer = "Panasonic"
 	b.Device.Model = "Aquarea"
 	b.Device.Identifiers = deviceID
@@ -169,7 +177,7 @@ func encodeSwitch(sensorName, deviceID string, values []string) (topic string, d
 	return topic, data, err
 }
 
-func encodeSelect(sensorName, deviceID string, values []string) (topic string, data []byte, err error) {
+func encodeSelect(sensorName, deviceID, category string, values []string) (topic string, data []byte, err error) {
 	var b mqttSelect
 	b.Name = strings.ReplaceAll(sensorName, "_", " ")
 	b.StateTopic = getStatusTopic(sensorName)
@@ -177,6 +185,7 @@ func encodeSelect(sensorName, deviceID string, values []string) (topic string, d
 	b.AvailabilityTopic = config.mqttWillTopic
 	b.Options = values
 	b.UniqueID = deviceID + "_" + sensorName
+	b.EntityCategory = category
 	b.Device.Manufacturer = "Panasonic"
 	b.Device.Model = "Aquarea"
 	b.Device.Identifiers = deviceID
@@ -188,7 +197,7 @@ func encodeSelect(sensorName, deviceID string, values []string) (topic string, d
 	return topic, data, err
 }
 
-func encodeNumber(sensorName, deviceID string, min, max, step int, unit string) (topic string, data []byte, err error) {
+func encodeNumber(sensorName, deviceID, unit, category string, min, max, step int) (topic string, data []byte, err error) {
 	var s mqttNumber
 	s.Name = strings.ReplaceAll(sensorName, "_", " ")
 	s.StateTopic = getStatusTopic(sensorName)
@@ -199,6 +208,7 @@ func encodeNumber(sensorName, deviceID string, min, max, step int, unit string) 
 	s.Max = max
 	s.Step = step
 	s.UniqueID = deviceID + "_" + sensorName
+	s.EntityCategory = category
 	s.Device.Manufacturer = "Panasonic"
 	s.Device.Model = "Aquarea"
 	s.Device.Identifiers = deviceID
@@ -220,20 +230,20 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 		if value.EncodeFunction != "" {
 			// Read-Write value
 			if len(value.Values) == 0 {
-				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.Min, value.Max, value.Step, value.DisplayUnit)
+				topic, data, err = encodeNumber(value.SensorName, config.DeviceName, value.DisplayUnit, value.Category, value.Min, value.Max, value.Step)
 			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				topic, data, err = encodeSelect(value.SensorName, config.DeviceName, value.Values)
+				topic, data, err = encodeSelect(value.SensorName, config.DeviceName, value.Category, value.Values)
 			} else if len(value.Values) == 2 {
-				topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Values)
+				topic, data, err = encodeSwitch(value.SensorName, config.DeviceName, value.Category, value.Values)
 			} else {
 				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
 		} else {
 			// Read only value
 			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, value.Values[1], value.Values[0])
+				topic, data, err = encodeBinarySensor(value.SensorName, config.DeviceName, value.Category, value.Values[1], value.Values[0])
 			} else {
-				topic, data, err = encodeSensor(value.SensorName, config.DeviceName, value.DisplayUnit)
+				topic, data, err = encodeSensor(value.SensorName, config.DeviceName, value.DisplayUnit, value.Category)
 			}
 		}
 		if err != nil {
