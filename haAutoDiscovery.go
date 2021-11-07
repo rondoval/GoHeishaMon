@@ -82,7 +82,7 @@ type mqttBinarySensor struct {
 }
 
 func getMqttDevice(deviceID string) mqttDevice {
-	return mqttDevice{"Panasonic", "Aquarea", "Aquarea" + deviceID, deviceID}
+	return mqttDevice{"Panasonic", "Aquarea", "Aquarea " + deviceID, deviceID}
 }
 
 func getDeviceClass(unit string) string {
