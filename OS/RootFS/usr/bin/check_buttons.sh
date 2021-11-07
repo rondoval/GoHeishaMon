@@ -1,78 +1,32 @@
-#!/bin/ash
+#temp
+0 - Button reset, act high
+1 - Button WPS, act high
+16 - Button Check, act low
+14 - OUT, USB enable, active high
 
-#LED
-echo 2 > /sys/class/gpio/export
-echo 3 > /sys/class/gpio/export
-echo 13 > /sys/class/gpio/export
-echo 15 > /sys/class/gpio/export
+3 - LED link green
+2 - status LED blue
+13 - status LED green
+15 - status LED red
 
-#link
-echo 10 > /sys/class/gpio/export
+10 - CNCNT Link - input, active high
 
-#buttons
-echo 0 > /sys/class/gpio/export
-echo 1 > /sys/class/gpio/export
-echo 16 > /sys/class/gpio/export
+11 - 
+    upd:
+        die - set IN, unexport
+        start: export, set OUT (low)
+        end: set IN (high), unexport
+
+    mount:
+        export
+        set dir high (IN)
+        set val 0
+    umount:
+        set to dir high - IN
+        unexport
 
 
-while :
-do
+GPIOs 0-17, ath79:
+ gpio-10  (sysfs               ) in  hi
+ gpio-11  (sysfs               ) out lo
 
-ButtonReset=`awk '/gpio-0 /{print $5}' /sys/kernel/debug/gpio`
-ButtonWPS=`awk '/gpio-1 /{print $5}' /sys/kernel/debug/gpio`
-ButtonCheck=`awk '/gpio-16 /{print $5}' /sys/kernel/debug/gpio`
-CNCNTLink=`awk '/gpio-10 /{print $5}' /sys/kernel/debug/gpio`
-
-#bwhite
-if [ "$ButtonReset" = 'lo' ] && [ "$ButtonWPS" = 'lo' ] && [ "$ButtonCheck" = 'hi' ] ; then
-echo high > /sys/class/gpio/gpio2/direction
-echo high > /sys/class/gpio/gpio13/direction
-echo high > /sys/class/gpio/gpio15/direction
-fi
-
-#blue
-if [ "$ButtonReset" = 'hi' ] || [ "$ButtonWPS" = 'hi' ] || [ "$ButtonCheck" = 'lo' ] ; then
-echo high > /sys/class/gpio/gpio2/direction
-echo low > /sys/class/gpio/gpio13/direction
-echo low > /sys/class/gpio/gpio15/direction
-fi
-
-#yellow
-if [ "$ButtonReset" = 'hi' ] && [ "$ButtonWPS" = 'hi' ] ; then
-echo low > /sys/class/gpio/gpio2/direction
-echo high > /sys/class/gpio/gpio13/direction
-echo high > /sys/class/gpio/gpio15/direction
-fi
-if [ "$ButtonReset" = 'hi' ] && [ "$ButtonCheck" = 'lo' ] ;then
-echo low > /sys/class/gpio/gpio2/direction
-echo high > /sys/class/gpio/gpio13/direction
-echo high > /sys/class/gpio/gpio15/direction
-fi
-if [ "$ButtonWPS" = 'hi' ] && [ "$ButtonCheck" = 'lo' ] ; then
-echo low > /sys/class/gpio/gpio2/direction
-echo high > /sys/class/gpio/gpio13/direction
-echo high > /sys/class/gpio/gpio15/direction
-fi
-
-#fw side switch
-if [ "$ButtonReset" = 'hi' ] && [ "$ButtonWPS" = 'hi' ] && [ "$ButtonCheck" = 'lo' ] ; then
-echo low > /sys/class/gpio/gpio2/direction
-echo low > /sys/class/gpio/gpio13/direction
-echo high > /sys/class/gpio/gpio15/direction
-fwupdate sw > /dev/null 2>&1
-sync
-reboot
-fi
-
-if [ "$CNCNTLink" = 'hi' ] ; then
-echo low > /sys/class/gpio/gpio3/direction
-fi
-if [ "$CNCNTLink" = 'lo' ] ; then
-echo high > /sys/class/gpio/gpio3/direction
-fi
-
-sleep 1
-
-done
-
-exit 0
