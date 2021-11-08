@@ -18,32 +18,9 @@ Unfortunatly from Smart Cloud software changing the side without having acces to
 
 Summary: 
 
-It is possible to go back to orginal software (A2Wmain with SmartCluod) very quick , without preparing pendrive ,becouse this solution don't remove firmware with A2Wmain (is still on other  "Side" in the flash).
-
 Even the GoHeishaMon is on other side you can't just change the site in orginal software to GoHeishaMon without acces to console. You have to install GoHeishaMon again. 
 
 ## Installation
 
-For installing GoHeishaMon on CZ-TAW1 you need a clean USB drive FAT32 formatted  (there is a problem with some pendrive vendors if it didin't work try another one, becouse of big drop of voltage on USB port please use USB flash memory stick.) https://github.com/lsochanowski/GoHeishaMon/releases/tag/1.0.159
-copy to usb drive files :
-- openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin
-- openwrt-ar71xx-generic-cus531-16M-kernel.bin
-- GoHeishaMonConfig.new ( It is config.example file edited according to your needs and changed it's name. Please pay attantion on file extantion ,since in Windows .txt is often added)
-
-
-After inserting drive with this files in runing CZ-TAW1 you need to push 3 buttons at once for more tnah 10 seconds until middle LED start changing the colors: green-blue-red. You may also notice the LED blinking on your drive ( if drive have it).
-
-Process of update starts ,and it will take app 3 min. In the meantime CZ-TAW1 reboots , and after a while you will notice middle LED lights white color . Wait with removing drive from module until the white LED turn off again ( that is a sign , that GoHeishaMon copied config file from drive and reboot CZ-TAW1. You need to remove the drive before the white LED turn on again , becouse the config file will be copied again and reboot if the drive with a config file will be still present.
-
-### SSH and web (over LuCI) access (on by default in 1.1.159 - to be veryfied)
-
-For advanced users there is possibility to have SSH and web acces (LuCI) on CZ-TAW1:
-- In config file you should have option "EnableCommand=true"
-- GoHeishaMon should be connected to MQTT server
-- Public in MQTT topic "panasonic_heat_pump/OSCommand" (or eqvivalent with is set as Mqtt_set_base) one by one values: "umount /overlay" , "jffs2reset -y" and finally "reboot". This will perform a so called firstboot. You can see the output console in topic"panasonic_heat_pump/OSCommand/out". All configuration ( also including WiFi connection , GoHeishaMon config) will be set to default , so please connect GoHeishaMon via Ethernet cable after that, and use a drive ( or ssh connection and edit file /etc/gh/config) to set GoHeishaMon configuration.  WiFi configuration you can do via ssh or LuCI ,identical to standard OpenWRT routers ( It is alsp posibility ,that CZ-TAW1 will be also a reapeter , or dummy AP ).
-
-After reboot you should be able to connect to ssh and via web with user: root and password: GoHeishaMonpass ( you should change it!)
-
-
-Screenshot from Homeassistant:
-![Screenshot from Homeassistant](PompaCieplaScreen.PNG)
+This is going to change failry soon:
+![image](https://user-images.githubusercontent.com/1310239/140833286-01c950ae-a072-4c7f-8952-7a1e2b648e8e.png)
