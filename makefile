@@ -10,7 +10,7 @@ BINARY_ARM=$(BINARY_NAME)_ARM
 BINARY_MIPSUPX=$(BINARY_NAME)_MIPSUPX
 
 
-all: build build-rpi build-linux build-mips upx compilesquash
+all: build build-rpi build-linux build-mips upx
 
 build: 
 	$(GOBUILD) -o $(BINARY_NAME) -v
@@ -34,4 +34,4 @@ compilesquash:
 	cp dist/$(BINARY_MIPSUPX) OS/RootFS/usr/bin/$(BINARY_MIPSUPX)
 	cp config.yaml.example OS/RootFS/etc/gh/config.yaml
 	cp topics.yaml OS/RootFS/etc/gh/topics.yaml
-	mksquashfs OS/RootFS dist/openwrt-ar71xx-generic-cus531-16M-rootfs-squashfs.bin -comp xz -noappend -always-use-fragments
+
