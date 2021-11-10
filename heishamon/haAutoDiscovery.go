@@ -227,11 +227,11 @@ func publishDiscoveryTopics(mclient mqtt.Client) {
 			}
 		}
 		if err != nil {
-			log.Println(err)
+			log.Print(err)
 			continue
 		}
 
 		mqttPublish(mclient, topic, data, 0)
 	}
-	log.Println(" done.")
+	log.Println("Publishing Home Assistant discovery topics done.")
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	gsyslog "github.com/hashicorp/go-syslog"
 )
 
 type mLogger struct {
@@ -24,7 +25,14 @@ func logHex(command []byte) {
 	}
 }
 
-func redirectLog(mclient mqtt.Client) {
+func redirectLogSyslog() {
+	syslog, err := gsyslog.NewLogger(gsyslog.LOG_INFO, "user", "heishamon")
+	if err == nil {
+		log.SetOutput(syslog)
+	}
+}
+
+func redirectLogMQTT(mclient mqtt.Client) {
 	logger.mclient = mclient
 
 	if config.LogMqtt == true {

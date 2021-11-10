@@ -37,6 +37,7 @@ endef
 
 define Package/heishamon/conffiles
 /etc/heishamon/config.yaml
+/etc/heishamon/optionalpcb.raw
 endef
 
 define Package/heishamon/install

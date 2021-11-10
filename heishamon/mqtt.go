@@ -21,11 +21,11 @@ func onMQTTConnect(mclient mqtt.Client) {
 		mclient.Subscribe(getCommandTopic("+"), 0, onGenericCommand)
 		mclient.Subscribe(getStatusTopic("+/set"), 0, onAquareaCommand)
 	}
-	log.Println("MQTT connected")
+	log.Print("MQTT connected")
 }
 
 func makeMQTTConn() mqtt.Client {
-	log.Println("Setting up MQTT...")
+	log.Print("Setting up MQTT...")
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("%s://%s:%v", "tcp", config.MqttServer, config.MqttPort))
 	opts.SetPassword(config.MqttPass)
@@ -47,6 +47,6 @@ func makeMQTTConn() mqtt.Client {
 		log.Fatalf("Fail to connect broker, %v", token.Error())
 		//should not happen - SetConnectRetry=true
 	}
-	log.Println("Done.")
+	log.Println("MQTT set up completed")
 	return client
 }

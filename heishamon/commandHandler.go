@@ -15,7 +15,7 @@ func onGenericCommand(mclient mqtt.Client, msg mqtt.Message) {
 	topicPieces := strings.Split(msg.Topic(), "/")
 	function := topicPieces[len(topicPieces)-1]
 	value := string(msg.Payload())
-	log.Printf("Command received - set %s to %s\n", function, value)
+	log.Printf("Command received - set %s to %s", function, value)
 
 	if function == "OSCommand" {
 		handleOSCommand(mclient, msg)
@@ -36,7 +36,7 @@ func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 	if err == nil {
 		commandsChannel <- command[:]
 	} else {
-		log.Println(err)
+		log.Print(err)
 	}
 }
 

@@ -145,7 +145,7 @@ func convertIntToEnum(value int, topic topicData) string {
 		if value >= 0 && value < numItems {
 			return topic.Values[value]
 		}
-		log.Printf("Value out of range %s: %d\n", topic.SensorName, value)
+		log.Printf("Value out of range %s: %d", topic.SensorName, value)
 	}
 	return fmt.Sprintf("%d", value)
 }
@@ -159,7 +159,7 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 		} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
 			topicValue = arrayOperator(data, v.DecodeOffset)
 		} else {
-			log.Println("Unknown codec function: ", v.DecodeFunction)
+			log.Print("Unknown codec function: ", v.DecodeFunction)
 		}
 
 		if v.currentValue != topicValue {
