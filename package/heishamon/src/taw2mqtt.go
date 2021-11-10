@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	redirectLogSyslog()
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	log.SetFlags(log.Lshortfile)
 	log.Println("GoHeishaMon loading...")
 	config = readConfig(*configPath)
 
