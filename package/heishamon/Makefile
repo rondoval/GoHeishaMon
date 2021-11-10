@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=heishamon
-PKG_VERSION:=3.0.0-b1
+PKG_VERSION:=3.0.0-rc1
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Lukasz Winczura <rondoval@gmail.com>
