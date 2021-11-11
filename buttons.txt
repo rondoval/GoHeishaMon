@@ -1,0 +1,15 @@
+
+11 - 
+    upd:
+        die - set IN, unexport
+        start: export, set OUT (low)
+        end: set IN (high), unexport
+
+    mount:
+        export
+        set dir high (IN)
+        set val 0
+    umount:
+        set to dir high - IN
+        unexport
+
