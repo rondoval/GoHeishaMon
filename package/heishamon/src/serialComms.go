@@ -85,7 +85,9 @@ func readSerial(mclient mqtt.Client) {
 			}
 			goodreads++
 			readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
-			log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
+			if totalreads%30 == 0 {
+				log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
+			}
 
 			if n == 203 { //for now only return true for this datagram because we can not decode the shorter datagram yet
 				decodeHeatpumpData(data[:n], mclient)

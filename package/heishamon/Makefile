@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=heishamon
-PKG_VERSION:=3.0.0-rc1
+PKG_VERSION:=3.0.0-rc2
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Lukasz Winczura <rondoval@gmail.com>
@@ -28,8 +28,7 @@ define Package/heishamon
 endef
 
 define Package/heishamon/description
-  This is a Panasonic Aquarea H-series heat pump to MQTT gateway.
-  Uses a serial connection to the heat pump's CN-CNT connector.
+ This is a Panasonic Aquarea H-series heat pump to MQTT gateway.
 endef
 
 define Package/heishamon/conffiles
