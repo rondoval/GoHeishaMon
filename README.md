@@ -1,5 +1,5 @@
 # Custom firmware for the Panasonic CZ-TAW1
-This is a replacement firmware for the Panasonic CZ-TAW1, an IOT adapter for the H-series heat pupmps.
+This is an alternative firmware for the Panasonic CZ-TAW1, an IoT adapter for the H-series heat pumps.
 It consists of:
 * a gateway written in Go that translates serial comms with the heat pump on the CN-CNT link to MQTT
 * a port of OpenWRT (21.02.1 currently) for the CZ-TAW1
@@ -24,10 +24,12 @@ The new version is running as a daemon. As a consequence, the logs are no longer
 ### OpenWRT 21.02.1 image for the CZ-TAW1
 
 **Features**
-* stock OpenWRT, with up-to-date kernel
+* stock OpenWRT, with up-to-date kernel (5.4.158)
 * GoHeishaMon is preinstalled and running as a system service (named heishamon) 
 * sysupgrade and upgrades from LuCI are working
 * The CZ-TAW1's WiFi can be used as an Access Point
+* ca. 6.6 MiB free on JFFS
+* WPA3, LuCI over HTTPS etc.
 
 This is pretty much stock OpenWRT, by default configured as an Acess Point/range extender, i.e. on first boot the Ethernet interface is configured as an DHCP client, and the AP is disabled. Both are in the LAN firewall zone, though one can of course reconfigure it and use the device as a router.
 There is no default password. The default host name is "aquarea".
@@ -40,16 +42,16 @@ Beware: This is a dangerous process that may brick your device! You do it on you
 
 ### Prerequisites
 * Serial port connection to the device
-* Backup of the MTD layout, all MTD partitions and U-Boot environmetn
+* Backup of the MTD layout, all MTD partitions and U-Boot environment
 * TFTP server
 
 Overview of the process:
 * Backup MTD layout (cat /proc/mtd)
 * Backup U-Boot env (fw_printenv)
-* Backup **all** partitions (dd if=/dev/mtdx of=/tmp/mtdx_backup, then scp somwhere safe)
+* Backup **all** partitions (dd if=/dev/mtdx of=/tmp/mtdx_backup, then scp somewhere safe)
 * Reboot to U-Boot
 * Change boot address and options
-    * skip this if you intend to only boot it from RAM without altering the MTD
+    * *skip this if you intend to only boot it from RAM without altering the MTD*
     * setenv bootargs console=ttyS0,115200
     * setenv bootcmd bootm 0x9f050000
     * saveenv
@@ -66,4 +68,5 @@ In order to configure GoHeishaMon:
 * service heishamon stop
 * Edit the config file (/etc/heishamon/config.yaml)
 * service heishamon start
+
 Logs - either logread or Status/System Log in LuCI
