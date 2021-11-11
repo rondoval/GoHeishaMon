@@ -1,4 +1,3 @@
-
 # Custom firmware for the Panasonic CZ-TAW1
 This is a replacement firmware for the Panasonic CZ-TAW1, an IOT adapter for the H-series heat pupmps.
 It consists of:
