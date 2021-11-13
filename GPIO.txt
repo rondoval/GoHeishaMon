@@ -2,7 +2,7 @@ GPIO 0  - Reset key
 GPIO 1  - WPS key
 GPIO 2  - blue:status
 GPIO 3  - green:link
-GPIO 10 - ?
+GPIO 10 - setting it to out/low seems to disable serial port TX
 GPIO 11 - Enable the USB port
 GPIO 13 - green:status
 GPIO 14 - Enable the EHCI controller
