@@ -85,7 +85,7 @@ func readSerial(mclient mqtt.Client) {
 			}
 			goodreads++
 			readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
-			if totalreads%30 == 0 {
+			if totalreads%150 == 0 {
 				log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
 			}
 
