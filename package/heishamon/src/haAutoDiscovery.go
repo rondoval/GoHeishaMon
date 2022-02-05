@@ -16,73 +16,26 @@ type mqttDevice struct {
 	Identifiers  string `json:"identifiers,omitempty"`
 }
 
-type mqttSwitch struct {
+type mqttCommon struct {
+	// These are common
 	Name              string     `json:"name,omitempty"`
-	CommandTopic      string     `json:"command_topic,omitempty"`
 	StateTopic        string     `json:"state_topic,omitempty"`
 	AvailabilityTopic string     `json:"availability_topic,omitempty"`
-	PayloadOn         string     `json:"payload_on,omitempty"`
-	PayloadOff        string     `json:"payload_off,omitempty"`
+	Device            mqttDevice `json:"device"`
 	UniqueID          string     `json:"unique_id,omitempty"`
 	EntityCategory    string     `json:"entity_category,omitempty"`
-	Device            mqttDevice `json:"device"`
-}
 
-type mqttSelect struct {
-	Name              string     `json:"name,omitempty"`
-	CommandTopic      string     `json:"command_topic,omitempty"`
-	StateTopic        string     `json:"state_topic,omitempty"`
-	AvailabilityTopic string     `json:"availability_topic,omitempty"`
-	Options           []string   `json:"options,omitempty"`
-	UniqueID          string     `json:"unique_id,omitempty"`
-	EntityCategory    string     `json:"entity_category,omitempty"`
-	Device            mqttDevice `json:"device"`
-}
-
-type mqttNumber struct {
-	Name              string     `json:"name,omitempty"`
-	CommandTopic      string     `json:"command_topic,omitempty"`
-	StateTopic        string     `json:"state_topic,omitempty"`
-	AvailabilityTopic string     `json:"availability_topic,omitempty"`
-	UnitOfMeasurement string     `json:"unit_of_measurement,omitempty"`
-	Min               int        `json:"min,omitempty"`
-	Max               int        `json:"max,omitempty"`
-	Step              int        `json:"step,omitempty"`
-	UniqueID          string     `json:"unique_id,omitempty"`
-	EntityCategory    string     `json:"entity_category,omitempty"`
-	Device            mqttDevice `json:"device"`
-}
-
-type mqttSensor struct {
-	Name              string     `json:"name,omitempty"`
-	StateTopic        string     `json:"state_topic"`
-	AvailabilityTopic string     `json:"availability_topic,omitempty"`
-	UnitOfMeasurement string     `json:"unit_of_measurement,omitempty"`
-	DeviceClass       string     `json:"device_class,omitempty"`
-	StateClass        string     `json:"state_class,omitempty"`
-	ForceUpdate       bool       `json:"force_update,omitempty"`
-	ExpireAfter       int        `json:"expire_after,omitempty"`
-	UniqueID          string     `json:"unique_id,omitempty"`
-	EntityCategory    string     `json:"entity_category,omitempty"`
-	Device            mqttDevice `json:"device"`
-}
-
-type mqttBinarySensor struct {
-	Name              string     `json:"name,omitempty"`
-	StateTopic        string     `json:"state_topic"`
-	AvailabilityTopic string     `json:"availability_topic,omitempty"`
-	PayloadOn         string     `json:"payload_on,omitempty"`
-	PayloadOff        string     `json:"payload_off,omitempty"`
-	DeviceClass       string     `json:"device_class,omitempty"`
-	ForceUpdate       bool       `json:"force_update,omitempty"`
-	ExpireAfter       int        `json:"expire_after,omitempty"`
-	UniqueID          string     `json:"unique_id,omitempty"`
-	EntityCategory    string     `json:"entity_category,omitempty"`
-	Device            mqttDevice `json:"device"`
-}
-
-func getMqttDevice(deviceID string) mqttDevice {
-	return mqttDevice{"Panasonic", "Aquarea", "Aquarea " + deviceID, deviceID}
+	// These are specific to entity types
+	CommandTopic      string   `json:"command_topic,omitempty"`
+	DeviceClass       string   `json:"device_class,omitempty"`
+	PayloadOn         string   `json:"payload_on,omitempty"`
+	PayloadOff        string   `json:"payload_off,omitempty"`
+	Options           []string `json:"options,omitempty"`
+	UnitOfMeasurement string   `json:"unit_of_measurement,omitempty"`
+	Min               int      `json:"min,omitempty"`
+	Max               int      `json:"max,omitempty"`
+	Step              int      `json:"step,omitempty"`
+	StateClass        string   `json:"state_class,omitempty"`
 }
 
 func getDeviceClass(unit string) string {
@@ -103,16 +56,20 @@ func getDeviceClass(unit string) string {
 	return ""
 }
 
-func encodeSensor(info topicData, deviceID string) (topic string, data []byte, err error) {
-	var s mqttSensor
+func encodeCommon(s *mqttCommon, info topicData, deviceID string) {
 	s.Name = strings.ReplaceAll(info.SensorName, "_", " ")
 	s.StateTopic = getStatusTopic(info.SensorName)
 	s.AvailabilityTopic = config.mqttWillTopic
-	s.UnitOfMeasurement = info.DisplayUnit
-	s.DeviceClass = getDeviceClass(info.DisplayUnit)
+	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + deviceID, deviceID}
 	s.UniqueID = deviceID + "_" + info.SensorName
 	s.EntityCategory = info.Category
-	s.Device = getMqttDevice(deviceID)
+}
+
+func encodeSensor(info topicData, deviceID string) (topic string, data []byte, err error) {
+	var s mqttCommon
+	encodeCommon(&s, info, deviceID)
+	s.UnitOfMeasurement = info.DisplayUnit
+	s.DeviceClass = getDeviceClass(info.DisplayUnit)
 
 	switch s.UnitOfMeasurement {
 	case "h", "Counter":
@@ -129,15 +86,10 @@ func encodeSensor(info topicData, deviceID string) (topic string, data []byte, e
 }
 
 func encodeBinarySensor(info topicData, deviceID string) (topic string, data []byte, err error) {
-	var s mqttBinarySensor
-	s.Name = strings.ReplaceAll(info.SensorName, "_", " ")
-	s.StateTopic = getStatusTopic(info.SensorName)
-	s.AvailabilityTopic = config.mqttWillTopic
+	var s mqttCommon
+	encodeCommon(&s, info, deviceID)
 	s.PayloadOff = info.Values[0]
 	s.PayloadOn = info.Values[1]
-	s.UniqueID = deviceID + "_" + info.SensorName
-	s.EntityCategory = info.Category
-	s.Device = getMqttDevice(deviceID)
 
 	topic = fmt.Sprintf("homeassistant/binary_sensor/%s/%s/config", deviceID, info.SensorName)
 	data, err = json.Marshal(s)
@@ -146,16 +98,11 @@ func encodeBinarySensor(info topicData, deviceID string) (topic string, data []b
 }
 
 func encodeSwitch(info topicData, deviceID string) (topic string, data []byte, err error) {
-	var b mqttSwitch
-	b.Name = strings.ReplaceAll(info.SensorName, "_", " ")
-	b.StateTopic = getStatusTopic(info.SensorName)
+	var b mqttCommon
+	encodeCommon(&b, info, deviceID)
 	b.CommandTopic = b.StateTopic + "/set"
-	b.AvailabilityTopic = config.mqttWillTopic
 	b.PayloadOn = info.Values[1]
 	b.PayloadOff = info.Values[0]
-	b.UniqueID = deviceID + "_" + info.SensorName
-	b.EntityCategory = info.Category
-	b.Device = getMqttDevice(deviceID)
 
 	topic = fmt.Sprintf("homeassistant/switch/%s/%s/config", deviceID, info.SensorName)
 	data, err = json.Marshal(b)
@@ -164,15 +111,10 @@ func encodeSwitch(info topicData, deviceID string) (topic string, data []byte, e
 }
 
 func encodeSelect(info topicData, deviceID string) (topic string, data []byte, err error) {
-	var b mqttSelect
-	b.Name = strings.ReplaceAll(info.SensorName, "_", " ")
-	b.StateTopic = getStatusTopic(info.SensorName)
+	var b mqttCommon
+	encodeCommon(&b, info, deviceID)
 	b.CommandTopic = b.StateTopic + "/set"
-	b.AvailabilityTopic = config.mqttWillTopic
 	b.Options = info.Values
-	b.UniqueID = deviceID + "_" + info.SensorName
-	b.EntityCategory = info.Category
-	b.Device = getMqttDevice(deviceID)
 
 	topic = fmt.Sprintf("homeassistant/select/%s/%s/config", deviceID, info.SensorName)
 	data, err = json.Marshal(b)
@@ -181,18 +123,13 @@ func encodeSelect(info topicData, deviceID string) (topic string, data []byte, e
 }
 
 func encodeNumber(info topicData, deviceID string) (topic string, data []byte, err error) {
-	var s mqttNumber
-	s.Name = strings.ReplaceAll(info.SensorName, "_", " ")
-	s.StateTopic = getStatusTopic(info.SensorName)
+	var s mqttCommon
+	encodeCommon(&s, info, deviceID)
 	s.CommandTopic = s.StateTopic + "/set"
-	s.AvailabilityTopic = config.mqttWillTopic
 	s.UnitOfMeasurement = info.DisplayUnit
 	s.Min = info.Min
 	s.Max = info.Max
 	s.Step = info.Step
-	s.UniqueID = deviceID + "_" + info.SensorName
-	s.EntityCategory = info.Category
-	s.Device = getMqttDevice(deviceID)
 
 	topic = fmt.Sprintf("homeassistant/number/%s/%s/config", deviceID, info.SensorName)
 	data, err = json.Marshal(s)
