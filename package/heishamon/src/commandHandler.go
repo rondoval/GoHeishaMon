@@ -2,9 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"os/exec"
 	"strconv"
 	"strings"
 
@@ -17,9 +15,7 @@ func onGenericCommand(mclient mqtt.Client, msg mqtt.Message) {
 	value := string(msg.Payload())
 	log.Printf("Command received - set %s to %s", function, value)
 
-	if function == "OSCommand" {
-		handleOSCommand(mclient, msg)
-	} else if config.OptionalPCB == true {
+	if config.OptionalPCB == true {
 		handlePCBCommand(function, value)
 	} else {
 		log.Printf("Unknown command %s", function)
@@ -94,27 +90,4 @@ func handlePCBCommand(function, value string) {
 	} else {
 		log.Printf("Unknown command (%s) or value conversion error (%s)", function, value)
 	}
-}
-
-func handleOSCommand(mclient mqtt.Client, msg mqtt.Message) {
-	if config.EnableOSCommand == false {
-		return
-	}
-	var cmd *exec.Cmd
-	var out2 string
-	s := strings.Split(string(msg.Payload()), " ")
-	if len(s) < 2 {
-		cmd = exec.Command(s[0])
-	} else {
-		cmd = exec.Command(s[0], s[1:]...)
-	}
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		// TODO: handle error more gracefully
-		out2 = fmt.Sprintf("%s", err)
-	}
-	comout := fmt.Sprintf("%s - %s", out, out2)
-	TOP := fmt.Sprintf("%s/out", getCommandTopic(("OSCommand")))
-	mqttPublish(mclient, TOP, comout, 0)
 }
