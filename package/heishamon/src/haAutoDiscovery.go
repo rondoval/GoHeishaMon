@@ -122,6 +122,10 @@ func (b *mqttCommon) encodeSelect(info topicEntry) {
 
 func (s *mqttCommon) encodeNumber(info topicEntry) {
 	s.DeviceClass = getDeviceClass(info.DisplayUnit)
+	// device classess for MQTT Number are somewhat limited currently
+	if s.DeviceClass != "temperature" {
+		s.DeviceClass = "None"
+	}
 	s.CommandTopic = s.StateTopic + "/set"
 	s.UnitOfMeasurement = info.DisplayUnit
 	s.Min = info.Min
