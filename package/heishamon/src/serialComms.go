@@ -5,11 +5,13 @@ import (
 	"log"
 	"os/exec"
 	"time"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var goodreads, totalreads int64
+
+const OPTIONAL_MSG_LENGTH = 20
+const COMMAND_MSG_LENGTH = 203
+const LOGGING_RATIO = 150
 
 func isValidReceiveChecksum(data []byte) bool {
 	var chk byte = 0
@@ -41,7 +43,7 @@ func sendCommand(command []byte) {
 	logHex(command)
 }
 
-func readSerial(mclient mqtt.Client) {
+func readSerial(logHexDump bool) []byte {
 	const maxDataLength = 255
 
 	data := make([]byte, maxDataLength)
@@ -52,18 +54,18 @@ func readSerial(mclient mqtt.Client) {
 			time.Sleep(5 * time.Second)
 			exec.Command("reboot").Run()
 		}
-		return
+		return nil
 	}
 	if n == 0 {
 		//no data
-		return
+		return nil
 	}
 	totalreads++
 
 	if data[0] != 113 { //wrong header received!
 		log.Print("Received bad header. Ignoring this data!")
 		logHex(data[:n])
-		return
+		return nil
 	}
 
 	if n > 1 { //should have received length part of header now
@@ -71,32 +73,30 @@ func readSerial(mclient mqtt.Client) {
 		if (n > int(data[1]+3)) || (n >= maxDataLength) {
 			log.Print("Received more data than header suggests! Ignoring this as this is bad data.")
 			logHex(data[:n])
-			return
+			return nil
 		}
 
 		if n == int(data[1]+3) { //we received all data (data[1] is header length field)
-			if config.LogHexDump == true {
+			if logHexDump == true {
 				log.Printf("Received %d bytes data", n)
 				logHex(data[:n])
 			}
 			if !isValidReceiveChecksum(data[:n]) {
 				log.Println("Invalid checksum on receive!")
-				return
+				return nil
 			}
 			goodreads++
 			readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
-			if totalreads%150 == 0 {
+			if totalreads%LOGGING_RATIO == 0 {
 				log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
 			}
 
-			if n == 203 { //for now only return true for this datagram because we can not decode the shorter datagram yet
-				decodeHeatpumpData(data[:n], mclient)
-			} else if n == 20 { //optional pcb acknowledge answer
-				log.Print("Received optional PCB ack answer. Decoding this in OPT topics.")
-				decodeOptionalHeatpumpData(data[:n], mclient)
+			if n == COMMAND_MSG_LENGTH || n == OPTIONAL_MSG_LENGTH {
+				return data[:n]
 			} else {
 				log.Print("Received a shorter datagram. Can't decode this yet.")
 			}
 		}
 	}
+	return nil
 }

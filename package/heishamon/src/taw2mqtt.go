@@ -11,7 +11,10 @@ import (
 
 var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 var optionalPCBQuery []byte = []byte{0xF1, 0x11, 0x01, 0x50, 0x00, 0x00, 0x40, 0xFF, 0xFF, 0xE5, 0xFF, 0xFF, 0x00, 0xFF, 0xEB, 0xFF, 0xFF, 0x00, 0x00}
+
 var config configStruct
+var commandTopics topicData
+var optionalPCBTopics topicData
 
 var serialPort *serial.Port
 var commandsChannel chan []byte
@@ -23,7 +26,7 @@ func main() {
 	redirectLogSyslog()
 	log.SetFlags(log.Lshortfile)
 	log.Println("GoHeishaMon loading...")
-	config = readConfig(*configPath)
+	config.readConfig(*configPath)
 
 	serialConfig := &serial.Config{Name: config.Device, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: config.serialTimeout}
 	var err error
@@ -35,7 +38,9 @@ func main() {
 	log.Print("Serial port open")
 
 	commandsChannel = make(chan []byte, 100)
-	loadTopics()
+	commandTopics.loadTopics(config.topicsFile, Main)
+	optionalPCBTopics.loadTopics(config.topicsOptionalPCBFile, Optional)
+
 	if config.OptionalPCB {
 		loadOptionalPCB()
 	}
@@ -43,7 +48,10 @@ func main() {
 	mclient := makeMQTTConn()
 	redirectLogMQTT(mclient)
 	if config.HAAutoDiscover == true {
-		publishDiscoveryTopics(mclient)
+		publishDiscoveryTopics(mclient, commandTopics, config)
+		if config.OptionalPCB == true {
+			publishDiscoveryTopics(mclient, optionalPCBTopics, config)
+		}
 	}
 
 	queryTicker := time.NewTicker(time.Second * time.Duration(config.ReadInterval))
@@ -52,7 +60,15 @@ func main() {
 	sendCommand(panasonicQuery)
 	for {
 		time.Sleep(config.serialTimeout)
-		readSerial(mclient)
+		data := readSerial(config.LogHexDump)
+		if len(data) == OPTIONAL_MSG_LENGTH {
+			decodeHeatpumpData(optionalPCBTopics, data, mclient)
+			//response to heatpump should contain the data from heatpump on byte 4 and 5
+			optionalPCBQuery[4] = data[4]
+			optionalPCBQuery[5] = data[5]
+		} else if len(data) == COMMAND_MSG_LENGTH {
+			decodeHeatpumpData(commandTopics, data, mclient)
+		}
 
 		var queueLen = len(commandsChannel)
 		if queueLen > 10 {
@@ -74,6 +90,7 @@ func main() {
 		default:
 			if config.OptionalPCB == true && config.ListenOnly == false {
 				commandsChannel <- optionalPCBQuery
+				// TODO ticker?
 			}
 		}
 	}
@@ -96,5 +113,4 @@ func loadOptionalPCB() {
 		optionalPCBQuery = data
 		log.Print("Optional PCB data loaded")
 	}
-
 }

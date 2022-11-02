@@ -9,26 +9,28 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func onGenericCommand(mclient mqtt.Client, msg mqtt.Message) {
-	topicPieces := strings.Split(msg.Topic(), "/")
-	function := topicPieces[len(topicPieces)-1]
-	value := string(msg.Payload())
-	log.Printf("Command received - set %s to %s", function, value)
+const setCmdLen = 110
 
-	if config.OptionalPCB == true {
-		handlePCBCommand(function, value)
-	} else {
-		log.Printf("Unknown command %s", function)
-	}
-}
+var panasonicSetCommand = [setCmdLen]byte{0xf1, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 	topicPieces := strings.Split(msg.Topic(), "/")
+	device := topicPieces[len(topicPieces)-3] // main, optional
 	function := topicPieces[len(topicPieces)-2]
 	value := string(msg.Payload())
-	log.Printf("Command received - set %s to %s\n", function, value)
+	log.Printf("Command received - set %s on %s to %s\n", function, device, value)
 
-	command, err := prepMainCommand(function, value)
+	var topics topicData
+	var command []byte
+	if device == main_topic {
+		topics = commandTopics
+		copy(command, panasonicSetCommand[:])
+	} else if device == optional_topic {
+		topics = optionalPCBTopics
+		command = optionalPCBQuery //this is not copied as we need all fields filled in
+	}
+
+	err := updateCommandMessage(function, value, topics, command)
 	if err == nil {
 		commandsChannel <- command[:]
 	} else {
@@ -36,8 +38,8 @@ func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 	}
 }
 
-func verboseToNumber(function, value string) (int64, error) {
-	if sensor, ok := topicNameLookup[function]; ok {
+func verboseToNumber(function, value string, topics topicData) (int64, error) {
+	if sensor, ok := topics.lookup(function); ok {
 		for valueKey, valueName := range sensor.Values {
 			if value == valueName {
 				return int64(valueKey), nil
@@ -47,47 +49,26 @@ func verboseToNumber(function, value string) (int64, error) {
 	return 0, errors.New("Can't convert literal to number")
 }
 
-func prepMainCommand(function, msg string) ([setCmdLen]byte, error) {
-	command := panasonicSetCommand
+func updateCommandMessage(function, msg string, topics topicData, command []byte) error {
 	v, err := strconv.ParseInt(msg, 10, 16)
 	if err != nil {
-		v, err = verboseToNumber(function, msg)
+		v, err = verboseToNumber(function, msg, topics)
 		if err != nil {
-			return command, err
+			return err
 		}
 	}
 
-	if sensor, ok := topicNameLookup[function]; ok {
+	if sensor, ok := topics.lookup(function); ok {
 		if sensor.EncodeFunction != "" {
 			if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
-				data := handler(int(v))
+				data := handler(int(v), command[sensor.DecodeOffset])
 				log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
 				command[sensor.DecodeOffset] = data
-				return command, nil
+				return nil
 			}
-			return command, errors.New("Unknown command " + sensor.EncodeFunction)
+			return errors.New("Unknown command " + sensor.EncodeFunction)
 		}
-		return command, errors.New("No encode function defined for " + function)
+		return errors.New("No encode function defined for " + function)
 	}
-	return command, errors.New("Unknown topic " + function)
-}
-
-func handlePCBCommand(function, value string) {
-	if handler, ok := optionCommandMapFloat[function]; ok {
-		temp, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			log.Printf("%s: %s value conversion error", function, value)
-			return
-		}
-		handler(temp)
-	} else if handler, ok := optionCommandMapByte[function]; ok {
-		v, err := strconv.ParseInt(value, 10, 8)
-		if err != nil {
-			log.Printf("%s: %s value conversion error", function, value)
-			return
-		}
-		handler(byte(v))
-	} else {
-		log.Printf("Unknown command (%s) or value conversion error (%s)", function, value)
-	}
+	return errors.New("Unknown topic " + function)
 }

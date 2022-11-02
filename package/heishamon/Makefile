@@ -45,6 +45,7 @@ define Package/heishamon/install
 	$(INSTALL_DIR) $(1)/etc/heishamon
 	$(INSTALL_CONF) ./files/config.yaml.example $(1)/etc/heishamon/config.yaml
 	$(INSTALL_CONF) ./files/topics.yaml $(1)/etc/heishamon/topics.yaml
+	$(INSTALL_CONF) ./files/topicsOptionalPCB.yaml $(1)/etc/heishamon/topicsOptionalPCB.yaml
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/heishamon.init $(1)/etc/init.d/heishamon

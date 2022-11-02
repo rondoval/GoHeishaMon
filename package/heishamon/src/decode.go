@@ -4,13 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"math"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
-
-const numberOfOptionalTopics = 7
-
-var optionalData []string = make([]string, numberOfOptionalTopics)
 
 var decodeToInt = map[string]func(byte) int{
 	"getIntMinus1Times50": func(input byte) int { return (int(input) - 1) * 50 },
@@ -22,16 +19,25 @@ var decodeToInt = map[string]func(byte) int{
 	"getLeft5bits":        func(input byte) int { return int((input >> 3) - 1) },
 	"getBit3and4and5":     func(input byte) int { return int(((input >> 3) & 0b111) - 1) },
 	"getBit7and8":         func(input byte) int { return int((input & 0b11) - 1) },
+	"getBit7and8Z":        func(input byte) int { return int(input & 0b11) },
 	"getBit5and6":         func(input byte) int { return int(((input >> 2) & 0b11) - 1) },
+	"getBit5and6Z":        func(input byte) int { return int((input >> 2) & 0b11) },
 	"getBit3and4":         func(input byte) int { return int(((input >> 4) & 0b11) - 1) },
+	"getBit3and4Z":        func(input byte) int { return int((input >> 4) & 0b11) },
+	"getBit2and3Z":        func(input byte) int { return int((input >> 5) & 0b11) },
 	"getBit1and2":         func(input byte) int { return int((input >> 6) - 1) },
+	"getBit1and2Z":        func(input byte) int { return int(input >> 6) },
 	"getBit8":             func(input byte) int { return int(input & 0b1) },
 	"getBit7":             func(input byte) int { return int((input & 0b10) >> 1) },
 	"getBit6":             func(input byte) int { return int((input & 0b100) >> 2) },
+	"getBit4":             func(input byte) int { return int((input & 0b1000) >> 4) },
+	"getBit2":             func(input byte) int { return int((input & 0b100000) >> 6) },
 	"getBit1":             func(input byte) int { return int(input >> 7) },
 	"getOpMode":           getOpMode,
 	"getModel":            getModel,
 	"getPower":            func(input byte) int { return (int(input) - 1) * 200 },
+	"hex2temp":            hex2temp,
+	"demand2hex":          hex2demand,
 }
 
 var decodeToString = map[string]func([]byte, int) string{
@@ -107,6 +113,39 @@ func getModel(input byte) int {
 	}
 }
 
+func hex2temp(input byte) int {
+	const Uref float64 = 255
+	const constant float64 = 3695
+	const R25 float64 = 6340
+	const T25 float64 = 25
+	const Rf float64 = 6480
+	const K float64 = 273.15
+	var hextemp float64 = float64(input)
+
+	var RT float64 = hextemp * Rf / (Uref - hextemp)
+	var temp int = int(constant/math.Log(RT/R25) - K + 1./(T25+K))
+	return temp
+}
+
+func hex2demand(input byte) int {
+	var demand int = 0
+
+	const min = 43 - 5 // 0% in hex
+	const max = 234    // 100% in hex
+
+	if input > max {
+		demand = 100
+	} else if input < min+5 {
+		demand = 5
+	} else {
+		const a float64 = 95. / (max - min)
+		const b float64 = 5 - 95.*min/(max-min)
+		demand = int(a*float64(input) + b)
+	}
+
+	return demand
+}
+
 func getIntMinus1Div5(data []byte, index int) string {
 	value := int(data[index]) - 1
 	return fmt.Sprintf("%.2f", float32(value)/5)
@@ -141,7 +180,7 @@ func getWord(data []byte, index int) string {
 	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
 }
 
-func convertIntToEnum(value int, topic topicData) string {
+func convertIntToEnum(value int, topic topicEntry) string {
 	numItems := len(topic.Values)
 	if numItems > 0 {
 		if value >= 0 && value < numItems {
@@ -152,8 +191,8 @@ func convertIntToEnum(value int, topic topicData) string {
 	return fmt.Sprintf("%d", value)
 }
 
-func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
-	for k, v := range allTopics {
+func decodeHeatpumpData(topics topicData, data []byte, mclient mqtt.Client) {
+	for k, v := range topics.getAll() {
 		var topicValue string
 
 		if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
@@ -165,47 +204,8 @@ func decodeHeatpumpData(data []byte, mclient mqtt.Client) {
 		}
 
 		if v.currentValue != topicValue {
-			v.currentValue = topicValue
-			allTopics[k] = v
-			mqttPublish(mclient, getStatusTopic(v.SensorName), topicValue, 0)
+			topics.set(k, topicValue)
+			mqttPublish(mclient, config.getStatusTopic(v.SensorName, topics.kind), topicValue, 0)
 		}
 	}
-}
-
-func decodeOptionalHeatpumpData(data []byte, mclient mqtt.Client) {
-	for topicNumber := 0; topicNumber < numberOfOptionalTopics; topicNumber++ {
-		var value, name string
-
-		switch topicNumber {
-		case 0:
-			value = fmt.Sprintf("%d", data[4]>>7)
-			name = "Z1_Water_Pump"
-		case 1:
-			value = fmt.Sprintf("%d", (data[4]>>5)&0b11)
-			name = "Z1_Mixing_Valve"
-		case 2:
-			value = fmt.Sprintf("%d", (data[4]>>4)&0b1)
-			name = "Z2_Water_Pump"
-		case 3:
-			value = fmt.Sprintf("%d", (data[4]>>2)&0b11)
-			name = "Z2_Mixing_Valve"
-		case 4:
-			value = fmt.Sprintf("%d", (data[4]>>1)&0b1)
-			name = "Pool_Water_Pump"
-		case 5:
-			value = fmt.Sprintf("%d", (data[4]>>0)&0b1)
-			name = "Solar_Water_Pump"
-		case 6:
-			value = fmt.Sprintf("%d", (data[5]>>0)&0b1)
-			name = "Alarm_State"
-		}
-
-		if optionalData[topicNumber] != value {
-			optionalData[topicNumber] = value
-			mqttPublish(mclient, getPcbStatusTopic(name), value, 0)
-		}
-	}
-	//response to heatpump should contain the data from heatpump on byte 4 and 5
-	optionalPCBQuery[4] = data[4]
-	optionalPCBQuery[5] = data[5]
 }

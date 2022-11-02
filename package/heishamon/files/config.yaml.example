@@ -3,7 +3,6 @@ device: "/dev/ttyUSB0"
 readInterval: 10
 listenOnly: false
 optionalPCB: false
-enableOSCommand: true
 mqttServer: "127.0.0.1"
 mqttPort: "1883"
 mqttLogin: ""

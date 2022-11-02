@@ -12,12 +12,11 @@ import (
 )
 
 type configStruct struct {
-	DeviceName      string `yaml:"deviceName"`      // for HA discovery
-	Device          string `yaml:"device"`          // serial port
-	ReadInterval    int    `yaml:"readInterval"`    // HP query interval
-	ListenOnly      bool   `yaml:"listenOnly"`      // no commands at all
-	OptionalPCB     bool   `yaml:"optionalPCB"`     // enable optional PCB emulation
-	EnableOSCommand bool   `yaml:"enableOSCommand"` // enable OS commands
+	DeviceName   string `yaml:"deviceName"`   // for HA discovery
+	Device       string `yaml:"device"`       // serial port
+	ReadInterval int    `yaml:"readInterval"` // HP query interval
+	ListenOnly   bool   `yaml:"listenOnly"`   // no commands at all
+	OptionalPCB  bool   `yaml:"optionalPCB"`  // enable optional PCB emulation
 
 	MqttServer     string `yaml:"mqttServer"`
 	MqttPort       string `yaml:"mqttPort"`
@@ -30,32 +29,48 @@ type configStruct struct {
 	LogMqtt    bool `yaml:"logmqtt"`
 	LogHexDump bool `yaml:"loghex"`
 
-	//topics
-	mqttWillTopic      string
-	mqttLogTopic       string
-	mqttValuesTopic    string
-	mqttPcbValuesTopic string
-	mqttCommandsTopic  string
+	mqttWillTopic string
+	mqttLogTopic  string
 
-	topicsFile          string
-	optionalPCBFile     string
-	serialTimeout       time.Duration
-	optionalPCBSaveTime time.Duration
+	topicsFile            string
+	topicsOptionalPCBFile string
+	optionalPCBFile       string
+	serialTimeout         time.Duration
+	optionalPCBSaveTime   time.Duration
 }
 
-func getStatusTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttValuesTopic, name)
+const (
+	Main = iota
+	Optional
+)
+const main_topic = "main"
+const optional_topic = "optional"
+
+type DeviceType int
+
+func (c configStruct) getDeviceName(kind DeviceType) string {
+	switch kind {
+	case Main:
+		return c.DeviceName
+	case Optional:
+		return c.DeviceName + " Optional PCB"
+	default:
+		return c.DeviceName
+	}
 }
 
-func getCommandTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttCommandsTopic, name)
+func (c configStruct) getStatusTopic(name string, kind DeviceType) string {
+	switch kind {
+	case Main:
+		return fmt.Sprintf("%s/%s/%s", c.MqttTopicBase, main_topic, name)
+	case Optional:
+		return fmt.Sprintf("%s/%s/%s", c.MqttTopicBase, optional_topic, name)
+	default:
+		return c.MqttTopicBase
+	}
 }
 
-func getPcbStatusTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttPcbValuesTopic, name)
-}
-
-func readConfig(configPath string) configStruct {
+func (c *configStruct) readConfig(configPath string) {
 	var configFile = path.Join(configPath, "config.yaml")
 
 	_, err := os.Stat(configFile)
@@ -63,29 +78,23 @@ func readConfig(configPath string) configStruct {
 		log.Fatalf("Config file is missing: %s ", configFile)
 	}
 
-	var config configStruct
-
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = yaml.Unmarshal(data, &config)
+	err = yaml.Unmarshal(data, c)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config.mqttWillTopic = config.MqttTopicBase + "/LWT"
-	config.mqttLogTopic = config.MqttTopicBase + "/log"
-	config.mqttValuesTopic = config.MqttTopicBase + "/main"
-	config.mqttPcbValuesTopic = config.MqttTopicBase + "/optional"
-	config.mqttCommandsTopic = config.MqttTopicBase + "/commands"
-	config.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
-	config.topicsFile = path.Join(configPath, "topics.yaml")
-	config.serialTimeout = 2 * time.Second
-	config.optionalPCBSaveTime = 5 * time.Minute
+	c.mqttWillTopic = c.MqttTopicBase + "/LWT"
+	c.mqttLogTopic = c.MqttTopicBase + "/log"
+	c.topicsFile = path.Join(configPath, "topics.yaml")
+	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
+	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
+	c.serialTimeout = 2 * time.Second
+	c.optionalPCBSaveTime = 60 * time.Minute //TODO add to yaml
 
 	log.Println("Config file loaded")
-
-	return config
 }

@@ -18,8 +18,10 @@ func mqttPublish(mclient mqtt.Client, topic string, data interface{}, qos byte) 
 func onMQTTConnect(mclient mqtt.Client) {
 	mqttPublish(mclient, config.mqttWillTopic, "online", 0)
 	if config.ListenOnly == false {
-		mclient.Subscribe(getCommandTopic("+"), 0, onGenericCommand)
-		mclient.Subscribe(getStatusTopic("+/set"), 0, onAquareaCommand)
+		mclient.Subscribe(config.getStatusTopic("+/set", Main), 0, onAquareaCommand)
+		if config.OptionalPCB == true {
+			mclient.Subscribe(config.getStatusTopic("+/set", Optional), 0, onAquareaCommand)
+		}
 	}
 	log.Print("MQTT connected")
 }
