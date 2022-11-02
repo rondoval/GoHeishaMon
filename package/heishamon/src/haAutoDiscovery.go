@@ -24,6 +24,8 @@ type mqttCommon struct {
 	Device            mqttDevice `json:"device"`
 	UniqueID          string     `json:"unique_id,omitempty"`
 	EntityCategory    string     `json:"entity_category,omitempty"`
+	Icon              string     `json:"icon,omitempty"`
+	Qos               int        `json:"qos,omitempty"`
 
 	// These are specific to entity types
 	CommandTopic      string   `json:"command_topic,omitempty"`
@@ -36,6 +38,7 @@ type mqttCommon struct {
 	Max               int      `json:"max,omitempty"`
 	Step              int      `json:"step,omitempty"`
 	StateClass        string   `json:"state_class,omitempty"`
+	Mode              string   `json:"mode,omitempty"` // Number
 }
 
 func getDeviceClass(unit string) string {
@@ -52,6 +55,12 @@ func getDeviceClass(unit string) string {
 		return "current"
 	case "°C":
 		return "temperature"
+	case "Hz":
+		return "frequency"
+	case "h":
+		return "duration"
+	case "min":
+		return "duration"
 	}
 	return ""
 }
@@ -125,11 +134,13 @@ func encodeSelect(info topicData, deviceID string) (topic string, data []byte, e
 func encodeNumber(info topicData, deviceID string) (topic string, data []byte, err error) {
 	var s mqttCommon
 	encodeCommon(&s, info, deviceID)
+	s.DeviceClass = getDeviceClass(info.DisplayUnit)
 	s.CommandTopic = s.StateTopic + "/set"
 	s.UnitOfMeasurement = info.DisplayUnit
 	s.Min = info.Min
 	s.Max = info.Max
 	s.Step = info.Step
+	s.Mode = "box"
 
 	topic = fmt.Sprintf("homeassistant/number/%s/%s/config", deviceID, info.SensorName)
 	data, err = json.Marshal(s)

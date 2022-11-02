@@ -65,11 +65,11 @@ func prepMainCommand(function, msg string) ([setCmdLen]byte, error) {
 				command[sensor.DecodeOffset] = data
 				return command, nil
 			}
-			return command, errors.New("Unknown command encodeFunction")
+			return command, errors.New("Unknown command " + sensor.EncodeFunction)
 		}
-		return command, errors.New("No encode function defined for this topic")
+		return command, errors.New("No encode function defined for " + function)
 	}
-	return command, errors.New("Unknown topic")
+	return command, errors.New("Unknown topic " + function)
 }
 
 func handlePCBCommand(function, value string) {

@@ -21,8 +21,10 @@ var encodeInt = map[string]func(int) byte{
 	"setBit5and6":      func(input int) byte { return byte(input+1) & 3 << 2 },
 	"setBit3and4":      func(input int) byte { return byte(input+1) & 3 << 4 },
 	"setBit1and2":      func(input int) byte { return byte(input+1) & 3 << 6 },
+	"setBit8":          func(input int) byte { return byte(input) & 1 },
 	"setBit7":          func(input int) byte { return byte(input) & 1 << 1 },
 	"setBit6":          func(input int) byte { return byte(input) & 1 << 2 },
+	"setBit1":          func(input int) byte { return byte(input) & 1 << 7 },
 	"setOpMode":        setOperationMode,
 }
 

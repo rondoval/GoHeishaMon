@@ -791,6 +791,13 @@
   decodeOffset: 60
   displayUnit: min
   category: config
+- sensorName: Coolant
+  decodeFunction: getBit1
+  decodeOffset: 20
+  category: config
+  values:
+    - Water
+    - Glycol
 - sensorName: Alternative_Outdoor_Sensor
   decodeFunction: getBit3and4
   encodeFunction: setBit3and4
