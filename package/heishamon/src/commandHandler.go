@@ -24,6 +24,7 @@ func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 	var command []byte
 	if device == main_topic {
 		topics = commandTopics
+		command = make([]byte, 0, setCmdLen)
 		copy(command, panasonicSetCommand[:])
 	} else if device == optional_topic {
 		topics = optionalPCBTopics
