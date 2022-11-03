@@ -85,53 +85,53 @@
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Buffer_Temp
   decodeOffset: 8
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Z1_Room_Temp
   decodeOffset: 10
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Z2_Room_Temp
   decodeOffset: 11
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Solar_Temp
   decodeOffset: 13
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Demand_Control
   decodeOffset: 14
   encodeFunction: demand2hex
   displayUnit: '%'
   min: 5
   max: 100
-  step: 1
+  step: 0.1
 - sensorName: Z2_Water_Temp
   decodeOffset: 15
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1
 - sensorName: Z1_Water_Temp
   decodeOffset: 16
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
   max: 120
-  step: 1
+  step: 0.1

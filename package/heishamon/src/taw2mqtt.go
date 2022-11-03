@@ -88,13 +88,14 @@ func main() {
 		case value := <-commandsChannel:
 			sendCommand(value)
 
-		case <-queryTicker.C:
-			commandsChannel <- panasonicQuery
-
 		case <-optionQueryTicker.C:
 			if config.OptionalPCB == true && config.ListenOnly == false {
 				commandsChannel <- optionalPCBQuery
 			}
+
+		case <-queryTicker.C:
+			commandsChannel <- panasonicQuery
+
 		}
 	}
 }

@@ -51,26 +51,32 @@ func verboseToNumber(function, value string, topics topicData) (int64, error) {
 }
 
 func updateCommandMessage(mclient mqtt.Client, function, msg string, topics topicData, command []byte) error {
-	v, err := strconv.ParseInt(msg, 10, 16)
-	if err != nil {
-		v, err = verboseToNumber(function, msg, topics)
-		if err != nil {
-			return err
-		}
-	}
-
 	if sensor, ok := topics.lookup(function); ok {
 		if sensor.EncodeFunction != "" {
+			// Update topic data as well for quicker turnaround.
+			// Also needed for Optional PCB - the pump does not confirm messages.
+			sensor.currentValue = msg
+			mqttPublish(mclient, config.getStatusTopic(sensor.SensorName, topics.kind), msg, 0)
 			if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
+				v, err := strconv.ParseInt(msg, 10, 16)
+				if err != nil {
+					v, err = verboseToNumber(function, msg, topics)
+					if err != nil {
+						return err
+					}
+				}
 				data := handler(int(v), command[sensor.DecodeOffset])
 				log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
 				command[sensor.DecodeOffset] = data
-
-				// Update topic data as well for quicker turnaround.
-				// Also needed for Optional PCB - the pump does not confirm messages.
-				sensor.currentValue = msg
-				mqttPublish(mclient, config.getStatusTopic(sensor.SensorName, topics.kind), msg, 0)
-
+				return nil
+			} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
+				v, err := strconv.ParseFloat(msg, 64)
+				if err != nil {
+					return err
+				}
+				data := handler(v)
+				log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+				command[sensor.DecodeOffset] = data
 				return nil
 			}
 			return errors.New("Unknown command " + sensor.EncodeFunction)

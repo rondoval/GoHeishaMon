@@ -29,11 +29,14 @@ var encodeInt = map[string]func(int, byte) byte{
 	"setBit2":          func(input int, val byte) byte { return val&0xbf | byte(input)&1<<6 },
 	"setBit1":          func(input int, val byte) byte { return val&0x7f | byte(input)&1<<7 },
 	"setOpMode":        setOperationMode,
-	"temp2hex":         temp2hex,
-	"demand2hex":       demand2hex,
 }
 
-func temp2hex(temp int, _ byte) byte {
+var encodeFloat = map[string]func(float64) byte{
+	"temp2hex":   temp2hex,
+	"demand2hex": demand2hex,
+}
+
+func temp2hex(temp float64) byte {
 	var hextemp byte = 0
 
 	if temp >= 120 {
@@ -47,13 +50,13 @@ func temp2hex(temp int, _ byte) byte {
 		const T25 float64 = 25
 		const Rf float64 = 6480
 		const K float64 = 273.15
-		var RT float64 = R25 * math.Exp(constant*(1/(float64(temp)+K)-1/(T25+K)))
+		var RT float64 = R25 * math.Exp(constant*(1/(temp+K)-1/(T25+K)))
 		hextemp = byte(Uref * (RT / (Rf + RT)))
 	}
 	return hextemp
 }
 
-func demand2hex(demand int, _ byte) byte {
+func demand2hex(demand float64) byte {
 	var hexdemand byte = 0
 
 	const min = 43 - 5 // 0% in hex
@@ -65,7 +68,7 @@ func demand2hex(demand int, _ byte) byte {
 		hexdemand = min + 5
 	} else {
 		const a float64 = (max - min) / 100.
-		hexdemand = byte(a*float64(demand) + min)
+		hexdemand = byte(a*demand + min)
 	}
 
 	return hexdemand
