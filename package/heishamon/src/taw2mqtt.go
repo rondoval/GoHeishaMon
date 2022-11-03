@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
+	"io"
 	"io/ioutil"
 	"log"
 	"time"
 
-	"github.com/tarm/serial"
+	"github.com/jacobsa/go-serial/serial"
 )
 
 var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -16,7 +17,7 @@ var config configStruct
 var commandTopics topicData
 var optionalPCBTopics topicData
 
-var serialPort *serial.Port
+var serialPort io.ReadWriteCloser
 var commandsChannel chan []byte
 
 func main() {
@@ -28,14 +29,24 @@ func main() {
 	log.Println("GoHeishaMon loading...")
 	config.readConfig(*configPath)
 
-	serialConfig := &serial.Config{Name: config.SerialPort, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: config.serialTimeout}
+	options := serial.OpenOptions{
+		PortName:              config.SerialPort,
+		BaudRate:              9600,
+		DataBits:              8,
+		StopBits:              1,
+		ParityMode:            serial.PARITY_EVEN,
+		RTSCTSFlowControl:     false,
+		InterCharacterTimeout: uint(config.serialTimeout),
+		MinimumReadSize:       0,
+	}
 	var err error
-	serialPort, err = serial.OpenPort(serialConfig)
+	serialPort, err = serial.Open(options)
 	if err != nil {
 		// no point in continuing, no config
 		log.Fatal(err)
 	}
 	log.Print("Serial port open")
+	defer serialPort.Close()
 
 	commandsChannel = make(chan []byte, 100)
 	commandTopics.loadTopics(config.topicsFile, Main)
@@ -57,26 +68,17 @@ func main() {
 	queryTicker := time.NewTicker(time.Second * time.Duration(config.QueryInterval))
 	optionPCBSaveTicker := time.NewTicker(time.Minute * time.Duration(config.OptionalSaveInterval))
 	optionQueryTicker := time.NewTicker(time.Second * time.Duration(config.OptionalQueryInterval))
+
 	log.Print("Entering main loop")
-	sendCommand(panasonicQuery)
 	if config.OptionalPCB == true {
 		sendCommand(optionalPCBQuery)
 	}
-	for {
-		time.Sleep(config.serialTimeout)
-		data := readSerial(config.LogHexDump)
-		if len(data) == OPTIONAL_MSG_LENGTH {
-			decodeHeatpumpData(optionalPCBTopics, data, mclient)
-			//response to heatpump should contain the data from heatpump on byte 4 and 5
-			optionalPCBQuery[4] = data[4]
-			optionalPCBQuery[5] = data[5]
-		} else if len(data) == COMMAND_MSG_LENGTH {
-			decodeHeatpumpData(commandTopics, data, mclient)
-		}
+	sendCommand(panasonicQuery)
 
+	for {
 		var queueLen = len(commandsChannel)
 		if queueLen > 10 {
-			log.Print("Command queue length: ", len(commandsChannel))
+			log.Print("Command queue length: ", queueLen)
 		}
 
 		select {
@@ -95,6 +97,17 @@ func main() {
 
 		case <-queryTicker.C:
 			commandsChannel <- panasonicQuery
+
+		default:
+			data := readSerial(config.LogHexDump)
+			if len(data) == OPTIONAL_MSG_LENGTH {
+				decodeHeatpumpData(optionalPCBTopics, data, mclient)
+				//response to heatpump should contain the data from heatpump on byte 4 and 5
+				optionalPCBQuery[4] = data[4]
+				optionalPCBQuery[5] = data[5]
+			} else if len(data) == COMMAND_MSG_LENGTH {
+				decodeHeatpumpData(commandTopics, data, mclient)
+			}
 
 		}
 	}

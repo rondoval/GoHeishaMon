@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"os/exec"
@@ -8,7 +9,9 @@ import (
 )
 
 var goodreads, totalreads int64
+var buffer bytes.Buffer
 
+const DATA_BUFFER = 512
 const OPTIONAL_MSG_LENGTH = 20
 const COMMAND_MSG_LENGTH = 203
 const LOGGING_RATIO = 150
@@ -43,59 +46,64 @@ func sendCommand(command []byte) {
 	logHex(command)
 }
 
+func readToBuffer() {
+	data := make([]byte, DATA_BUFFER)
+	_, err := serialPort.Read(data)
+	if err != io.EOF {
+		log.Print(err)
+		time.Sleep(5 * time.Second)
+		exec.Command("reboot").Run()
+	}
+	buffer.Write(data)
+}
+
 func readSerial(logHexDump bool) []byte {
-	const maxDataLength = 255
-
-	data := make([]byte, maxDataLength)
-	n, err := serialPort.Read(data)
-	if err != nil {
-		if err != io.EOF {
-			log.Print(err)
-			time.Sleep(5 * time.Second)
-			exec.Command("reboot").Run()
-		}
-		//TODO rework to detect header and read len of bytes from that, remove sleeps
-		return nil
-	}
-	if n == 0 {
-		//no data
-		return nil
-	}
-	totalreads++
-
-	if data[0] != 113 { //wrong header received!
-		log.Print("Received bad header. Ignoring this data!")
-		logHex(data[:n])
+	readToBuffer()
+	if buffer.Len() < OPTIONAL_MSG_LENGTH {
+		// not enough data to have a full message
 		return nil
 	}
 
-	if n > 1 { //should have received length part of header now
+	// opt header: 71 11 01 50; 20 bytes
+	// header:     71 c8 01 10; 203 bytes
+	// looking for header
+	hdr := bytes.IndexByte(buffer.Bytes(), 0x71)
+	if hdr < 0 {
+		return nil
+	} else if hdr > 0 {
+		log.Print("Throwing away some data")
+		logHex(buffer.Next(hdr))
+	}
 
-		if (n > int(data[1]+3)) || (n >= maxDataLength) {
-			log.Print("Received more data than header suggests! Ignoring this as this is bad data.")
-			logHex(data[:n])
-			return nil
-		}
+	if buffer.Len() > 1 { // can check length
+		data := buffer.Bytes()
+		lenFromHeader := data[1] + 3
 
-		if n == int(data[1]+3) { //we received all data (data[1] is header length field)
-			if logHexDump == true {
-				log.Printf("Received %d bytes data", n)
-				logHex(data[:n])
-			}
-			if !isValidReceiveChecksum(data[:n]) {
+		if buffer.Len() >= int(lenFromHeader) { // have entire packet
+			totalreads++
+
+			if isValidReceiveChecksum(data[:lenFromHeader]) {
+				goodreads++
+				readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
+				if totalreads%LOGGING_RATIO == 0 {
+					log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
+				}
+
+				packet := buffer.Next(int(lenFromHeader))
+				if logHexDump == true {
+					log.Printf("Received %d bytes data", lenFromHeader)
+					logHex(packet)
+				}
+				if lenFromHeader == COMMAND_MSG_LENGTH || lenFromHeader == OPTIONAL_MSG_LENGTH {
+					return packet
+				} else {
+					log.Print("Received an unknown datagram. Can't decode this (yet?).")
+				}
+			} else {
+				// invalid checksum, need to consume 0x71 and look for another one
+				buffer.ReadByte()
 				log.Println("Invalid checksum on receive!")
 				return nil
-			}
-			goodreads++
-			readpercentage := float64(totalreads-goodreads) / float64(totalreads) * 100.
-			if totalreads%LOGGING_RATIO == 0 {
-				log.Printf("RX: %d RX errors: %d (%.2f %%)", totalreads, totalreads-goodreads, readpercentage)
-			}
-
-			if n == COMMAND_MSG_LENGTH || n == OPTIONAL_MSG_LENGTH {
-				return data[:n]
-			} else {
-				log.Print("Received a shorter datagram. Can't decode this yet.")
 			}
 		}
 	}
