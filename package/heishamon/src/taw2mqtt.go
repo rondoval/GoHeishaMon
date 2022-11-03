@@ -28,7 +28,7 @@ func main() {
 	log.Println("GoHeishaMon loading...")
 	config.readConfig(*configPath)
 
-	serialConfig := &serial.Config{Name: config.Device, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: config.serialTimeout}
+	serialConfig := &serial.Config{Name: config.SerialPort, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: config.serialTimeout}
 	var err error
 	serialPort, err = serial.OpenPort(serialConfig)
 	if err != nil {
@@ -54,10 +54,14 @@ func main() {
 		}
 	}
 
-	queryTicker := time.NewTicker(time.Second * time.Duration(config.ReadInterval))
-	optionPCBSaveTicker := time.NewTicker(config.optionalPCBSaveTime)
+	queryTicker := time.NewTicker(time.Second * time.Duration(config.QueryInterval))
+	optionPCBSaveTicker := time.NewTicker(time.Minute * time.Duration(config.OptionalSaveInterval))
+	optionQueryTicker := time.NewTicker(time.Second * time.Duration(config.OptionalQueryInterval))
 	log.Print("Entering main loop")
 	sendCommand(panasonicQuery)
+	if config.OptionalPCB == true {
+		sendCommand(optionalPCBQuery)
+	}
 	for {
 		time.Sleep(config.serialTimeout)
 		data := readSerial(config.LogHexDump)
@@ -87,10 +91,9 @@ func main() {
 		case <-queryTicker.C:
 			commandsChannel <- panasonicQuery
 
-		default:
+		case <-optionQueryTicker.C:
 			if config.OptionalPCB == true && config.ListenOnly == false {
 				commandsChannel <- optionalPCBQuery
-				// TODO ticker?
 			}
 		}
 	}

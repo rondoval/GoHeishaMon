@@ -12,11 +12,13 @@ import (
 )
 
 type configStruct struct {
-	DeviceName   string `yaml:"deviceName"`   // for HA discovery
-	Device       string `yaml:"device"`       // serial port
-	ReadInterval int    `yaml:"readInterval"` // HP query interval
-	ListenOnly   bool   `yaml:"listenOnly"`   // no commands at all
-	OptionalPCB  bool   `yaml:"optionalPCB"`  // enable optional PCB emulation
+	DeviceName            string `yaml:"deviceName"`            // for HA discovery
+	SerialPort            string `yaml:"serialPort"`            // serial port
+	QueryInterval         int    `yaml:"queryInterval"`         // HP query interval (sec)
+	ListenOnly            bool   `yaml:"listenOnly"`            // no commands at all
+	OptionalPCB           bool   `yaml:"optionalPCB"`           // enable optional PCB emulation
+	OptionalQueryInterval int    `yaml:"optionalQueryInterval"` // Optional PCB query interval (sec)
+	OptionalSaveInterval  int    `yaml:"optionalSaveInterval"`  // Optional PCB data save interval (min)
 
 	MqttServer     string `yaml:"mqttServer"`
 	MqttPort       string `yaml:"mqttPort"`
@@ -36,7 +38,6 @@ type configStruct struct {
 	topicsOptionalPCBFile string
 	optionalPCBFile       string
 	serialTimeout         time.Duration
-	optionalPCBSaveTime   time.Duration
 }
 
 const (
@@ -94,7 +95,6 @@ func (c *configStruct) readConfig(configPath string) {
 	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
 	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
 	c.serialTimeout = 2 * time.Second
-	c.optionalPCBSaveTime = 60 * time.Minute //TODO add to yaml
 
 	log.Println("Config file loaded")
 }
