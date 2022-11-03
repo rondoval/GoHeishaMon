@@ -75,9 +75,9 @@ func (s *mqttCommon) encodeCommon(info topicEntry, kind DeviceType, config confi
 	s.AvailabilityTopic = config.mqttWillTopic
 
 	s.sensorName = info.SensorName
-	s.deviceID = config.getDeviceName(kind)
+	s.deviceID = strings.ReplaceAll(config.getDeviceName(kind), " ", "_")
 
-	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + s.deviceID, s.deviceID}
+	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + config.getDeviceName(kind), s.deviceID}
 	s.UniqueID = s.deviceID + "_" + info.SensorName
 	s.EntityCategory = info.Category
 }
