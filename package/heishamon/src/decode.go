@@ -37,7 +37,7 @@ var decodeToInt = map[string]func(byte) int{
 	"getModel":            getModel,
 	"getPower":            func(input byte) int { return (int(input) - 1) * 200 },
 	"hex2temp":            hex2temp,
-	"demand2hex":          hex2demand,
+	"hex2demand":          hex2demand,
 }
 
 var decodeToString = map[string]func([]byte, int) string{
@@ -123,7 +123,7 @@ func hex2temp(input byte) int {
 	var hextemp float64 = float64(input)
 
 	var RT float64 = hextemp * Rf / (Uref - hextemp)
-	var temp int = int(constant/math.Log(RT/R25) - K + 1./(T25+K))
+	var temp int = int(constant/(math.Log(RT/R25)+constant/(T25+K)) - K)
 	return temp
 }
 
@@ -133,9 +133,9 @@ func hex2demand(input byte) int {
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
 
-	if input > max {
+	if input >= max {
 		demand = 100
-	} else if input < min+5 {
+	} else if input <= min+5 {
 		demand = 5
 	} else {
 		const a float64 = 95. / (max - min)

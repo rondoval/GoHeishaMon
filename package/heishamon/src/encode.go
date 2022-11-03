@@ -36,9 +36,9 @@ var encodeInt = map[string]func(int, byte) byte{
 func temp2hex(temp int, _ byte) byte {
 	var hextemp byte = 0
 
-	if temp > 120 {
+	if temp >= 120 {
 		hextemp = 0
-	} else if temp < -78 {
+	} else if temp <= -78 {
 		hextemp = 255
 	} else {
 		const Uref float64 = 255
@@ -59,9 +59,9 @@ func demand2hex(demand int, _ byte) byte {
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
 
-	if demand > 100 {
+	if demand >= 100 {
 		hexdemand = max
-	} else if demand < 5 {
+	} else if demand <= 5 {
 		hexdemand = min + 5
 	} else {
 		const a float64 = (max - min) / 100.

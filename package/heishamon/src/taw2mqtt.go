@@ -63,7 +63,7 @@ func main() {
 		sendCommand(optionalPCBQuery)
 	}
 	for {
-		time.Sleep(config.serialTimeout)
+		//time.Sleep(config.serialTimeout)
 		data := readSerial(config.LogHexDump)
 		if len(data) == OPTIONAL_MSG_LENGTH {
 			decodeHeatpumpData(optionalPCBTopics, data, mclient)
