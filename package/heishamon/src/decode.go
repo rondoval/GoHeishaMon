@@ -192,20 +192,22 @@ func convertIntToEnum(value int, topic topicEntry) string {
 }
 
 func decodeHeatpumpData(topics topicData, data []byte, mclient mqtt.Client) {
-	for k, v := range topics.getAll() {
+	for _, v := range topics.getAll() {
 		var topicValue string
 
-		if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
-			topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), v)
-		} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
-			topicValue = arrayOperator(data, v.DecodeOffset)
-		} else {
-			log.Print("Unknown codec function: ", v.DecodeFunction)
-		}
+		if v.DecodeFunction != "" {
+			if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
+				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), *v)
+			} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
+				topicValue = arrayOperator(data, v.DecodeOffset)
+			} else {
+				log.Print("Unknown codec function: ", v.DecodeFunction)
+			}
 
-		if v.currentValue != topicValue {
-			topics.set(k, topicValue)
-			mqttPublish(mclient, config.getStatusTopic(v.SensorName, topics.kind), topicValue, 0)
+			if v.currentValue != topicValue {
+				v.currentValue = topicValue
+				mqttPublish(mclient, config.getStatusTopic(v.SensorName, topics.kind), topicValue, 0)
+			}
 		}
 	}
 }

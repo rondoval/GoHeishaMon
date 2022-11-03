@@ -151,25 +151,25 @@ func publishDiscoveryTopics(mclient mqtt.Client, allTopics topicData, config con
 		var err error
 
 		var mqttAdvert mqttCommon
-		mqttAdvert.encodeCommon(value, allTopics.kind, config)
+		mqttAdvert.encodeCommon(*value, allTopics.kind, config)
 
 		if value.EncodeFunction != "" {
 			// Read-Write value
 			if len(value.Values) == 0 {
-				mqttAdvert.encodeNumber(value)
+				mqttAdvert.encodeNumber(*value)
 			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				mqttAdvert.encodeSelect(value)
+				mqttAdvert.encodeSelect(*value)
 			} else if len(value.Values) == 2 {
-				mqttAdvert.encodeSwitch(value)
+				mqttAdvert.encodeSwitch(*value)
 			} else {
 				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
 		} else {
 			// Read only value
 			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				mqttAdvert.encodeBinarySensor(value)
+				mqttAdvert.encodeBinarySensor(*value)
 			} else {
-				mqttAdvert.encodeSensor(value)
+				mqttAdvert.encodeSensor(*value)
 			}
 		}
 

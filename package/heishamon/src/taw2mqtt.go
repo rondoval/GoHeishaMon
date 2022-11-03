@@ -101,6 +101,7 @@ func main() {
 
 func saveOptionalPCB() {
 	err := ioutil.WriteFile(config.optionalPCBFile, optionalPCBQuery, 0644)
+	//TODO serialize to json instead, restore topics and []byte
 	if err != nil {
 		log.Print(err)
 	} else {

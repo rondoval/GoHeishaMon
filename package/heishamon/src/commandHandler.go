@@ -31,7 +31,7 @@ func onAquareaCommand(mclient mqtt.Client, msg mqtt.Message) {
 		command = optionalPCBQuery //this is not copied as we need all fields filled in
 	}
 
-	err := updateCommandMessage(function, value, topics, command)
+	err := updateCommandMessage(mclient, function, value, topics, command)
 	if err == nil {
 		commandsChannel <- command[:]
 	} else {
@@ -50,7 +50,7 @@ func verboseToNumber(function, value string, topics topicData) (int64, error) {
 	return 0, errors.New("Can't convert literal to number")
 }
 
-func updateCommandMessage(function, msg string, topics topicData, command []byte) error {
+func updateCommandMessage(mclient mqtt.Client, function, msg string, topics topicData, command []byte) error {
 	v, err := strconv.ParseInt(msg, 10, 16)
 	if err != nil {
 		v, err = verboseToNumber(function, msg, topics)
@@ -65,6 +65,12 @@ func updateCommandMessage(function, msg string, topics topicData, command []byte
 				data := handler(int(v), command[sensor.DecodeOffset])
 				log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
 				command[sensor.DecodeOffset] = data
+
+				// Update topic data as well for quicker turnaround.
+				// Also needed for Optional PCB - the pump does not confirm messages.
+				sensor.currentValue = msg
+				mqttPublish(mclient, config.getStatusTopic(sensor.SensorName, topics.kind), msg, 0)
+
 				return nil
 			}
 			return errors.New("Unknown command " + sensor.EncodeFunction)

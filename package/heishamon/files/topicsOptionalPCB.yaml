@@ -45,21 +45,18 @@
     - 'On'
 - sensorName: Heat_Cool_Mode
   decodeOffset: 6
-  decodeFunction: getBit1
   encodeFunction: setBit1
   values:
     - Heat
     - Cool
 - sensorName: Compressor_State
   decodeOffset: 6
-  decodeFunction: getBit2
   encodeFunction: setBit2
   values:
     - 'Off'
     - 'On'
 - sensorName: Smart_Grid_Mode
   decodeOffset: 6
-  decodeFunction: getBit3and4Z
   encodeFunction: setBit3and4Z
   values:
     - Normal
@@ -68,7 +65,6 @@
     - Capacity_2
 - sensorName: External_Thermostat_1
   decodeOffset: 6
-  decodeFunction: getBit5and6Z
   encodeFunction: setBit5and6Z
   values:
     - No_demand
@@ -77,7 +73,6 @@
     - Cool_and_Heat_demand
 - sensorName: External_Thermostat_2
   decodeOffset: 6
-  decodeFunction: getBit7and8Z
   encodeFunction: setBit7and8Z
   values:
     - No_demand
@@ -86,7 +81,6 @@
     - Cool_and_Heat_demand
 - sensorName: Pool_Temp
   decodeOffset: 7
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -94,7 +88,6 @@
   step: 1
 - sensorName: Buffer_Temp
   decodeOffset: 8
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -102,7 +95,6 @@
   step: 1
 - sensorName: Z1_Room_Temp
   decodeOffset: 10
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -110,7 +102,6 @@
   step: 1
 - sensorName: Z2_Room_Temp
   decodeOffset: 11
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -118,7 +109,6 @@
   step: 1
 - sensorName: Solar_Temp
   decodeOffset: 13
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -126,7 +116,6 @@
   step: 1
 - sensorName: Demand_Control
   decodeOffset: 14
-  decodeFunction: hex2demand
   encodeFunction: demand2hex
   displayUnit: '%'
   min: 5
@@ -134,7 +123,6 @@
   step: 1
 - sensorName: Z2_Water_Temp
   decodeOffset: 15
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
@@ -142,7 +130,6 @@
   step: 1
 - sensorName: Z1_Water_Temp
   decodeOffset: 16
-  decodeFunction: hex2temp
   encodeFunction: temp2hex
   displayUnit: °C
   min: -78
