@@ -54,6 +54,7 @@ func readSerial(logHexDump bool) []byte {
 			time.Sleep(5 * time.Second)
 			exec.Command("reboot").Run()
 		}
+		//TODO rework to detect header and read len of bytes from that, remove sleeps
 		return nil
 	}
 	if n == 0 {
