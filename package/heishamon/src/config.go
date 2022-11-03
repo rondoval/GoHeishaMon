@@ -94,7 +94,7 @@ func (c *configStruct) readConfig(configPath string) {
 	c.topicsFile = path.Join(configPath, "topics.yaml")
 	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
 	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
-	c.serialTimeout = 2 * time.Second
+	c.serialTimeout = 1 * time.Second
 
 	log.Println("Config file loaded")
 }
