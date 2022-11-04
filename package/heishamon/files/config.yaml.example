@@ -3,7 +3,7 @@ serialPort: "/dev/ttyUSB0"
 queryInterval: 10
 listenOnly: false
 optionalPCB: false
-optionalQueryInterval: 15
+optionalQueryInterval: 5
 optionalSaveInterval: 60
 mqttServer: "127.0.0.1"
 mqttPort: "1883"

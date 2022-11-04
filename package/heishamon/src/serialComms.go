@@ -48,13 +48,13 @@ func sendCommand(command []byte) {
 
 func readToBuffer() {
 	data := make([]byte, DATA_BUFFER)
-	_, err := serialPort.Read(data)
+	n, err := serialPort.Read(data)
 	if err != io.EOF {
 		log.Print(err)
 		time.Sleep(5 * time.Second)
 		exec.Command("reboot").Run()
 	}
-	buffer.Write(data)
+	buffer.Write(data[:n])
 }
 
 func readSerial(logHexDump bool) []byte {
