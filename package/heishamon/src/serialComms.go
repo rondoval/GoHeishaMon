@@ -81,11 +81,11 @@ func readSerial(logHexDump bool) []byte {
 	if buffer.Len() > 1 { // can check length
 		data := buffer.Bytes()
 		lenFromHeader := data[1] + 3
-		if config.LogDebug {
-			log.Printf("Date len in header: %d", lenFromHeader)
-		}
 
 		if buffer.Len() >= int(lenFromHeader) { // have entire packet
+			if config.LogDebug {
+				log.Printf("Date len in header: %d", lenFromHeader)
+			}
 			totalreads++
 
 			if isValidReceiveChecksum(data[:lenFromHeader]) {
