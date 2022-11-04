@@ -49,7 +49,7 @@ func sendCommand(command []byte) {
 func readToBuffer() {
 	data := make([]byte, DATA_BUFFER)
 	n, err := serialPort.Read(data)
-	if err != io.EOF {
+	if err != nil && err != io.EOF {
 		log.Print(err)
 		time.Sleep(5 * time.Second)
 		exec.Command("reboot").Run()
