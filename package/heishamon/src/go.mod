@@ -9,8 +9,8 @@ require (
 )
 
 require (
-	github.com/chmorgan/go-serial2 v0.0.0-20190806182038-472d60f85d9b
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/rondoval/go-serial2 v0.0.0-20221104082451-78fdd488995b
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
