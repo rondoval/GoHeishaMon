@@ -88,6 +88,13 @@ func main() {
 			}
 
 		case value := <-commandsChannel:
+			switch len(value) {
+			case setCmdLen:
+				queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
+
+			case len(optionalPCBQuery):
+				optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
+			}
 			sendCommand(value)
 
 		case <-optionQueryTicker.C:
