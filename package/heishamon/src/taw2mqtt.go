@@ -74,17 +74,11 @@ func main() {
 
 		select {
 		case <-optionPCBSaveTicker.C:
-			if config.LogDebug {
-				log.Println("PCB save")
-			}
 			if config.OptionalPCB {
 				saveOptionalPCB()
 			}
 
 		case value := <-commandsChannel:
-			if config.LogDebug {
-				log.Println("Sending command")
-			}
 			switch len(value) {
 			case setCmdLen:
 				queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
@@ -95,9 +89,6 @@ func main() {
 			sendCommand(value)
 
 		case <-optionQueryTicker.C:
-			if config.LogDebug {
-				log.Println("Sending optional")
-			}
 			if config.OptionalPCB == true && config.ListenOnly == false {
 				commandsChannel <- optionalPCBQuery
 			}
@@ -106,9 +97,6 @@ func main() {
 			commandsChannel <- panasonicQuery
 
 		default:
-			if config.LogDebug {
-				log.Println("Reading data")
-			}
 			data := readSerial(config.LogHexDump)
 			if len(data) == OPTIONAL_MSG_LENGTH {
 				decodeHeatpumpData(optionalPCBTopics, data, mclient)

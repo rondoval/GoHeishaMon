@@ -59,9 +59,6 @@ func readToBuffer() {
 
 func readSerial(logHexDump bool) []byte {
 	readToBuffer()
-	if config.LogDebug {
-		log.Printf("In buffer: %d bytes", buffer.Len())
-	}
 	if buffer.Len() < OPTIONAL_MSG_LENGTH {
 		// not enough data to have a full message
 		return nil
