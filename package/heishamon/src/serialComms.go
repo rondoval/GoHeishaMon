@@ -59,6 +59,9 @@ func readToBuffer() {
 
 func readSerial(logHexDump bool) []byte {
 	readToBuffer()
+	if config.LogDebug {
+		log.Printf("In buffer: %d bytes", buffer.Len())
+	}
 	if buffer.Len() < OPTIONAL_MSG_LENGTH {
 		// not enough data to have a full message
 		return nil
@@ -69,6 +72,9 @@ func readSerial(logHexDump bool) []byte {
 	// looking for header
 	hdr := bytes.IndexByte(buffer.Bytes(), 0x71)
 	if hdr < 0 {
+		if config.LogDebug {
+			log.Println("Header not found")
+		}
 		return nil
 	} else if hdr > 0 {
 		log.Print("Throwing away some data")
@@ -78,6 +84,9 @@ func readSerial(logHexDump bool) []byte {
 	if buffer.Len() > 1 { // can check length
 		data := buffer.Bytes()
 		lenFromHeader := data[1] + 3
+		if config.LogDebug {
+			log.Printf("Date len in header: %d", lenFromHeader)
+		}
 
 		if buffer.Len() >= int(lenFromHeader) { // have entire packet
 			totalreads++

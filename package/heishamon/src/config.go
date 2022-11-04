@@ -30,6 +30,7 @@ type configStruct struct {
 
 	LogMqtt    bool `yaml:"logmqtt"`
 	LogHexDump bool `yaml:"loghex"`
+	LogDebug   bool `yaml:"logdebug"`
 
 	mqttWillTopic string
 	mqttLogTopic  string
