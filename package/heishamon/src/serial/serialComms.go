@@ -153,7 +153,7 @@ func (s *SerialComms) Read(logHexDump bool) []byte {
 				log.Println("Invalid checksum on receive!")
 			}
 		} else {
-			//TODO			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), len-s.buffer.Len())
+			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), len-s.buffer.Len())
 		}
 	}
 	return nil

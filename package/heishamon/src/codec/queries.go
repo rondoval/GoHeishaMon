@@ -19,7 +19,7 @@ var commandChannel chan []byte
 
 func GetChannel() chan []byte {
 	if commandChannel == nil {
-		commandChannel = make(chan []byte, 100)
+		commandChannel = make(chan []byte, 20)
 	}
 	return commandChannel
 }
