@@ -29,8 +29,6 @@ func main() {
 	commandChannel := codec.GetChannel()
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
 	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
-	logger.LogDebug("Got %d entries", len(commandTopics.GetAll()))
-	logger.LogDebug("Got %d entries", len(optionalPCBTopics.GetAll()))
 
 	if config.OptionalPCB {
 		codec.LoadOptionalPCB(config.optionalPCBFile)
@@ -81,13 +79,13 @@ func main() {
 			}
 
 		case value := <-commandChannel:
-			switch len(value) {
-			case codec.PANASONIC_QUERY_SIZE:
-				queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
+			// switch len(value) {
+			// case codec.PANASONIC_QUERY_SIZE:
+			// 	queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
 
-			case codec.OPTIONAL_QUERY_SIZE:
-				optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
-			}
+			// case codec.OPTIONAL_QUERY_SIZE:
+			// 	optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
+			// }
 			serialPort.SendCommand(value)
 
 		case <-optionQueryTicker.C:
@@ -101,13 +99,16 @@ func main() {
 		default:
 			data := serialPort.Read(config.LogHexDump)
 			if len(data) == serial.OPTIONAL_MSG_LENGTH {
-				if value := codec.DecodeHeatpumpData(optionalPCBTopics, data); value != nil {
-					mclient.PublishValue(value)
+				values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
+				for _, v := range values {
+					mclient.PublishValue(v)
+
 				}
 				codec.Acknowledge(data)
 			} else if len(data) == serial.DATA_MSG_LENGTH {
-				if value := codec.DecodeHeatpumpData(commandTopics, data); value != nil {
-					mclient.PublishValue(value)
+				values := codec.DecodeHeatpumpData(commandTopics, data)
+				for _, v := range values {
+					mclient.PublishValue(v)
 				}
 			} else if data != nil {
 				logger.LogDebug("Unkown message length: %d", len(data))

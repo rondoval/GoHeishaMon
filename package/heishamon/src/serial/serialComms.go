@@ -89,7 +89,8 @@ func (s *SerialComms) findHeaderStart() bool {
 		return false
 	} else if hdr > 0 {
 		log.Printf("Throwing away %d bytes of data", hdr)
-		logger.LogHex(s.buffer.Next(hdr))
+		waste := s.buffer.Next(hdr)
+		logger.LogHex(waste)
 	}
 	return true
 }
@@ -116,7 +117,7 @@ func (s *SerialComms) checkHeader() (len int, ok bool) {
 	// opt header: 71 11 01 50; 20 bytes
 	// header:     71 c8 01 10; 203 bytes
 	data := s.buffer.Bytes()
-	len = int(data[1] + 3)
+	len = int(data[1]) + 3
 	ok = false
 	if data[0] == 0x71 && data[2] == 0x1 && (data[3] == 0x50 || data[3] == 0x10) {
 		ok = true
@@ -151,6 +152,8 @@ func (s *SerialComms) Read(logHexDump bool) []byte {
 				s.buffer.ReadByte()
 				log.Println("Invalid checksum on receive!")
 			}
+		} else {
+			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), len-s.buffer.Len())
 		}
 	}
 	return nil

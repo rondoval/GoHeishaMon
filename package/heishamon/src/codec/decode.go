@@ -191,8 +191,9 @@ func convertIntToEnum(value int, topic topics.TopicEntry) string {
 	return fmt.Sprintf("%d", value)
 }
 
-func DecodeHeatpumpData(topics *topics.TopicData, data []byte) *topics.TopicEntry {
-	for _, v := range topics.GetAll() {
+func DecodeHeatpumpData(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
+	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
+	for _, v := range allTopics.GetAll() {
 		var topicValue string
 
 		if v.DecodeFunction != "" {
@@ -206,9 +207,9 @@ func DecodeHeatpumpData(topics *topics.TopicData, data []byte) *topics.TopicEntr
 
 			if v.CurrentValue != topicValue {
 				v.CurrentValue = topicValue
-				return v
+				changed = append(changed, v)
 			}
 		}
 	}
-	return nil
+	return changed
 }
