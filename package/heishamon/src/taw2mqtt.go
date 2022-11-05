@@ -72,6 +72,23 @@ func main() {
 			log.Print("Command queue length: ", queueLen)
 		}
 
+		data := serialPort.Read(config.LogHexDump)
+		if len(data) == serial.OPTIONAL_MSG_LENGTH {
+			values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
+			for _, v := range values {
+				mclient.PublishValue(v)
+
+			}
+			codec.Acknowledge(data)
+		} else if len(data) == serial.DATA_MSG_LENGTH {
+			values := codec.DecodeHeatpumpData(commandTopics, data)
+			for _, v := range values {
+				mclient.PublishValue(v)
+			}
+		} else if data != nil {
+			logger.LogDebug("Unkown message length: %d", len(data))
+		}
+
 		select {
 		case <-optionPCBSaveTicker.C:
 			if config.OptionalPCB {
@@ -97,22 +114,7 @@ func main() {
 			codec.SendPanasonicQuery()
 
 		default:
-			data := serialPort.Read(config.LogHexDump)
-			if len(data) == serial.OPTIONAL_MSG_LENGTH {
-				values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
-				for _, v := range values {
-					mclient.PublishValue(v)
-
-				}
-				codec.Acknowledge(data)
-			} else if len(data) == serial.DATA_MSG_LENGTH {
-				values := codec.DecodeHeatpumpData(commandTopics, data)
-				for _, v := range values {
-					mclient.PublishValue(v)
-				}
-			} else if data != nil {
-				logger.LogDebug("Unkown message length: %d", len(data))
-			}
+			// nothing
 		}
 	}
 }
