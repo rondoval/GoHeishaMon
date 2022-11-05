@@ -50,7 +50,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 		log.Fatal(err)
 	}
 
-	err = yaml.Unmarshal(data, t.allTopics)
+	err = yaml.Unmarshal(data, &t.allTopics)
 	if err != nil {
 		log.Fatal(err)
 	}
