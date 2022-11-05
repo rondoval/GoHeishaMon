@@ -1,4 +1,4 @@
-package main
+package codec
 
 import (
 	"encoding/binary"
@@ -6,7 +6,7 @@ import (
 	"log"
 	"math"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/rondoval/GoHeishaMon/topics"
 )
 
 var decodeToInt = map[string]func(byte) int{
@@ -180,34 +180,35 @@ func getWord(data []byte, index int) string {
 	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
 }
 
-func convertIntToEnum(value int, topic topicEntry) string {
-	numItems := len(topic.Values)
+func convertIntToEnum(value int, topic topics.TopicEntry) string {
+	numItems := len(topic.Values())
 	if numItems > 0 {
 		if value >= 0 && value < numItems {
-			return topic.Values[value]
+			return topic.Values()[value]
 		}
-		log.Printf("Value out of range %s: %d", topic.SensorName, value)
+		log.Printf("Value out of range %s: %d", topic.SensorName(), value)
 	}
 	return fmt.Sprintf("%d", value)
 }
 
-func decodeHeatpumpData(topics topicData, data []byte, mclient mqtt.Client) {
-	for _, v := range topics.getAll() {
+func DecodeHeatpumpData(topics *topics.TopicData, data []byte) *topics.TopicEntry {
+	for _, v := range topics.GetAll() {
 		var topicValue string
 
-		if v.DecodeFunction != "" {
-			if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
-				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), *v)
-			} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
-				topicValue = arrayOperator(data, v.DecodeOffset)
+		if v.DecodeFunction() != "" {
+			if byteOperator, ok := decodeToInt[v.DecodeFunction()]; ok {
+				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset()]), *v)
+			} else if arrayOperator, ok := decodeToString[v.DecodeFunction()]; ok {
+				topicValue = arrayOperator(data, v.DecodeOffset())
 			} else {
-				log.Print("Unknown codec function: ", v.DecodeFunction)
+				log.Print("Unknown codec function: ", v.DecodeFunction())
 			}
 
-			if v.currentValue != topicValue {
-				v.currentValue = topicValue
-				mqttPublish(mclient, config.getStatusTopic(v.SensorName, topics.kind), topicValue, 0)
+			if v.CurrentValue != topicValue {
+				v.CurrentValue = topicValue
+				return v
 			}
 		}
 	}
+	return nil
 }

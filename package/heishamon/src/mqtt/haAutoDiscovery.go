@@ -1,4 +1,4 @@
-package main
+package mqtt
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/rondoval/GoHeishaMon/topics"
 )
 
 type mqttDevice struct {
@@ -69,22 +69,22 @@ func getDeviceClass(unit string) string {
 	return ""
 }
 
-func (s *mqttCommon) encodeCommon(info topicEntry, kind DeviceType, config configStruct) {
-	s.Name = strings.ReplaceAll(info.SensorName, "_", " ")
-	s.StateTopic = config.getStatusTopic(info.SensorName, kind)
-	s.AvailabilityTopic = config.mqttWillTopic
+func (s *mqttCommon) encodeCommon(info *topics.TopicEntry, statusTopic, willTopic, deviceName string) {
+	s.Name = strings.ReplaceAll(info.SensorName(), "_", " ")
+	s.StateTopic = statusTopic
+	s.AvailabilityTopic = willTopic
 
-	s.sensorName = info.SensorName
-	s.deviceID = strings.ReplaceAll(config.getDeviceName(kind), " ", "_")
+	s.sensorName = info.SensorName()
+	s.deviceID = strings.ReplaceAll(deviceName, " ", "_")
 
-	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + config.getDeviceName(kind), s.deviceID}
-	s.UniqueID = s.deviceID + "_" + info.SensorName
-	s.EntityCategory = info.Category
+	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + deviceName, s.deviceID}
+	s.UniqueID = s.deviceID + "_" + info.SensorName()
+	s.EntityCategory = info.Category()
 }
 
-func (s *mqttCommon) encodeSensor(info topicEntry) {
-	s.UnitOfMeasurement = info.DisplayUnit
-	s.DeviceClass = getDeviceClass(info.DisplayUnit)
+func (s *mqttCommon) encodeSensor(info *topics.TopicEntry) {
+	s.UnitOfMeasurement = info.DisplayUnit()
+	s.DeviceClass = getDeviceClass(info.DisplayUnit())
 
 	switch s.UnitOfMeasurement {
 	case "h", "Counter":
@@ -98,39 +98,39 @@ func (s *mqttCommon) encodeSensor(info topicEntry) {
 	s.entityType = "sensor"
 }
 
-func (s *mqttCommon) encodeBinarySensor(info topicEntry) {
-	s.PayloadOff = info.Values[0]
-	s.PayloadOn = info.Values[1]
+func (s *mqttCommon) encodeBinarySensor(info *topics.TopicEntry) {
+	s.PayloadOff = info.Values()[0]
+	s.PayloadOn = info.Values()[1]
 
 	s.entityType = "binary_sensor"
 }
 
-func (b *mqttCommon) encodeSwitch(info topicEntry) {
+func (b *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
 	b.CommandTopic = b.StateTopic + "/set"
-	b.PayloadOn = info.Values[1]
-	b.PayloadOff = info.Values[0]
+	b.PayloadOn = info.Values()[1]
+	b.PayloadOff = info.Values()[0]
 
 	b.entityType = "switch"
 }
 
-func (b *mqttCommon) encodeSelect(info topicEntry) {
+func (b *mqttCommon) encodeSelect(info *topics.TopicEntry) {
 	b.CommandTopic = b.StateTopic + "/set"
-	b.Options = info.Values
+	b.Options = info.Values()
 
 	b.entityType = "select"
 }
 
-func (s *mqttCommon) encodeNumber(info topicEntry) {
-	s.DeviceClass = getDeviceClass(info.DisplayUnit)
+func (s *mqttCommon) encodeNumber(info *topics.TopicEntry) {
+	s.DeviceClass = getDeviceClass(info.DisplayUnit())
 	// device classess for MQTT Number are somewhat limited currently
 	if s.DeviceClass != "temperature" {
 		s.DeviceClass = ""
 	}
 	s.CommandTopic = s.StateTopic + "/set"
-	s.UnitOfMeasurement = info.DisplayUnit
-	s.Min = info.Min
-	s.Max = info.Max
-	s.Step = info.Step
+	s.UnitOfMeasurement = info.DisplayUnit()
+	s.Min = info.Min()
+	s.Max = info.Max()
+	s.Step = info.Step()
 	s.Mode = "box"
 
 	s.entityType = "number"
@@ -143,33 +143,33 @@ func (s *mqttCommon) marshal() (topic string, data []byte, err error) {
 	return topic, data, err
 }
 
-func publishDiscoveryTopics(mclient mqtt.Client, allTopics topicData, config configStruct) {
+func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 	log.Print("Publishing Home Assistant discovery topics...")
-	for _, value := range allTopics.getAll() {
+	for _, value := range allTopics.GetAll() {
 		var topic string
 		var data []byte
 		var err error
 
 		var mqttAdvert mqttCommon
-		mqttAdvert.encodeCommon(*value, allTopics.kind, config)
+		mqttAdvert.encodeCommon(value, m.StatusTopic(value.SensorName(), value.Kind()), m.willTopic, allTopics.DeviceName())
 
-		if value.EncodeFunction != "" {
+		if value.EncodeFunction() != "" {
 			// Read-Write value
-			if len(value.Values) == 0 {
-				mqttAdvert.encodeNumber(*value)
-			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				mqttAdvert.encodeSelect(*value)
-			} else if len(value.Values) == 2 {
-				mqttAdvert.encodeSwitch(*value)
+			if len(value.Values()) == 0 {
+				mqttAdvert.encodeNumber(value)
+			} else if len(value.Values()) > 2 || !(value.Values()[0] == "Off" || value.Values()[0] == "Disabled" || value.Values()[0] == "Inactive") {
+				mqttAdvert.encodeSelect(value)
+			} else if len(value.Values()) == 2 {
+				mqttAdvert.encodeSwitch(value)
 			} else {
-				log.Println("Warning: Don't know how to encode " + value.SensorName)
+				log.Println("Warning: Don't know how to encode " + value.SensorName())
 			}
 		} else {
 			// Read only value
-			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
-				mqttAdvert.encodeBinarySensor(*value)
+			if len(value.Values()) == 2 && (value.Values()[0] == "Off" || value.Values()[0] == "Disabled" || value.Values()[0] == "Inactive") {
+				mqttAdvert.encodeBinarySensor(value)
 			} else {
-				mqttAdvert.encodeSensor(*value)
+				mqttAdvert.encodeSensor(value)
 			}
 		}
 
@@ -179,7 +179,7 @@ func publishDiscoveryTopics(mclient mqtt.Client, allTopics topicData, config con
 			continue
 		}
 
-		mqttPublish(mclient, topic, data, 0)
+		m.Publish(topic, data, 0)
 	}
 	log.Println("Publishing Home Assistant discovery topics done.")
 }

@@ -1,4 +1,4 @@
-package main
+package codec
 
 import (
 	"math"

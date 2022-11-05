@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"time"
 
+	"github.com/rondoval/GoHeishaMon/topics"
 	"gopkg.in/yaml.v2"
 )
 
@@ -21,7 +21,7 @@ type configStruct struct {
 	OptionalSaveInterval  int    `yaml:"optionalSaveInterval"`  // Optional PCB data save interval (min)
 
 	MqttServer     string `yaml:"mqttServer"`
-	MqttPort       string `yaml:"mqttPort"`
+	MqttPort       int    `yaml:"mqttPort"`
 	MqttLogin      string `yaml:"mqttLogin"`
 	MqttPass       string `yaml:"mqttPass"`
 	MqttKeepalive  int    `yaml:"mqttKeepalive"`
@@ -32,43 +32,23 @@ type configStruct struct {
 	LogHexDump bool `yaml:"loghex"`
 	LogDebug   bool `yaml:"logdebug"`
 
-	mqttWillTopic string
-	mqttLogTopic  string
-
 	topicsFile            string
 	topicsOptionalPCBFile string
 	optionalPCBFile       string
 	serialTimeout         time.Duration
 }
 
-const (
-	Main = iota
-	Optional
-)
 const main_topic = "main"
 const optional_topic = "optional"
 
-type DeviceType int
-
-func (c configStruct) getDeviceName(kind DeviceType) string {
+func (c configStruct) getDeviceName(kind topics.DeviceType) string {
 	switch kind {
-	case Main:
+	case topics.Main:
 		return c.DeviceName
-	case Optional:
+	case topics.Optional:
 		return c.DeviceName + " Optional PCB"
 	default:
 		return c.DeviceName
-	}
-}
-
-func (c configStruct) getStatusTopic(name string, kind DeviceType) string {
-	switch kind {
-	case Main:
-		return fmt.Sprintf("%s/%s/%s", c.MqttTopicBase, main_topic, name)
-	case Optional:
-		return fmt.Sprintf("%s/%s/%s", c.MqttTopicBase, optional_topic, name)
-	default:
-		return c.MqttTopicBase
 	}
 }
 
@@ -90,8 +70,6 @@ func (c *configStruct) readConfig(configPath string) {
 		log.Fatal(err)
 	}
 
-	c.mqttWillTopic = c.MqttTopicBase + "/LWT"
-	c.mqttLogTopic = c.MqttTopicBase + "/log"
 	c.topicsFile = path.Join(configPath, "topics.yaml")
 	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
 	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")

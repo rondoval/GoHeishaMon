@@ -2,57 +2,57 @@ package main
 
 import (
 	"flag"
-	"io"
-	"io/ioutil"
 	"log"
 	"time"
 
-	"github.com/tarm/serial"
+	"github.com/rondoval/GoHeishaMon/codec"
+	"github.com/rondoval/GoHeishaMon/logger"
+	"github.com/rondoval/GoHeishaMon/mqtt"
+	"github.com/rondoval/GoHeishaMon/serial"
+	"github.com/rondoval/GoHeishaMon/topics"
 )
-
-var panasonicQuery []byte = []byte{0x71, 0x6c, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-var optionalPCBQuery []byte = []byte{0xF1, 0x11, 0x01, 0x50, 0x00, 0x00, 0x40, 0xFF, 0xFF, 0xE5, 0xFF, 0xFF, 0x00, 0xFF, 0xEB, 0xFF, 0xFF, 0x00, 0x00}
-
-var config configStruct
-var commandTopics topicData
-var optionalPCBTopics topicData
-
-var serialPort io.ReadWriteCloser
-var commandsChannel chan []byte
 
 func main() {
 	var configPath = flag.String("path", "/etc/heishamon", "Path to Heishamon configuration files")
 	flag.Parse()
 
-	redirectLogSyslog()
-	log.SetFlags(log.Lshortfile)
+	logger.Configure()
 	log.Println("GoHeishaMon loading...")
+
+	var config configStruct
 	config.readConfig(*configPath)
+	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
-	serialConfig := &serial.Config{Name: config.SerialPort, Baud: 9600, Parity: serial.ParityEven, StopBits: serial.Stop1, ReadTimeout: config.serialTimeout}
-	var err error
-	serialPort, err = serial.OpenPort(serialConfig)
-	if err != nil {
-		// no point in continuing, no config
-		log.Fatal(err)
-	}
-	log.Print("Serial port open")
+	var serialPort serial.SerialComms
+	serialPort.Open(config.SerialPort, config.serialTimeout)
 	defer serialPort.Close()
-
-	commandsChannel = make(chan []byte, 100)
-	commandTopics.loadTopics(config.topicsFile, Main)
-	optionalPCBTopics.loadTopics(config.topicsOptionalPCBFile, Optional)
+	commandChannel := codec.GetChannel()
+	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
+	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
 
 	if config.OptionalPCB {
-		loadOptionalPCB()
+		codec.LoadOptionalPCB(config.optionalPCBFile)
 	}
 
-	mclient := makeMQTTConn()
-	redirectLogMQTT(mclient)
+	mclient := mqtt.MakeMQTTConn(mqtt.Options{
+		Server:         config.MqttServer,
+		Port:           config.MqttPort,
+		Username:       config.MqttLogin,
+		Password:       config.MqttPass,
+		BaseTopic:      config.MqttTopicBase,
+		KeepAlive:      time.Second * time.Duration(config.MqttKeepalive),
+		ListenOnly:     config.ListenOnly,
+		OptionalPCB:    config.OptionalPCB,
+		CommandTopics:  commandTopics,
+		OptionalTopics: optionalPCBTopics,
+	})
+	if config.LogMqtt {
+		logger.RedirectLogMQTT(&mclient)
+	}
 	if config.HAAutoDiscover == true {
-		publishDiscoveryTopics(mclient, commandTopics, config)
+		mclient.PublishDiscoveryTopics(commandTopics)
 		if config.OptionalPCB == true {
-			publishDiscoveryTopics(mclient, optionalPCBTopics, config)
+			mclient.PublishDiscoveryTopics(optionalPCBTopics)
 		}
 	}
 
@@ -61,13 +61,13 @@ func main() {
 	optionQueryTicker := time.NewTicker(time.Second * time.Duration(config.OptionalQueryInterval))
 
 	log.Print("Entering main loop")
-	if config.OptionalPCB == true {
-		sendCommand(optionalPCBQuery)
+	if config.OptionalPCB == true && config.ListenOnly == false {
+		codec.SendOptionalPCBQuery()
 	}
-	sendCommand(panasonicQuery)
+	codec.SendPanasonicQuery()
 
 	for {
-		var queueLen = len(commandsChannel)
+		var queueLen = len(commandChannel)
 		if queueLen > 10 {
 			log.Print("Command queue length: ", queueLen)
 		}
@@ -75,58 +75,41 @@ func main() {
 		select {
 		case <-optionPCBSaveTicker.C:
 			if config.OptionalPCB {
-				saveOptionalPCB()
+				codec.SaveOptionalPCB(config.optionalPCBFile)
 			}
 
-		case value := <-commandsChannel:
+		case value := <-commandChannel:
 			switch len(value) {
-			case setCmdLen:
+			case codec.PANASONIC_QUERY_SIZE:
 				queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
 
-			case len(optionalPCBQuery):
+			case codec.OPTIONAL_QUERY_SIZE:
 				optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
 			}
-			sendCommand(value)
+			serialPort.SendCommand(value)
 
 		case <-optionQueryTicker.C:
 			if config.OptionalPCB == true && config.ListenOnly == false {
-				commandsChannel <- optionalPCBQuery
+				codec.SendOptionalPCBQuery()
 			}
 
 		case <-queryTicker.C:
-			commandsChannel <- panasonicQuery
+			codec.SendPanasonicQuery()
 
 		default:
-			data := readSerial(config.LogHexDump)
-			if len(data) == OPTIONAL_MSG_LENGTH {
-				decodeHeatpumpData(optionalPCBTopics, data, mclient)
-				//response to heatpump should contain the data from heatpump on byte 4 and 5
-				optionalPCBQuery[4] = data[4]
-				optionalPCBQuery[5] = data[5]
-			} else if len(data) == COMMAND_MSG_LENGTH {
-				decodeHeatpumpData(commandTopics, data, mclient)
+			data := serialPort.Read(config.LogHexDump)
+			if len(data) == serial.OPTIONAL_MSG_LENGTH {
+				if value := codec.DecodeHeatpumpData(optionalPCBTopics, data); value != nil {
+					mclient.PublishValue(value)
+				}
+				codec.Acknowledge(data)
+			} else if len(data) == serial.DATA_MSG_LENGTH {
+				if value := codec.DecodeHeatpumpData(commandTopics, data); value != nil {
+					mclient.PublishValue(value)
+				}
+			} else {
+				logger.LogDebug("Unkown message length: %d", len(data))
 			}
-
 		}
-	}
-}
-
-func saveOptionalPCB() {
-	err := ioutil.WriteFile(config.optionalPCBFile, optionalPCBQuery, 0644)
-	//TODO serialize to json instead, restore topics and []byte
-	if err != nil {
-		log.Print(err)
-	} else {
-		log.Print("Optional PCB data stored")
-	}
-}
-
-func loadOptionalPCB() {
-	data, err := ioutil.ReadFile(config.optionalPCBFile)
-	if err != nil {
-		log.Print(err)
-	} else {
-		optionalPCBQuery = data
-		log.Print("Optional PCB data loaded")
 	}
 }
