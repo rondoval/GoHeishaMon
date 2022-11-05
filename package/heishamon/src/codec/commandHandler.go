@@ -16,19 +16,27 @@ func OnAquareaCommand(mqttTopic, payload string, allTopics *topics.TopicData) *t
 	function := topicPieces[len(topicPieces)-2]
 	log.Printf("Command received - set %s on %s to %s\n", function, allTopics.Kind(), payload)
 
-	var command []byte
 	switch allTopics.Kind() {
 	case topics.Main:
-		command = make([]byte, PANASONIC_QUERY_SIZE)
+		command := make([]byte, PANASONIC_QUERY_SIZE)
 		copy(command, panasonicSetCommand[:])
+		if sensor, ok := updateCommandMessage(function, payload, allTopics, command); ok {
+			commandChannel <- command[:]
+			return sensor
+		}
+
 	case topics.Optional:
-		command = optionalPCBQuery[:] //this is not copied as we need all fields filled in
+		optionalPCBMutex.Lock()
+		defer optionalPCBMutex.Unlock()
+		//this is not copied as we need all fields filled in
+		if sensor, ok := updateCommandMessage(function, payload, allTopics, optionalPCBQuery[:]); ok {
+			command := make([]byte, len(optionalPCBQuery))
+			copy(command, optionalPCBQuery[:])
+			commandChannel <- command[:]
+			return sensor
+		}
 	}
 
-	if sensor, ok := updateCommandMessage(function, payload, allTopics, command); ok {
-		commandChannel <- command[:]
-		return sensor
-	}
 	return nil
 }
 
@@ -58,7 +66,7 @@ func updateCommandMessage(function, msg string, topics *topics.TopicData, comman
 
 	// Update topic data as well for quicker turnaround.
 	// Also needed for Optional PCB - the pump does not confirm messages.
-	sensor.CurrentValue = msg
+	sensor.UpdateValue(msg)
 
 	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
 		v, err := verboseToNumber(msg, sensor)

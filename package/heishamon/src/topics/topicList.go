@@ -3,6 +3,7 @@ package topics
 import (
 	"io/ioutil"
 	"log"
+	"sync"
 
 	"gopkg.in/yaml.v2"
 )
@@ -26,12 +27,29 @@ type TopicEntry struct {
 	Max            int      `yaml:"max"`
 	Step           int      `yaml:"step"`
 
-	CurrentValue string
-	kind         DeviceType
+	currentValue      string
+	currentValueMutex sync.Mutex
+	kind              DeviceType
 }
 
-func (t TopicEntry) Kind() DeviceType {
+func (t *TopicEntry) Kind() DeviceType {
 	return t.kind
+}
+
+func (t *TopicEntry) CurrentValue() string {
+	t.currentValueMutex.Lock()
+	defer t.currentValueMutex.Unlock()
+	return t.currentValue
+}
+
+func (t *TopicEntry) UpdateValue(newValue string) bool {
+	t.currentValueMutex.Lock()
+	defer t.currentValueMutex.Unlock()
+	if newValue != t.currentValue {
+		t.currentValue = newValue
+		return true
+	}
+	return false
 }
 
 type TopicData struct {

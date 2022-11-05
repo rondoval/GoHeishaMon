@@ -180,7 +180,7 @@ func getWord(data []byte, index int) string {
 	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
 }
 
-func convertIntToEnum(value int, topic topics.TopicEntry) string {
+func convertIntToEnum(value int, topic *topics.TopicEntry) string {
 	numItems := len(topic.Values)
 	if numItems > 0 {
 		if value >= 0 && value < numItems {
@@ -198,15 +198,14 @@ func DecodeHeatpumpData(allTopics *topics.TopicData, data []byte) []*topics.Topi
 
 		if v.DecodeFunction != "" {
 			if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
-				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), *v)
+				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), v)
 			} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
 				topicValue = arrayOperator(data, v.DecodeOffset)
 			} else {
 				log.Print("Unknown codec function: ", v.DecodeFunction)
 			}
 
-			if v.CurrentValue != topicValue {
-				v.CurrentValue = topicValue
+			if v.UpdateValue(topicValue) {
 				changed = append(changed, v)
 			}
 		}

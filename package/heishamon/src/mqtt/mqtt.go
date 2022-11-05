@@ -18,9 +18,11 @@ type MQTT struct {
 
 func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 	token := m.mclient.Publish(topic, qos, true, data)
-	if token.Wait() && token.Error() != nil {
-		log.Printf("Failed to publish, %v", token.Error())
-	}
+	go func() {
+		if token.Wait() && token.Error() != nil {
+			log.Printf("Failed to publish, %v", token.Error())
+		}
+	}()
 }
 
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
@@ -70,19 +72,33 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
 		if opt.ListenOnly == false {
-			mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
-				sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.CommandTopics)
-				if sensor != nil {
-					mqtt.PublishValue(sensor)
-				}
-			})
-			if opt.OptionalPCB == true {
-				mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
-					sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.OptionalTopics)
+			tokenMain := mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
+				go func() {
+					sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.CommandTopics)
 					if sensor != nil {
 						mqtt.PublishValue(sensor)
 					}
+				}()
+			})
+			go func() {
+				if tokenMain.Wait() && tokenMain.Error() != nil {
+					log.Printf("Failed to subscribe, %v", tokenMain.Error())
+				}
+			}()
+			if opt.OptionalPCB == true {
+				tokenOptional := mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
+					go func() {
+						sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.OptionalTopics)
+						if sensor != nil {
+							mqtt.PublishValue(sensor)
+						}
+					}()
 				})
+				go func() {
+					if tokenOptional.Wait() && tokenOptional.Error() != nil {
+						log.Printf("Failed to subscribe, %v", tokenOptional.Error())
+					}
+				}()
 			}
 		}
 		log.Print("MQTT connected")
