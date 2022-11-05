@@ -109,6 +109,7 @@ func main() {
 				optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
 			}
 			serialPort.SendCommand(value)
+			//TODO this should likely be sync'd with following read
 
 		case <-optionQueryTicker.C:
 			if config.OptionalPCB == true && config.ListenOnly == false {
