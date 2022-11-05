@@ -65,7 +65,7 @@ func main() {
 	// 	codec.SendOptionalPCBQuery()
 	// }
 	// codec.SendPanasonicQuery()
-	flag := true
+	flag := false
 	for {
 		var queueLen = len(commandChannel)
 		if queueLen > 10 {
