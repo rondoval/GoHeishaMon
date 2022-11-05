@@ -150,6 +150,8 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 		var data []byte
 		var err error
 
+		log.Printf("Topic %s", value.SensorName())
+
 		var mqttAdvert mqttCommon
 		mqttAdvert.encodeCommon(value, m.StatusTopic(value.SensorName(), value.Kind()), m.willTopic, allTopics.DeviceName())
 
