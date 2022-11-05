@@ -29,6 +29,8 @@ func main() {
 	commandChannel := codec.GetChannel()
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
 	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
+	logger.LogDebug("Got %d entries", len(commandTopics.GetAll()))
+	logger.LogDebug("Got %d entries", len(optionalPCBTopics.GetAll()))
 
 	if config.OptionalPCB {
 		codec.LoadOptionalPCB(config.optionalPCBFile)

@@ -63,7 +63,6 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetClientID("GoHeishaMon-pub")
 	pahoOpt.SetWill(mqtt.willTopic, "offline", 0, true)
 	pahoOpt.SetKeepAlive(opt.KeepAlive)
-	//opts.SetKeepAlive(time.Duration(config.MqttKeepalive) * time.Second)
 
 	pahoOpt.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
 	pahoOpt.SetAutoReconnect(true) // default, but I want it explicit
