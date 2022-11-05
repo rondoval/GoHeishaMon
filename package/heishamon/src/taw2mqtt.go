@@ -61,11 +61,11 @@ func main() {
 	optionQueryTicker := time.NewTicker(time.Second * time.Duration(config.OptionalQueryInterval))
 
 	log.Print("Entering main loop")
-	if config.OptionalPCB == true && config.ListenOnly == false {
-		codec.SendOptionalPCBQuery()
-	}
-	codec.SendPanasonicQuery()
-
+	// if config.OptionalPCB == true && config.ListenOnly == false {
+	// 	codec.SendOptionalPCBQuery()
+	// }
+	// codec.SendPanasonicQuery()
+	flag := true
 	for {
 		var queueLen = len(commandChannel)
 		if queueLen > 10 {
@@ -73,11 +73,13 @@ func main() {
 		}
 
 		data := serialPort.Read(config.LogHexDump)
+		if data != nil {
+			flag = false
+		}
 		if len(data) == serial.OPTIONAL_MSG_LENGTH {
 			values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
 			for _, v := range values {
 				mclient.PublishValue(v)
-
 			}
 			codec.Acknowledge(data)
 		} else if len(data) == serial.DATA_MSG_LENGTH {
@@ -88,33 +90,35 @@ func main() {
 		} else if data != nil {
 			logger.LogDebug("Unkown message length: %d", len(data))
 		}
+		if flag == false {
+			select {
+			case <-optionPCBSaveTicker.C:
+				if config.OptionalPCB {
+					codec.SaveOptionalPCB(config.optionalPCBFile)
+				}
 
-		select {
-		case <-optionPCBSaveTicker.C:
-			if config.OptionalPCB {
-				codec.SaveOptionalPCB(config.optionalPCBFile)
+			case value := <-commandChannel:
+				// switch len(value) {
+				// case codec.PANASONIC_QUERY_SIZE:
+				// 	queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
+
+				// case codec.OPTIONAL_QUERY_SIZE:
+				// 	optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
+				// }
+				serialPort.SendCommand(value)
+				flag = true
+
+			case <-optionQueryTicker.C:
+				if config.OptionalPCB == true && config.ListenOnly == false {
+					codec.SendOptionalPCBQuery()
+				}
+
+			case <-queryTicker.C:
+				codec.SendPanasonicQuery()
+
+			default:
+				// nothing
 			}
-
-		case value := <-commandChannel:
-			// switch len(value) {
-			// case codec.PANASONIC_QUERY_SIZE:
-			// 	queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
-
-			// case codec.OPTIONAL_QUERY_SIZE:
-			// 	optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
-			// }
-			serialPort.SendCommand(value)
-
-		case <-optionQueryTicker.C:
-			if config.OptionalPCB == true && config.ListenOnly == false {
-				codec.SendOptionalPCBQuery()
-			}
-
-		case <-queryTicker.C:
-			codec.SendPanasonicQuery()
-
-		default:
-			// nothing
 		}
 	}
 }
