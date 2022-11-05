@@ -73,12 +73,16 @@ func MakeMQTTConn(opt Options) MQTT {
 		if opt.ListenOnly == false {
 			mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
 				sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.CommandTopics)
-				mqtt.PublishValue(sensor)
+				if sensor != nil {
+					mqtt.PublishValue(sensor)
+				}
 			})
 			if opt.OptionalPCB == true {
 				mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
 					sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.OptionalTopics)
-					mqtt.PublishValue(sensor)
+					if sensor != nil {
+						mqtt.PublishValue(sensor)
+					}
 				})
 			}
 		}
