@@ -64,7 +64,7 @@ func (s *SerialComms) SendCommand(command []byte) {
 	if err != nil {
 		log.Print(err)
 	}
-	logger.LogHex(command)
+	logger.LogHex("Send", command)
 }
 
 func (s *SerialComms) readToBuffer() {
@@ -90,7 +90,7 @@ func (s *SerialComms) findHeaderStart() bool {
 	} else if hdr > 0 {
 		log.Printf("Throwing away %d bytes of data", hdr)
 		waste := s.buffer.Next(hdr)
-		logger.LogHex(waste)
+		logger.LogHex("Waste", waste)
 	}
 	return true
 }
@@ -103,7 +103,7 @@ func (s *SerialComms) dispatchDatagram(len int) []byte {
 	}
 
 	packet := s.buffer.Next(len)
-	logger.LogHex(packet)
+	logger.LogHex("Received", packet)
 	if len == DATA_MSG_LENGTH || len == OPTIONAL_MSG_LENGTH {
 		logger.LogDebug("Received %d bytes of data with correct header and checksum", len)
 		return packet

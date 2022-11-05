@@ -31,9 +31,9 @@ func SetLevel(loghex, logdebug bool) {
 	logger.logHex = loghex
 }
 
-func LogHex(command []byte) {
+func LogHex(comment string, command []byte) {
 	if logger.logHex {
-		log.Printf("%X\n", command)
+		log.Printf("%s: %X\n", comment, command)
 	}
 }
 
