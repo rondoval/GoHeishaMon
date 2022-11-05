@@ -37,7 +37,7 @@ func verboseToNumber(value string, sensor *topics.TopicEntry) (int, error) {
 		return int(number), nil
 	}
 
-	for valueKey, valueName := range sensor.Values() {
+	for valueKey, valueName := range sensor.Values {
 		if value == valueName {
 			return valueKey, nil
 		}
@@ -51,7 +51,7 @@ func updateCommandMessage(function, msg string, topics *topics.TopicData, comman
 		log.Println("Unknown topic: " + function)
 		return
 	}
-	if sensor.EncodeFunction() == "" {
+	if sensor.EncodeFunction == "" {
 		log.Println("No encode function specified: " + function)
 		return
 	}
@@ -60,28 +60,28 @@ func updateCommandMessage(function, msg string, topics *topics.TopicData, comman
 	// Also needed for Optional PCB - the pump does not confirm messages.
 	sensor.CurrentValue = msg
 
-	if handler, ok := encodeInt[sensor.EncodeFunction()]; ok {
+	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
 		v, err := verboseToNumber(msg, sensor)
 		if err != nil {
 			log.Println(err)
 			return sensor, false
 		}
-		data := handler(v, command[sensor.DecodeOffset()])
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset(), data)
-		command[sensor.DecodeOffset()] = data
+		data := handler(v, command[sensor.DecodeOffset])
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
 		return sensor, true
-	} else if handler, ok := encodeFloat[sensor.EncodeFunction()]; ok {
+	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
 		v, err := strconv.ParseFloat(msg, 64)
 		if err != nil {
 			log.Println(err)
 			return sensor, false
 		}
 		data := handler(v)
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset(), data)
-		command[sensor.DecodeOffset()] = data
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
 		return sensor, true
 	} else {
-		log.Println("No encoder implemented for " + sensor.EncodeFunction())
+		log.Println("No encoder implemented for " + sensor.EncodeFunction)
 		return sensor, false
 	}
 }

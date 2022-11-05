@@ -70,21 +70,21 @@ func getDeviceClass(unit string) string {
 }
 
 func (s *mqttCommon) encodeCommon(info *topics.TopicEntry, statusTopic, willTopic, deviceName string) {
-	s.Name = strings.ReplaceAll(info.SensorName(), "_", " ")
+	s.Name = strings.ReplaceAll(info.SensorName, "_", " ")
 	s.StateTopic = statusTopic
 	s.AvailabilityTopic = willTopic
 
-	s.sensorName = info.SensorName()
+	s.sensorName = info.SensorName
 	s.deviceID = strings.ReplaceAll(deviceName, " ", "_")
 
 	s.Device = mqttDevice{"Panasonic", "Aquarea", "Aquarea " + deviceName, s.deviceID}
-	s.UniqueID = s.deviceID + "_" + info.SensorName()
-	s.EntityCategory = info.Category()
+	s.UniqueID = s.deviceID + "_" + info.SensorName
+	s.EntityCategory = info.Category
 }
 
 func (s *mqttCommon) encodeSensor(info *topics.TopicEntry) {
-	s.UnitOfMeasurement = info.DisplayUnit()
-	s.DeviceClass = getDeviceClass(info.DisplayUnit())
+	s.UnitOfMeasurement = info.DisplayUnit
+	s.DeviceClass = getDeviceClass(info.DisplayUnit)
 
 	switch s.UnitOfMeasurement {
 	case "h", "Counter":
@@ -99,38 +99,38 @@ func (s *mqttCommon) encodeSensor(info *topics.TopicEntry) {
 }
 
 func (s *mqttCommon) encodeBinarySensor(info *topics.TopicEntry) {
-	s.PayloadOff = info.Values()[0]
-	s.PayloadOn = info.Values()[1]
+	s.PayloadOff = info.Values[0]
+	s.PayloadOn = info.Values[1]
 
 	s.entityType = "binary_sensor"
 }
 
 func (b *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
 	b.CommandTopic = b.StateTopic + "/set"
-	b.PayloadOn = info.Values()[1]
-	b.PayloadOff = info.Values()[0]
+	b.PayloadOn = info.Values[1]
+	b.PayloadOff = info.Values[0]
 
 	b.entityType = "switch"
 }
 
 func (b *mqttCommon) encodeSelect(info *topics.TopicEntry) {
 	b.CommandTopic = b.StateTopic + "/set"
-	b.Options = info.Values()
+	b.Options = info.Values
 
 	b.entityType = "select"
 }
 
 func (s *mqttCommon) encodeNumber(info *topics.TopicEntry) {
-	s.DeviceClass = getDeviceClass(info.DisplayUnit())
+	s.DeviceClass = getDeviceClass(info.DisplayUnit)
 	// device classess for MQTT Number are somewhat limited currently
 	if s.DeviceClass != "temperature" {
 		s.DeviceClass = ""
 	}
 	s.CommandTopic = s.StateTopic + "/set"
-	s.UnitOfMeasurement = info.DisplayUnit()
-	s.Min = info.Min()
-	s.Max = info.Max()
-	s.Step = info.Step()
+	s.UnitOfMeasurement = info.DisplayUnit
+	s.Min = info.Min
+	s.Max = info.Max
+	s.Step = info.Step
 	s.Mode = "box"
 
 	s.entityType = "number"
@@ -150,25 +150,25 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 		var data []byte
 		var err error
 
-		log.Printf("Topic %s", value.SensorName())
+		log.Printf("Topic %s", value.SensorName)
 
 		var mqttAdvert mqttCommon
-		mqttAdvert.encodeCommon(value, m.StatusTopic(value.SensorName(), value.Kind()), m.willTopic, allTopics.DeviceName())
+		mqttAdvert.encodeCommon(value, m.StatusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
 
-		if value.EncodeFunction() != "" {
+		if value.EncodeFunction != "" {
 			// Read-Write value
-			if len(value.Values()) == 0 {
+			if len(value.Values) == 0 {
 				mqttAdvert.encodeNumber(value)
-			} else if len(value.Values()) > 2 || !(value.Values()[0] == "Off" || value.Values()[0] == "Disabled" || value.Values()[0] == "Inactive") {
+			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				mqttAdvert.encodeSelect(value)
-			} else if len(value.Values()) == 2 {
+			} else if len(value.Values) == 2 {
 				mqttAdvert.encodeSwitch(value)
 			} else {
-				log.Println("Warning: Don't know how to encode " + value.SensorName())
+				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
 		} else {
 			// Read only value
-			if len(value.Values()) == 2 && (value.Values()[0] == "Off" || value.Values()[0] == "Disabled" || value.Values()[0] == "Inactive") {
+			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				mqttAdvert.encodeBinarySensor(value)
 			} else {
 				mqttAdvert.encodeSensor(value)

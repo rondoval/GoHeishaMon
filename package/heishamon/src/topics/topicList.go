@@ -15,59 +15,19 @@ const (
 )
 
 type TopicEntry struct {
-	sensorName     string   `yaml:"sensorName"`
-	decodeFunction string   `yaml:"decodeFunction"`
-	encodeFunction string   `yaml:"encodeFunction"`
-	decodeOffset   int      `yaml:"decodeOffset"`
-	displayUnit    string   `yaml:"displayUnit"`
-	category       string   `yaml:"category"`
-	values         []string `yaml:"values"`
-	min            int      `yaml:"min"`
-	max            int      `yaml:"max"`
-	step           int      `yaml:"step"`
+	SensorName     string   `yaml:"sensorName"`
+	DecodeFunction string   `yaml:"decodeFunction"`
+	EncodeFunction string   `yaml:"encodeFunction"`
+	DecodeOffset   int      `yaml:"decodeOffset"`
+	DisplayUnit    string   `yaml:"displayUnit"`
+	Category       string   `yaml:"category"`
+	Values         []string `yaml:"values"`
+	Min            int      `yaml:"min"`
+	Max            int      `yaml:"max"`
+	Step           int      `yaml:"step"`
 
 	CurrentValue string
 	kind         DeviceType
-}
-
-func (t TopicEntry) SensorName() string {
-	return t.sensorName
-}
-
-func (t TopicEntry) DecodeFunction() string {
-	return t.decodeFunction
-}
-
-func (t TopicEntry) EncodeFunction() string {
-	return t.encodeFunction
-}
-
-func (t TopicEntry) DecodeOffset() int {
-	return t.decodeOffset
-}
-
-func (t TopicEntry) DisplayUnit() string {
-	return t.displayUnit
-}
-
-func (t TopicEntry) Category() string {
-	return t.category
-}
-
-func (t TopicEntry) Values() []string {
-	return t.values
-}
-
-func (t TopicEntry) Min() int {
-	return t.min
-}
-
-func (t TopicEntry) Max() int {
-	return t.max
-}
-
-func (t TopicEntry) Step() int {
-	return t.step
 }
 
 func (t TopicEntry) Kind() DeviceType {
@@ -83,7 +43,7 @@ type TopicData struct {
 
 func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	log.Print("Loading topic data from: ", filename)
-	t := new(TopicData)
+	var t TopicData
 
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -97,14 +57,14 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 
 	t.topicNameLookup = make(map[string]*TopicEntry)
 	for _, val := range t.allTopics {
-		t.topicNameLookup[val.sensorName] = val
+		t.topicNameLookup[val.SensorName] = val
 		val.kind = kind
 	}
 
 	t.deviceName = deviceName
 	t.kind = kind
 	log.Printf("Topic data loaded. %d entries.", len(t.allTopics))
-	return t
+	return &t
 }
 
 func (t *TopicData) Lookup(name string) (*TopicEntry, bool) {

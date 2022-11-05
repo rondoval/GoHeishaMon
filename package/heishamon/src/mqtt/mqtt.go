@@ -24,7 +24,7 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 }
 
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
-	m.Publish(m.StatusTopic(value.SensorName(), value.Kind()), value.CurrentValue, 0)
+	m.Publish(m.StatusTopic(value.SensorName, value.Kind()), value.CurrentValue, 0)
 
 }
 

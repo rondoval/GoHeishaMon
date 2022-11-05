@@ -120,8 +120,9 @@ func (s *SerialComms) checkHeader() (len int, ok bool) {
 	ok = false
 	if data[0] == 0x71 && data[2] == 0x1 && (data[3] == 0x50 || data[3] == 0x10) {
 		ok = true
+		return
 	}
-	logger.LogDebug("Bad header: %x", data[:3])
+	logger.LogDebug("Bad header: %x", data[:4])
 	return
 }
 
