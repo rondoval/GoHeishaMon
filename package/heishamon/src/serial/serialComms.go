@@ -80,6 +80,9 @@ func (s *SerialComms) readToBuffer() {
 }
 
 func (s *SerialComms) findHeaderStart() bool {
+	if s.buffer.Len() < 1 {
+		return false
+	}
 	hdr := bytes.IndexByte(s.buffer.Bytes(), 0x71)
 	if hdr < 0 {
 		logger.LogDebug("Header not found in %d bytes", s.buffer.Len())

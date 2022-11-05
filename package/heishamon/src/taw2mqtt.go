@@ -107,7 +107,7 @@ func main() {
 				if value := codec.DecodeHeatpumpData(commandTopics, data); value != nil {
 					mclient.PublishValue(value)
 				}
-			} else {
+			} else if data != nil {
 				logger.LogDebug("Unkown message length: %d", len(data))
 			}
 		}

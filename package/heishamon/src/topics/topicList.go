@@ -103,7 +103,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 
 	t.deviceName = deviceName
 	t.kind = kind
-	log.Print("Topic data loaded.")
+	log.Printf("Topic data loaded. %d entries.", len(t.allTopics))
 	return &t
 }
 

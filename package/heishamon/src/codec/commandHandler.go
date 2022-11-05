@@ -47,8 +47,12 @@ func verboseToNumber(value string, sensor *topics.TopicEntry) (int, error) {
 
 func updateCommandMessage(function, msg string, topics *topics.TopicData, command []byte) (sensor *topics.TopicEntry, sensorOK bool) {
 	sensor, sensorOK = topics.Lookup(function)
-	if !sensorOK || sensor.EncodeFunction() == "" {
-		log.Println("Unknown topic or no encode function specified: " + function)
+	if !sensorOK {
+		log.Println("Unknown topic: " + function)
+		return
+	}
+	if sensor.EncodeFunction() == "" {
+		log.Println("No encode function specified: " + function)
 		return
 	}
 
