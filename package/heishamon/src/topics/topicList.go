@@ -83,14 +83,14 @@ type TopicData struct {
 
 func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	log.Print("Loading topic data from: ", filename)
-	var t TopicData
+	t := new(TopicData)
 
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = yaml.Unmarshal(data, &t.allTopics)
+	err = yaml.Unmarshal(data, t.allTopics)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	t.deviceName = deviceName
 	t.kind = kind
 	log.Printf("Topic data loaded. %d entries.", len(t.allTopics))
-	return &t
+	return t
 }
 
 func (t *TopicData) Lookup(name string) (*TopicEntry, bool) {
