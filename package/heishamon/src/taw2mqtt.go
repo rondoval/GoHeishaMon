@@ -24,7 +24,7 @@ func main() {
 	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
 	var serialPort serial.SerialComms
-	serialPort.Open(config.SerialPort, config.serialTimeout)
+	serialPort.Open(config.SerialPort, time.Millisecond*time.Duration(config.SerialTimeout))
 	defer serialPort.Close()
 	commandChannel := codec.GetChannel()
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)

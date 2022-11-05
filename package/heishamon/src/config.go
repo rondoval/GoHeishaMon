@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"time"
 
 	"github.com/rondoval/GoHeishaMon/topics"
 	"gopkg.in/yaml.v2"
@@ -14,6 +13,7 @@ import (
 type configStruct struct {
 	DeviceName            string `yaml:"deviceName"`            // for HA discovery
 	SerialPort            string `yaml:"serialPort"`            // serial port
+	SerialTimeout         int    `yaml:"serialTimeout"`         // serial port timeout (ms)
 	QueryInterval         int    `yaml:"queryInterval"`         // HP query interval (sec)
 	ListenOnly            bool   `yaml:"listenOnly"`            // no commands at all
 	OptionalPCB           bool   `yaml:"optionalPCB"`           // enable optional PCB emulation
@@ -35,7 +35,6 @@ type configStruct struct {
 	topicsFile            string
 	topicsOptionalPCBFile string
 	optionalPCBFile       string
-	serialTimeout         time.Duration
 }
 
 const main_topic = "main"
@@ -73,7 +72,6 @@ func (c *configStruct) readConfig(configPath string) {
 	c.topicsFile = path.Join(configPath, "topics.yaml")
 	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
 	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
-	c.serialTimeout = time.Millisecond * time.Duration(200)
 
 	log.Println("Config file loaded")
 }

@@ -1,5 +1,6 @@
 deviceName: "B121679621"
 serialPort: "/dev/ttyUSB0"
+serialTimeout: 200
 queryInterval: 10
 listenOnly: false
 optionalPCB: false
