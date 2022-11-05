@@ -1,9 +1,11 @@
 deviceName: "B121679621"
-device: "/dev/ttyUSB0"
-readInterval: 10
+serialPort: "/dev/ttyUSB0"
+serialTimeout: 200
+queryInterval: 10
 listenOnly: false
 optionalPCB: false
-enableOSCommand: true
+optionalQueryInterval: 5
+optionalSaveInterval: 60
 mqttServer: "127.0.0.1"
 mqttPort: "1883"
 mqttLogin: ""
@@ -13,3 +15,4 @@ mqttTopicBase: "panasonic_heat_pump"
 haAutoDiscover: true
 logmqtt: true
 loghex: false
+logdebug: false

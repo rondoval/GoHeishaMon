@@ -1,26 +1,27 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
-	"time"
 
+	"github.com/rondoval/GoHeishaMon/topics"
 	"gopkg.in/yaml.v2"
 )
 
 type configStruct struct {
-	DeviceName      string `yaml:"deviceName"`      // for HA discovery
-	Device          string `yaml:"device"`          // serial port
-	ReadInterval    int    `yaml:"readInterval"`    // HP query interval
-	ListenOnly      bool   `yaml:"listenOnly"`      // no commands at all
-	OptionalPCB     bool   `yaml:"optionalPCB"`     // enable optional PCB emulation
-	EnableOSCommand bool   `yaml:"enableOSCommand"` // enable OS commands
+	DeviceName            string `yaml:"deviceName"`            // for HA discovery
+	SerialPort            string `yaml:"serialPort"`            // serial port
+	SerialTimeout         int    `yaml:"serialTimeout"`         // serial port timeout (ms)
+	QueryInterval         int    `yaml:"queryInterval"`         // HP query interval (sec)
+	ListenOnly            bool   `yaml:"listenOnly"`            // no commands at all
+	OptionalPCB           bool   `yaml:"optionalPCB"`           // enable optional PCB emulation
+	OptionalQueryInterval int    `yaml:"optionalQueryInterval"` // Optional PCB query interval (sec)
+	OptionalSaveInterval  int    `yaml:"optionalSaveInterval"`  // Optional PCB data save interval (min)
 
 	MqttServer     string `yaml:"mqttServer"`
-	MqttPort       string `yaml:"mqttPort"`
+	MqttPort       int    `yaml:"mqttPort"`
 	MqttLogin      string `yaml:"mqttLogin"`
 	MqttPass       string `yaml:"mqttPass"`
 	MqttKeepalive  int    `yaml:"mqttKeepalive"`
@@ -29,33 +30,28 @@ type configStruct struct {
 
 	LogMqtt    bool `yaml:"logmqtt"`
 	LogHexDump bool `yaml:"loghex"`
+	LogDebug   bool `yaml:"logdebug"`
 
-	//topics
-	mqttWillTopic      string
-	mqttLogTopic       string
-	mqttValuesTopic    string
-	mqttPcbValuesTopic string
-	mqttCommandsTopic  string
-
-	topicsFile          string
-	optionalPCBFile     string
-	serialTimeout       time.Duration
-	optionalPCBSaveTime time.Duration
+	topicsFile            string
+	topicsOptionalPCBFile string
+	optionalPCBFile       string
 }
 
-func getStatusTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttValuesTopic, name)
+const main_topic = "main"
+const optional_topic = "optional"
+
+func (c configStruct) getDeviceName(kind topics.DeviceType) string {
+	switch kind {
+	case topics.Main:
+		return c.DeviceName
+	case topics.Optional:
+		return c.DeviceName + " Optional PCB"
+	default:
+		return c.DeviceName
+	}
 }
 
-func getCommandTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttCommandsTopic, name)
-}
-
-func getPcbStatusTopic(name string) string {
-	return fmt.Sprintf("%s/%s", config.mqttPcbValuesTopic, name)
-}
-
-func readConfig(configPath string) configStruct {
+func (c *configStruct) readConfig(configPath string) {
 	var configFile = path.Join(configPath, "config.yaml")
 
 	_, err := os.Stat(configFile)
@@ -63,29 +59,19 @@ func readConfig(configPath string) configStruct {
 		log.Fatalf("Config file is missing: %s ", configFile)
 	}
 
-	var config configStruct
-
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = yaml.Unmarshal(data, &config)
+	err = yaml.Unmarshal(data, c)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config.mqttWillTopic = config.MqttTopicBase + "/LWT"
-	config.mqttLogTopic = config.MqttTopicBase + "/log"
-	config.mqttValuesTopic = config.MqttTopicBase + "/main"
-	config.mqttPcbValuesTopic = config.MqttTopicBase + "/optional"
-	config.mqttCommandsTopic = config.MqttTopicBase + "/commands"
-	config.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
-	config.topicsFile = path.Join(configPath, "topics.yaml")
-	config.serialTimeout = 2 * time.Second
-	config.optionalPCBSaveTime = 5 * time.Minute
+	c.topicsFile = path.Join(configPath, "topics.yaml")
+	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
+	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
 
 	log.Println("Config file loaded")
-
-	return config
 }
