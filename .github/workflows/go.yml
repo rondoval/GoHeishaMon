@@ -22,7 +22,7 @@ jobs:
         go-version: 1.19
         
     - name: List
-      run: ls
+      run: pwd && ls
 
     - name: Build
       run: go build -v package/heishamon/src
