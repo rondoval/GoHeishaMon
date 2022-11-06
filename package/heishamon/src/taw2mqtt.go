@@ -57,20 +57,27 @@ func main() {
 	}
 
 	if config.OptionalPCB {
-		optionPCBSaveTicker := time.NewTicker(time.Minute * time.Duration(config.OptionalSaveInterval))
 		go func() {
 			log.Println("PCB save thread starting")
-			for {
-				<-optionPCBSaveTicker.C
+			for range time.Tick(time.Minute * time.Duration(config.OptionalSaveInterval)) {
 				codec.SaveOptionalPCB(config.optionalPCBFile)
 			}
 		}()
 	}
 
+	received := make(chan bool)
+	received <- true
+
 	go func() {
 		log.Println("Receiver thread starting")
 		for {
 			data := serialPort.Read(config.LogHexDump)
+			if data != nil {
+				select {
+				case received <- true:
+				default:
+				}
+			}
 			if len(data) == serial.OPTIONAL_MSG_LENGTH {
 				values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
 				for _, v := range values {
@@ -88,36 +95,44 @@ func main() {
 		}
 	}()
 
-	queryTicker := time.NewTicker(time.Second * time.Duration(config.QueryInterval))
-	optionQueryTicker := time.NewTicker(time.Second * time.Duration(config.OptionalQueryInterval))
+	go func() {
+		log.Println("Starting periodic query ticker")
+		for range time.Tick(time.Second * time.Duration(config.QueryInterval)) {
+			codec.SendPanasonicQuery()
+		}
+	}()
+
+	if config.OptionalPCB == true && config.ListenOnly == false {
+		go func() {
+			log.Println("Starting Optional PCB ticker")
+			for range time.Tick(time.Second * time.Duration(config.OptionalQueryInterval)) {
+				codec.SendOptionalPCBQuery()
+			}
+		}()
+	}
 
 	log.Print("Entering main loop")
 	for {
+		select {
+		case <-received:
+			//ok, did receive something, can send next request
+		case <-time.After(15 * time.Second):
+			log.Println("Response not received, recovering")
+		}
+		serialPort.SendCommand(<-commandChannel)
+
 		// TODO combine requests into single command if many coming from MQTT?
 		var queueLen = len(commandChannel)
 		if queueLen > 10 {
 			log.Print("Command queue length: ", queueLen)
 		}
 
-		select {
-		case value := <-commandChannel:
-			switch len(value) {
-			case codec.PANASONIC_QUERY_SIZE:
-				queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
+		// switch len(value) {
+		// case codec.PANASONIC_QUERY_SIZE:
+		// 	queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
 
-			case codec.OPTIONAL_QUERY_SIZE:
-				optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
-			}
-			serialPort.SendCommand(value)
-			//TODO this should likely be sync'd with following read
-
-		case <-optionQueryTicker.C:
-			if config.OptionalPCB == true && config.ListenOnly == false {
-				codec.SendOptionalPCBQuery()
-			}
-
-		case <-queryTicker.C:
-			codec.SendPanasonicQuery()
-		}
+		// case codec.OPTIONAL_QUERY_SIZE:
+		// 	optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
+		// }
 	}
 }
