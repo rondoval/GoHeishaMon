@@ -21,11 +21,11 @@ jobs:
       with:
         go-version: 1.19
         
-    - name: List
-      run: pwd && ls
+    - name: Set dir
+      run: cd package/heishamon/src
 
     - name: Build
-      run: go build -v ./package/heishamon/src
+      run: go build -v ./...
 
     - name: Test
-      run: go test -v ./package/heishamon/src
+      run: go test -v ./...
