@@ -31,6 +31,7 @@ func (s *SerialComms) Open(portName string, timeout time.Duration) {
 		log.Fatal(err)
 	}
 	log.Print("Serial port open")
+	s.serialPort.Flush()
 }
 
 func (s *SerialComms) Close() {
