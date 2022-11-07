@@ -13,14 +13,14 @@ var panasonicSetCommand = [PANASONIC_QUERY_SIZE]byte{0xf1, 0x6c, 0x01, 0x10, 0x0
 
 func OnAquareaCommand(mqttTopic, payload string, allTopics *topics.TopicData) *topics.TopicEntry {
 	topicPieces := strings.Split(mqttTopic, "/")
-	function := topicPieces[len(topicPieces)-2]
-	log.Printf("Command received - set %s on %s to %s\n", function, allTopics.Kind(), payload)
+	sensorName := topicPieces[len(topicPieces)-2]
+	log.Printf("Command received - set %s on %s to %s\n", sensorName, allTopics.Kind(), payload)
 
 	switch allTopics.Kind() {
 	case topics.Main:
 		command := make([]byte, PANASONIC_QUERY_SIZE)
 		copy(command, panasonicSetCommand[:])
-		if sensor, ok := updateCommandMessage(function, payload, allTopics, command); ok {
+		if sensor, ok := updateCommandMessage(sensorName, payload, allTopics, command); ok {
 			commandChannel <- command[:]
 			return sensor
 		}
@@ -29,7 +29,7 @@ func OnAquareaCommand(mqttTopic, payload string, allTopics *topics.TopicData) *t
 		optionalPCBMutex.Lock()
 		defer optionalPCBMutex.Unlock()
 		//this is not copied as we need all fields filled in
-		if sensor, ok := updateCommandMessage(function, payload, allTopics, optionalPCBQuery[:]); ok {
+		if sensor, ok := updateCommandMessage(sensorName, payload, allTopics, optionalPCBQuery[:]); ok {
 			command := make([]byte, len(optionalPCBQuery))
 			copy(command, optionalPCBQuery[:])
 			commandChannel <- command[:]
@@ -59,37 +59,9 @@ func updateCommandMessage(function, msg string, topics *topics.TopicData, comman
 		log.Println("Unknown topic: " + function)
 		return
 	}
-	if sensor.EncodeFunction == "" {
-		log.Println("No encode function specified: " + function)
-		return
-	}
 
 	// Update topic data as well for quicker turnaround.
 	// Also needed for Optional PCB - the pump does not confirm messages.
 	sensor.UpdateValue(msg)
-
-	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
-		v, err := verboseToNumber(msg, sensor)
-		if err != nil {
-			log.Println(err)
-			return sensor, false
-		}
-		data := handler(v, command[sensor.DecodeOffset])
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
-		command[sensor.DecodeOffset] = data
-		return sensor, true
-	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
-		v, err := strconv.ParseFloat(msg, 64)
-		if err != nil {
-			log.Println(err)
-			return sensor, false
-		}
-		data := handler(v)
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
-		command[sensor.DecodeOffset] = data
-		return sensor, true
-	} else {
-		log.Println("No encoder implemented for " + sensor.EncodeFunction)
-		return sensor, false
-	}
+	return sensor, encode(sensor, command)
 }

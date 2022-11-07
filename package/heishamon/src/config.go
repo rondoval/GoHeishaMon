@@ -71,7 +71,7 @@ func (c *configStruct) readConfig(configPath string) {
 
 	c.topicsFile = path.Join(configPath, "topics.yaml")
 	c.topicsOptionalPCBFile = path.Join(configPath, "topicsOptionalPCB.yaml")
-	c.optionalPCBFile = path.Join(configPath, "optionalpcb.raw")
+	c.optionalPCBFile = path.Join(configPath, "optionalpcb.yaml")
 
 	log.Println("Config file loaded")
 }

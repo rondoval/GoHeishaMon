@@ -26,7 +26,7 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 }
 
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
-	m.Publish(m.StatusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
+	m.Publish(m.statusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
 
 }
 
@@ -34,7 +34,7 @@ func (m MQTT) LogTopic() string {
 	return m.baseTopic + "/log"
 }
 
-func (m MQTT) StatusTopic(name string, kind topics.DeviceType) string {
+func (m MQTT) statusTopic(name string, kind topics.DeviceType) string {
 	return fmt.Sprintf("%s/%s/%s", m.baseTopic, string(kind), name)
 }
 
@@ -72,7 +72,7 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
 		if opt.ListenOnly == false {
-			tokenMain := mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
+			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
 				go func() {
 					sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.CommandTopics)
 					if sensor != nil {
@@ -86,7 +86,7 @@ func MakeMQTTConn(opt Options) MQTT {
 				}
 			}()
 			if opt.OptionalPCB == true {
-				tokenOptional := mclient.Subscribe(mqtt.StatusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
+				tokenOptional := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
 					go func() {
 						sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.OptionalTopics)
 						if sensor != nil {
@@ -108,10 +108,12 @@ func MakeMQTTConn(opt Options) MQTT {
 	mqtt.mclient = paho.NewClient(pahoOpt)
 
 	token := mqtt.mclient.Connect()
-	if token.Wait() && token.Error() != nil {
-		log.Fatalf("Fail to connect broker, %v", token.Error())
-		//should not happen - SetConnectRetry=true
-	}
+	go func() {
+		if token.Wait() && token.Error() != nil {
+			log.Printf("Failed to connect broker, %v", token.Error())
+			//should not happen - SetConnectRetry=true
+		}
+	}()
 	log.Println("MQTT set up completed")
 	return mqtt
 }

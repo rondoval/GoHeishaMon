@@ -1,7 +1,11 @@
 package codec
 
 import (
+	"log"
 	"math"
+	"strconv"
+
+	"github.com/rondoval/GoHeishaMon/topics"
 )
 
 var encodeInt = map[string]func(int, byte) byte{
@@ -102,4 +106,37 @@ func setOperationMode(val int, _ byte) (data byte) {
 		data = 0
 	}
 	return data
+}
+
+func encode(sensor *topics.TopicEntry, command []byte) bool {
+	if sensor.EncodeFunction == "" {
+		log.Println("No encode function specified: " + sensor.SensorName)
+		return false
+	}
+	msg := sensor.CurrentValue()
+
+	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
+		v, err := verboseToNumber(msg, sensor)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		data := handler(v, command[sensor.DecodeOffset])
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
+		return true
+	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
+		v, err := strconv.ParseFloat(msg, 64)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		data := handler(v)
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
+		return true
+	} else {
+		log.Println("No encoder implemented for " + sensor.EncodeFunction)
+		return false
+	}
 }

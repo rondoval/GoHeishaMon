@@ -1,9 +1,9 @@
 package codec
 
 import (
-	"io/ioutil"
-	"log"
 	"sync"
+
+	"github.com/rondoval/GoHeishaMon/topics"
 )
 
 const (
@@ -45,27 +45,12 @@ func Acknowledge(datagram []byte) {
 	optionalPCBMutex.Unlock()
 }
 
-func SaveOptionalPCB(filename string) {
+func RestoreOptionalPCB(optinalTopics []*topics.TopicEntry) {
 	optionalPCBMutex.Lock()
-	err := ioutil.WriteFile(filename, optionalPCBQuery[:], 0644)
+	for _, sensor := range optinalTopics {
+		if sensor.EncodeFunction != "" {
+			encode(sensor, optionalPCBQuery[:])
+		}
+	}
 	optionalPCBMutex.Unlock()
-	//TODO serialize to json instead, restore topics and []byte
-	if err != nil {
-		log.Print(err)
-	} else {
-		log.Print("Optional PCB data stored")
-	}
-}
-
-func LoadOptionalPCB(filename string) {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Print(err)
-	} else {
-		optionalPCBMutex.Lock()
-		copy(optionalPCBQuery[:], data)
-		optionalPCBMutex.Unlock()
-
-		log.Print("Optional PCB data loaded")
-	}
 }

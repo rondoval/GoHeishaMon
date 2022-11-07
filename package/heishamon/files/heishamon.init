@@ -12,7 +12,7 @@ start_service() {
         procd_open_instance
         
         procd_set_param command /usr/bin/heishamon
-        procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-0}
+        procd_set_param respawn ${respawn_threshold:-600} ${respawn_timeout:-10} ${respawn_retry:-40}
         procd_set_param file /etc/heishamon/config.yaml
         procd_set_param file /etc/heishamon/topics.yaml
         procd_set_param file /etc/heishamon/topicsOptionalPCB.yaml
