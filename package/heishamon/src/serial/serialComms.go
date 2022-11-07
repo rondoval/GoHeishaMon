@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"log"
-	"os/exec"
 	"time"
 
 	"github.com/rondoval/GoHeishaMon/logger"
@@ -20,12 +19,17 @@ type SerialComms struct {
 	goodreads, totalreads int64
 	buffer                bytes.Buffer
 	serialPort            *tarm.Port
+	serialConfig          *tarm.Config
 }
 
 func (s *SerialComms) Open(portName string, timeout time.Duration) {
-	serialConfig := &tarm.Config{Name: portName, Baud: 9600, Parity: tarm.ParityEven, StopBits: tarm.Stop1, ReadTimeout: timeout}
+	s.serialConfig = &tarm.Config{Name: portName, Baud: 9600, Parity: tarm.ParityEven, StopBits: tarm.Stop1, ReadTimeout: timeout}
+	s.openInternal()
+}
+
+func (s *SerialComms) openInternal() {
 	var err error
-	s.serialPort, err = tarm.OpenPort(serialConfig)
+	s.serialPort, err = tarm.OpenPort(s.serialConfig)
 	if err != nil {
 		// no point in continuing, no config
 		log.Fatal(err)
@@ -73,9 +77,8 @@ func (s *SerialComms) readToBuffer() {
 	n, err := s.serialPort.Read(data)
 	if err != nil && err != io.EOF {
 		log.Print(err)
-		time.Sleep(10 * time.Second)
-		exec.Command("reboot").Run()
-		// TODO replace with some sort of receovery - reopen serial port?
+		s.Close()
+		s.openInternal()
 	}
 	s.buffer.Write(data[:n])
 }
