@@ -66,7 +66,6 @@ func main() {
 	}
 
 	received := make(chan bool)
-	received <- true
 
 	go func() {
 		log.Println("Receiver thread starting")
@@ -113,13 +112,13 @@ func main() {
 
 	log.Print("Entering main loop")
 	for {
+		serialPort.SendCommand(<-commandChannel)
 		select {
 		case <-received:
 			//ok, did receive something, can send next request
 		case <-time.After(15 * time.Second):
 			log.Println("Response not received, recovering")
 		}
-		serialPort.SendCommand(<-commandChannel)
 
 		// TODO combine requests into single command if many coming from MQTT?
 		var queueLen = len(commandChannel)
