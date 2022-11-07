@@ -41,7 +41,7 @@ var encodeFloat = map[string]func(float64) byte{
 }
 
 func temp2hex(temp float64) byte {
-	var hextemp byte = 0
+	var hextemp byte
 
 	if temp >= 120 {
 		hextemp = 0
@@ -54,14 +54,14 @@ func temp2hex(temp float64) byte {
 		const T25 float64 = 25
 		const Rf float64 = 6480
 		const K float64 = 273.15
-		var RT float64 = R25 * math.Exp(constant*(1/(temp+K)-1/(T25+K)))
+		RT := R25 * math.Exp(constant*(1/(temp+K)-1/(T25+K)))
 		hextemp = byte(Uref * (RT / (Rf + RT)))
 	}
 	return hextemp
 }
 
 func demand2hex(demand float64) byte {
-	var hexdemand byte = 0
+	var hexdemand byte
 
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex

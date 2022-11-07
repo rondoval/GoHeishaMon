@@ -128,7 +128,7 @@ func hex2temp(input byte) int {
 }
 
 func hex2demand(input byte) int {
-	var demand int = 0
+	var demand int
 
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex

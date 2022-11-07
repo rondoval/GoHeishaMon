@@ -10,10 +10,10 @@ import (
 	tarm "github.com/tarm/serial"
 )
 
-const DATA_BUFFER = 1024
-const OPTIONAL_MSG_LENGTH = 20
-const DATA_MSG_LENGTH = 203
-const LOGGING_RATIO = 150
+const dataBufferSize = 1024
+const OptionalMessageLength = 20
+const DataMessageLength = 203
+const loggingRatio = 150
 
 type SerialComms struct {
 	goodreads, totalreads int64
@@ -43,7 +43,7 @@ func (s *SerialComms) Close() {
 }
 
 func isValidReceiveChecksum(data []byte) bool {
-	var chk byte = 0
+	var chk byte
 	for _, v := range data {
 		chk += v
 	}
@@ -51,7 +51,7 @@ func isValidReceiveChecksum(data []byte) bool {
 }
 
 func calcChecksum(command []byte) byte {
-	var chk byte = 0
+	var chk byte
 	for _, v := range command {
 		chk += v
 	}
@@ -73,7 +73,7 @@ func (s *SerialComms) SendCommand(command []byte) {
 }
 
 func (s *SerialComms) readToBuffer() {
-	data := make([]byte, DATA_BUFFER)
+	data := make([]byte, dataBufferSize)
 	n, err := s.serialPort.Read(data)
 	if err != nil && err != io.EOF {
 		log.Print(err)
@@ -102,19 +102,18 @@ func (s *SerialComms) findHeaderStart() bool {
 func (s *SerialComms) dispatchDatagram(len int) []byte {
 	s.goodreads++
 	readpercentage := float64(s.totalreads-s.goodreads) / float64(s.totalreads) * 100.
-	if s.totalreads%LOGGING_RATIO == 0 {
+	if s.totalreads%loggingRatio == 0 {
 		log.Printf("RX: %d RX errors: %d (%.2f %%)", s.totalreads, s.totalreads-s.goodreads, readpercentage)
 	}
 
 	packet := s.buffer.Next(len)
 	logger.LogHex("Received", packet)
-	if len == DATA_MSG_LENGTH || len == OPTIONAL_MSG_LENGTH {
+	if len == DataMessageLength || len == OptionalMessageLength {
 		logger.LogDebug("Received %d bytes of data with correct header and checksum", len)
 		return packet
-	} else {
-		log.Printf("Received an unknown datagram. Can't decode this (yet?). Length: %d", len)
-		return nil
 	}
+	log.Printf("Received an unknown datagram. Can't decode this (yet?). Length: %d", len)
+	return nil
 }
 
 func (s *SerialComms) checkHeader() (len int, ok bool) {
@@ -151,11 +150,11 @@ func (s *SerialComms) Read(logHexDump bool) []byte {
 
 			if isValidReceiveChecksum(s.buffer.Bytes()[:len]) {
 				return s.dispatchDatagram(len)
-			} else {
-				// invalid checksum, need to consume 0x71 and look for another one
-				s.buffer.ReadByte()
-				log.Println("Invalid checksum on receive!")
 			}
+			// invalid checksum, need to consume 0x71 and look for another one
+			s.buffer.ReadByte()
+			log.Println("Invalid checksum on receive!")
+
 		} else {
 			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), len-s.buffer.Len())
 		}

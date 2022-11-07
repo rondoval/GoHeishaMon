@@ -82,13 +82,13 @@ func main() {
 				default:
 				}
 			}
-			if len(data) == serial.OPTIONAL_MSG_LENGTH {
+			if len(data) == serial.OptionalMessageLength {
 				values := codec.Decode(optionalPCBTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
 				codec.Acknowledge(data)
-			} else if len(data) == serial.DATA_MSG_LENGTH {
+			} else if len(data) == serial.DataMessageLength {
 				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
