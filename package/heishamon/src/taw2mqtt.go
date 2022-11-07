@@ -96,6 +96,7 @@ func main() {
 
 	go func() {
 		log.Println("Starting periodic query ticker")
+		codec.SendPanasonicQuery()
 		for range time.Tick(time.Second * time.Duration(config.QueryInterval)) {
 			codec.SendPanasonicQuery()
 		}
@@ -104,6 +105,7 @@ func main() {
 	if config.OptionalPCB == true && config.ListenOnly == false {
 		go func() {
 			log.Println("Starting Optional PCB ticker")
+			codec.SendOptionalPCBQuery()
 			for range time.Tick(time.Second * time.Duration(config.OptionalQueryInterval)) {
 				codec.SendOptionalPCBQuery()
 			}
