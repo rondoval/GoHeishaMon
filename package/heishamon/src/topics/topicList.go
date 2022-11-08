@@ -113,14 +113,14 @@ func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Printf("Errow while loading optional PCB state: %v", err)
+		log.Printf("Error while loading optional PCB state: %v", err)
 		return
 	}
 
 	var m map[string]string
 	err = yaml.Unmarshal(data, &m)
 	if err != nil {
-		log.Printf("Errow while unmarshalling optional PCB state: %v", err)
+		log.Printf("Error while unmarshalling optional PCB state: %v", err)
 		return
 	}
 

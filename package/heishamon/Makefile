@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=heishamon
 PKG_VERSION:=3.1.0
-PKG_RELEASE:=28
+PKG_RELEASE:=29
 
 PKG_MAINTAINER:=Lukasz Winczura <rondoval@gmail.com>
 PKG_LICENSE:=MIT
@@ -33,7 +33,7 @@ endef
 
 define Package/heishamon/conffiles
 /etc/heishamon/config.yaml
-/etc/heishamon/optionalpcb.raw
+/etc/heishamon/optionalpcb.yaml
 endef
 
 define Package/heishamon/install
