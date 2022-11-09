@@ -51,6 +51,7 @@ func main() {
 	}
 
 	if config.OptionalPCB {
+		log.Println("Restoring Optional PCB values")
 		changed := optionalPCBTopics.Unmarshal(config.optionalPCBFile)
 		for _, c := range changed {
 			mclient.PublishValue(c)
