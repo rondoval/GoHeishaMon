@@ -69,7 +69,7 @@ func main() {
 		}
 	}
 
-	var serialPort serial.SerialComms
+	var serialPort serial.Comms
 	serialPort.Open(config.SerialPort, time.Millisecond*time.Duration(config.SerialTimeout))
 	defer serialPort.Close()
 

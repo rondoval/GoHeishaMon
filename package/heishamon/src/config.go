@@ -37,9 +37,6 @@ type configStruct struct {
 	optionalPCBFile       string
 }
 
-const main_topic = "main"
-const optional_topic = "optional"
-
 func (c configStruct) getDeviceName(kind topics.DeviceType) string {
 	switch kind {
 	case topics.Main:

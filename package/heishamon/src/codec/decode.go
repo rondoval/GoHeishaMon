@@ -120,9 +120,9 @@ func hex2temp(input byte) int {
 	const T25 float64 = 25
 	const Rf float64 = 6480
 	const K float64 = 273.15
-	var hextemp float64 = float64(input)
+	hextemp := float64(input)
 
-	var RT float64 = hextemp * Rf / (Uref - hextemp)
+	RT := hextemp * Rf / (Uref - hextemp)
 	var temp int = int(constant/(math.Log(RT/R25)+constant/(T25+K)) - K)
 	return temp
 }
