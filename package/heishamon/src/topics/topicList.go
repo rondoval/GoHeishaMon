@@ -85,6 +85,54 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	return &t
 }
 
+func (t *TopicData) Marshal(filename string) {
+	m := make(map[string]string)
+	for _, val := range t.allTopics {
+		// we'll marshal only the values that we write/send to the pump
+		// this is the state that is to be restored after reboot
+		if val.EncodeFunction != "" {
+			m[val.SensorName] = val.CurrentValue()
+		}
+	}
+
+	data, err := yaml.Marshal(m)
+	if err != nil {
+		log.Printf("Error while marshalling optional PCB state: %v", err)
+		return
+	}
+
+	err = ioutil.WriteFile(filename, data, 0644)
+	if err != nil {
+		log.Printf("Error while saving optional PCB state: %v", err)
+		return
+	}
+}
+
+func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
+	changed = make([]*TopicEntry, 0, len(t.allTopics))
+
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Printf("Error while loading optional PCB state: %v", err)
+		return
+	}
+
+	var m map[string]string
+	err = yaml.Unmarshal(data, &m)
+	if err != nil {
+		log.Printf("Error while unmarshalling optional PCB state: %v", err)
+		return
+	}
+
+	for _, sensor := range t.allTopics {
+		if val, ok := m[sensor.SensorName]; ok && val != "" {
+			sensor.UpdateValue(val)
+			changed = append(changed, sensor)
+		}
+	}
+	return
+}
+
 func (t *TopicData) Lookup(name string) (*TopicEntry, bool) {
 	elem, ok := t.topicNameLookup[name]
 	return elem, ok

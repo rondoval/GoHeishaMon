@@ -128,7 +128,7 @@ func hex2temp(input byte) int {
 }
 
 func hex2demand(input byte) int {
-	var demand int = 0
+	var demand int
 
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
@@ -191,7 +191,7 @@ func convertIntToEnum(value int, topic *topics.TopicEntry) string {
 	return fmt.Sprintf("%d", value)
 }
 
-func DecodeHeatpumpData(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
+func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
 	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
 	for _, v := range allTopics.GetAll() {
 		var topicValue string

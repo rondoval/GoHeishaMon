@@ -105,19 +105,19 @@ func (s *mqttCommon) encodeBinarySensor(info *topics.TopicEntry) {
 	s.entityType = "binary_sensor"
 }
 
-func (b *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
-	b.CommandTopic = b.StateTopic + "/set"
-	b.PayloadOn = info.Values[1]
-	b.PayloadOff = info.Values[0]
+func (s *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
+	s.CommandTopic = s.StateTopic + "/set"
+	s.PayloadOn = info.Values[1]
+	s.PayloadOff = info.Values[0]
 
-	b.entityType = "switch"
+	s.entityType = "switch"
 }
 
-func (b *mqttCommon) encodeSelect(info *topics.TopicEntry) {
-	b.CommandTopic = b.StateTopic + "/set"
-	b.Options = info.Values
+func (s *mqttCommon) encodeSelect(info *topics.TopicEntry) {
+	s.CommandTopic = s.StateTopic + "/set"
+	s.Options = info.Values
 
-	b.entityType = "select"
+	s.entityType = "select"
 }
 
 func (s *mqttCommon) encodeNumber(info *topics.TopicEntry) {
@@ -144,14 +144,11 @@ func (s *mqttCommon) marshal() (topic string, data []byte, err error) {
 }
 
 func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
-	log.Print("Publishing Home Assistant discovery topics...")
+	log.Printf("Publishing Home Assistant %s discovery topics...", allTopics.Kind())
 	for _, value := range allTopics.GetAll() {
-		var topic string
-		var data []byte
-		var err error
 
 		var mqttAdvert mqttCommon
-		mqttAdvert.encodeCommon(value, m.StatusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
+		mqttAdvert.encodeCommon(value, m.statusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
 
 		if value.EncodeFunction != "" {
 			// Read-Write value
@@ -173,7 +170,7 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 			}
 		}
 
-		topic, data, err = mqttAdvert.marshal()
+		topic, data, err := mqttAdvert.marshal()
 		if err != nil {
 			log.Print(err)
 			continue

@@ -23,16 +23,9 @@ func main() {
 	config.readConfig(*configPath)
 	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
-	var serialPort serial.SerialComms
-	serialPort.Open(config.SerialPort, time.Millisecond*time.Duration(config.SerialTimeout))
-	defer serialPort.Close()
 	commandChannel := codec.GetChannel()
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
 	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
-
-	if config.OptionalPCB {
-		codec.LoadOptionalPCB(config.optionalPCBFile)
-	}
 
 	mclient := mqtt.MakeMQTTConn(mqtt.Options{
 		Server:         config.MqttServer,
@@ -49,6 +42,7 @@ func main() {
 	if config.LogMqtt {
 		logger.RedirectLogMQTT(&mclient)
 	}
+
 	if config.HAAutoDiscover == true {
 		mclient.PublishDiscoveryTopics(commandTopics)
 		if config.OptionalPCB == true {
@@ -57,13 +51,27 @@ func main() {
 	}
 
 	if config.OptionalPCB {
-		go func() {
-			log.Println("PCB save thread starting")
-			for range time.Tick(time.Minute * time.Duration(config.OptionalSaveInterval)) {
-				codec.SaveOptionalPCB(config.optionalPCBFile)
-			}
-		}()
+		log.Println("Restoring Optional PCB values")
+		changed := optionalPCBTopics.Unmarshal(config.optionalPCBFile)
+		for _, c := range changed {
+			mclient.PublishValue(c)
+		}
+		if len(changed) > 0 {
+			codec.RestoreOptionalPCB(optionalPCBTopics.GetAll())
+		}
+		if config.OptionalSaveInterval > 0 {
+			go func() {
+				log.Println("PCB save thread starting")
+				for range time.Tick(time.Minute * time.Duration(config.OptionalSaveInterval)) {
+					optionalPCBTopics.Marshal(config.optionalPCBFile)
+				}
+			}()
+		}
 	}
+
+	var serialPort serial.SerialComms
+	serialPort.Open(config.SerialPort, time.Millisecond*time.Duration(config.SerialTimeout))
+	defer serialPort.Close()
 
 	received := make(chan bool)
 
@@ -77,14 +85,14 @@ func main() {
 				default:
 				}
 			}
-			if len(data) == serial.OPTIONAL_MSG_LENGTH {
-				values := codec.DecodeHeatpumpData(optionalPCBTopics, data)
+			if len(data) == serial.OptionalMessageLength {
+				values := codec.Decode(optionalPCBTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
 				codec.Acknowledge(data)
-			} else if len(data) == serial.DATA_MSG_LENGTH {
-				values := codec.DecodeHeatpumpData(commandTopics, data)
+			} else if len(data) == serial.DataMessageLength {
+				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}

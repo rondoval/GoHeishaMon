@@ -1,7 +1,11 @@
 package codec
 
 import (
+	"log"
 	"math"
+	"strconv"
+
+	"github.com/rondoval/GoHeishaMon/topics"
 )
 
 var encodeInt = map[string]func(int, byte) byte{
@@ -37,7 +41,7 @@ var encodeFloat = map[string]func(float64) byte{
 }
 
 func temp2hex(temp float64) byte {
-	var hextemp byte = 0
+	var hextemp byte
 
 	if temp >= 120 {
 		hextemp = 0
@@ -50,14 +54,14 @@ func temp2hex(temp float64) byte {
 		const T25 float64 = 25
 		const Rf float64 = 6480
 		const K float64 = 273.15
-		var RT float64 = R25 * math.Exp(constant*(1/(temp+K)-1/(T25+K)))
+		RT := R25 * math.Exp(constant*(1/(temp+K)-1/(T25+K)))
 		hextemp = byte(Uref * (RT / (Rf + RT)))
 	}
 	return hextemp
 }
 
 func demand2hex(demand float64) byte {
-	var hexdemand byte = 0
+	var hexdemand byte
 
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
@@ -102,4 +106,37 @@ func setOperationMode(val int, _ byte) (data byte) {
 		data = 0
 	}
 	return data
+}
+
+func encode(sensor *topics.TopicEntry, command []byte) bool {
+	if sensor.EncodeFunction == "" {
+		log.Println("No encode function specified: " + sensor.SensorName)
+		return false
+	}
+	msg := sensor.CurrentValue()
+
+	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
+		v, err := verboseToNumber(msg, sensor)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		data := handler(v, command[sensor.DecodeOffset])
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
+		return true
+	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
+		v, err := strconv.ParseFloat(msg, 64)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		data := handler(v)
+		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
+		command[sensor.DecodeOffset] = data
+		return true
+	} else {
+		log.Println("No encoder implemented for " + sensor.EncodeFunction)
+		return false
+	}
 }
