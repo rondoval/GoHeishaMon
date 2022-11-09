@@ -58,12 +58,14 @@ func main() {
 		if len(changed) > 0 {
 			codec.RestoreOptionalPCB(optionalPCBTopics.GetAll())
 		}
-		go func() {
-			log.Println("PCB save thread starting")
-			for range time.Tick(time.Minute * time.Duration(config.OptionalSaveInterval)) {
-				optionalPCBTopics.Marshal(config.optionalPCBFile)
-			}
-		}()
+		if config.OptionalSaveInterval > 0 {
+			go func() {
+				log.Println("PCB save thread starting")
+				for range time.Tick(time.Minute * time.Duration(config.OptionalSaveInterval)) {
+					optionalPCBTopics.Marshal(config.optionalPCBFile)
+				}
+			}()
+		}
 	}
 
 	var serialPort serial.SerialComms
