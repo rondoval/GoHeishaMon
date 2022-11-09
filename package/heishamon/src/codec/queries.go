@@ -48,7 +48,7 @@ func Acknowledge(datagram []byte) {
 func RestoreOptionalPCB(optinalTopics []*topics.TopicEntry) {
 	optionalPCBMutex.Lock()
 	for _, sensor := range optinalTopics {
-		if sensor.EncodeFunction != "" {
+		if sensor.EncodeFunction != "" && sensor.CurrentValue() != "" {
 			encode(sensor, optionalPCBQuery[:])
 		}
 	}

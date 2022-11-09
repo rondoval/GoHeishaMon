@@ -125,11 +125,9 @@ func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	}
 
 	for _, sensor := range t.allTopics {
-		if val, ok := m[sensor.SensorName]; ok {
-			if val != "" {
-				sensor.UpdateValue(val)
-				changed = append(changed, sensor)
-			}
+		if val, ok := m[sensor.SensorName]; ok && val != "" {
+			sensor.UpdateValue(val)
+			changed = append(changed, sensor)
 		}
 	}
 	return
