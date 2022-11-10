@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"errors"
 	"log"
 	"math"
 	"strconv"
@@ -108,10 +109,23 @@ func setOperationMode(val int, _ byte) (data byte) {
 	return data
 }
 
-func encode(sensor *topics.TopicEntry, command []byte) bool {
+func verboseToNumber(value string, sensor *topics.TopicEntry) (int, error) {
+	if number, err := strconv.ParseInt(value, 10, 16); err == nil {
+		return int(number), nil
+	}
+
+	for valueKey, valueName := range sensor.Values {
+		if value == valueName {
+			return valueKey, nil
+		}
+	}
+	return 0, errors.New("Can't convert literal to number")
+}
+
+func encode(sensor *topics.TopicEntry, command []byte) {
 	if sensor.EncodeFunction == "" {
 		log.Println("No encode function specified: " + sensor.SensorName)
-		return false
+		return
 	}
 	msg := sensor.CurrentValue()
 
@@ -119,24 +133,24 @@ func encode(sensor *topics.TopicEntry, command []byte) bool {
 		v, err := verboseToNumber(msg, sensor)
 		if err != nil {
 			log.Println(err)
-			return false
+			return
 		}
 		data := handler(v, command[sensor.DecodeOffset])
 		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
 		command[sensor.DecodeOffset] = data
-		return true
+		return
 	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
 		v, err := strconv.ParseFloat(msg, 64)
 		if err != nil {
 			log.Println(err)
-			return false
+			return
 		}
 		data := handler(v)
 		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
 		command[sensor.DecodeOffset] = data
-		return true
+		return
 	} else {
 		log.Println("No encoder implemented for " + sensor.EncodeFunction)
-		return false
+		return
 	}
 }

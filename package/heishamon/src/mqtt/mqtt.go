@@ -6,7 +6,6 @@ import (
 	"time"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/rondoval/GoHeishaMon/codec"
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
@@ -14,6 +13,14 @@ type MQTT struct {
 	mclient   paho.Client
 	baseTopic string
 	willTopic string
+
+	commandChannel chan Command
+}
+
+type Command struct {
+	Topic     string
+	Payload   string
+	AllTopics *topics.TopicData
 }
 
 func (m MQTT) Publish(topic string, data interface{}, qos byte) {
@@ -32,6 +39,10 @@ func (m MQTT) PublishValue(value *topics.TopicEntry) {
 
 func (m MQTT) LogTopic() string {
 	return m.baseTopic + "/log"
+}
+
+func (m MQTT) CommandChannel() chan Command {
+	return m.commandChannel
 }
 
 func (m MQTT) statusTopic(name string, kind topics.DeviceType) string {
@@ -55,6 +66,7 @@ func MakeMQTTConn(opt Options) MQTT {
 	log.Print("Setting up MQTT...")
 	var mqtt MQTT
 
+	mqtt.commandChannel = make(chan Command, 20)
 	mqtt.baseTopic = opt.BaseTopic
 	mqtt.willTopic = opt.BaseTopic + "/LWT"
 
@@ -73,12 +85,7 @@ func MakeMQTTConn(opt Options) MQTT {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
 		if opt.ListenOnly == false {
 			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
-				go func() {
-					sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.CommandTopics)
-					if sensor != nil {
-						mqtt.PublishValue(sensor)
-					}
-				}()
+				mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.CommandTopics}
 			})
 			go func() {
 				if tokenMain.Wait() && tokenMain.Error() != nil {
@@ -87,12 +94,7 @@ func MakeMQTTConn(opt Options) MQTT {
 			}()
 			if opt.OptionalPCB == true {
 				tokenOptional := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
-					go func() {
-						sensor := codec.OnAquareaCommand(payload.Topic(), string(payload.Payload()), opt.OptionalTopics)
-						if sensor != nil {
-							mqtt.PublishValue(sensor)
-						}
-					}()
+					mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.OptionalTopics}
 				})
 				go func() {
 					if tokenOptional.Wait() && tokenOptional.Error() != nil {

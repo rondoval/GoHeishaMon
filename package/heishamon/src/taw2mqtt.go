@@ -23,7 +23,6 @@ func main() {
 	config.readConfig(*configPath)
 	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
-	commandChannel := codec.GetChannel()
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
 	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
 
@@ -56,9 +55,6 @@ func main() {
 		for _, c := range changed {
 			mclient.PublishValue(c)
 		}
-		if len(changed) > 0 {
-			codec.RestoreOptionalPCB(optionalPCBTopics.GetAll())
-		}
 		if config.OptionalSaveInterval > 0 {
 			go func() {
 				log.Println("PCB save thread starting")
@@ -74,6 +70,8 @@ func main() {
 	defer serialPort.Close()
 
 	received := make(chan bool)
+	acknowledge := make(chan []byte)
+	commandChannel := codec.Start(mclient, time.Duration(config.QueryInterval), time.Duration(config.OptionalQueryInterval), optionalPCBTopics, acknowledge)
 
 	go func() {
 		log.Println("Receiver thread starting")
@@ -90,7 +88,7 @@ func main() {
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
-				codec.Acknowledge(data)
+				acknowledge <- data
 			} else if len(data) == serial.DataMessageLength {
 				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
@@ -102,24 +100,6 @@ func main() {
 		}
 	}()
 
-	go func() {
-		log.Println("Starting periodic query ticker")
-		codec.SendPanasonicQuery()
-		for range time.Tick(time.Second * time.Duration(config.QueryInterval)) {
-			codec.SendPanasonicQuery()
-		}
-	}()
-
-	if config.OptionalPCB == true && config.ListenOnly == false {
-		go func() {
-			log.Println("Starting Optional PCB ticker")
-			codec.SendOptionalPCBQuery()
-			for range time.Tick(time.Second * time.Duration(config.OptionalQueryInterval)) {
-				codec.SendOptionalPCBQuery()
-			}
-		}()
-	}
-
 	log.Print("Entering main loop")
 	for {
 		serialPort.SendCommand(<-commandChannel)
@@ -130,18 +110,9 @@ func main() {
 			log.Println("Response not received, recovering")
 		}
 
-		// TODO combine requests into single command if many coming from MQTT?
 		var queueLen = len(commandChannel)
 		if queueLen > 10 {
 			log.Print("Command queue length: ", queueLen)
 		}
-
-		// switch len(value) {
-		// case codec.PANASONIC_QUERY_SIZE:
-		// 	queryTicker.Reset(time.Second * time.Duration(config.QueryInterval))
-
-		// case codec.OPTIONAL_QUERY_SIZE:
-		// 	optionQueryTicker.Reset(time.Second * time.Duration(config.OptionalQueryInterval))
-		// }
 	}
 }
