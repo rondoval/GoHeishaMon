@@ -66,17 +66,19 @@ func (c *commandHandler) encoderThread() {
 
 	panasonicTicker := time.NewTicker(time.Second * c.queryInterval)
 	optionalTicker := time.NewTicker(time.Second * c.optionalQueryInterval)
-	var setTimer *time.Timer
+	setTimer := time.NewTimer(0)
+	if !setTimer.Stop() {
+		<-setTimer.C
+	}
+	var setRunning bool
 
 	for {
 		select {
 		case command := <-c.commandChannel:
 			c.processCommand(command.Topic, command.Payload, command.AllTopics)
-			if command.AllTopics.Kind() == topics.Main {
-				if setTimer != nil && !setTimer.Stop() {
-					<-setTimer.C
-				}
-				setTimer = time.NewTimer(time.Second * 2)
+			if command.AllTopics.Kind() == topics.Main && !setRunning {
+				setTimer.Reset(time.Second * 2)
+				setRunning = true
 			}
 			// TODO speed up optional ticker?
 
@@ -88,6 +90,7 @@ func (c *commandHandler) encoderThread() {
 
 		case <-setTimer.C:
 			panasonicTicker.Reset(time.Second * c.queryInterval)
+			setRunning = false
 			c.sendPanasonicCommand()
 
 		case datagram := <-c.ackChannel:
