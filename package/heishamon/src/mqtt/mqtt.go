@@ -25,7 +25,7 @@ type Command struct {
 	AllTopics *topics.TopicData
 }
 
-// Use this to publish data via MQTT
+// Publish data via MQTT
 func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 	token := m.mclient.Publish(topic, qos, true, data)
 	go func() {
@@ -35,18 +35,18 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 	}()
 }
 
-// Use this to publish entity value via MQTT.
+// PublishValue posts an entity value via MQTT.
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
 	m.Publish(m.statusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
 
 }
 
-// Returns topic that shall be used by logging for posting log entries.
+// LogTopic returns a topic that shall be used by logging for posting log entries.
 func (m MQTT) LogTopic() string {
 	return m.baseTopic + "/log"
 }
 
-// Returns channel on which incoming MQTT requests are sent.
+// CommandChannel returns a channel on which incoming MQTT requests are sent.
 func (m MQTT) CommandChannel() chan Command {
 	return m.commandChannel
 }
@@ -55,7 +55,7 @@ func (m MQTT) statusTopic(name string, kind topics.DeviceType) string {
 	return fmt.Sprintf("%s/%s/%s", m.baseTopic, string(kind), name)
 }
 
-// This is used as options to MakeMQTTConn
+// Options is used as an argument to MakeMQTTConn
 type Options struct {
 	Server         string            // MQTT server address
 	Port           int               // MQTT server port
@@ -69,7 +69,7 @@ type Options struct {
 	OptionalTopics *topics.TopicData // Structure describing Optional PCB entities
 }
 
-// Creates a new MQTT connection.
+// MakeMQTTConn creates a new MQTT connection.
 // Sets up subscriptions.
 func MakeMQTTConn(opt Options) MQTT {
 	log.Print("Setting up MQTT...")

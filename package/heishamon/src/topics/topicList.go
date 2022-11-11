@@ -13,8 +13,8 @@ import (
 type DeviceType string
 
 const (
-	Main     DeviceType = "main"
-	Optional            = "optional"
+	Main     DeviceType = "main"     // type of device - IoT device
+	Optional            = "optional" // type of device - Optional PCB
 )
 
 // TopicEntry represents a single entity, e.g. a sensor or configuration option.
@@ -35,12 +35,12 @@ type TopicEntry struct {
 	kind              DeviceType
 }
 
-// Returns type of device this TopicEntry is used with.
+// Kind returns the type of the device this TopicEntry is used with.
 func (t *TopicEntry) Kind() DeviceType {
 	return t.kind
 }
 
-// Return current value of the entity, i.e. either received from the device or requested via MQTT.
+// CurrentValue returns the current value of the entity, i.e. either received from the device or requested via MQTT.
 // Thread safe.
 func (t *TopicEntry) CurrentValue() string {
 	t.currentValueMutex.Lock()
@@ -48,7 +48,7 @@ func (t *TopicEntry) CurrentValue() string {
 	return t.currentValue
 }
 
-// Updates the value of the entity.
+// UpdateValue updates the value of the entity.
 // Returns true if the value has changed.
 // Thread safe.
 func (t *TopicEntry) UpdateValue(newValue string) bool {
@@ -61,6 +61,7 @@ func (t *TopicEntry) UpdateValue(newValue string) bool {
 	return false
 }
 
+// TopicData stores entities for a single device
 type TopicData struct {
 	allTopics       []*TopicEntry
 	topicNameLookup map[string]*TopicEntry
@@ -68,7 +69,7 @@ type TopicData struct {
 	kind            DeviceType
 }
 
-// Creates a TopicData strucutre by reading a YAML file.
+// LoadTopics creates a TopicData strucutre by reading a YAML file.
 // filename - name of the file to load
 // deviceName - Name of the device, as should be used by HA discovery mechanism
 // kind - either Main or Optional
@@ -98,7 +99,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	return &t
 }
 
-// Used to store the Optional PCB state to a file.
+// Marshal stores the Optional PCB state to a file.
 // Stores values that are being send to the heat pump only.
 func (t *TopicData) Marshal(filename string) {
 	m := make(map[string]string)
@@ -123,7 +124,7 @@ func (t *TopicData) Marshal(filename string) {
 	}
 }
 
-// Used to restore the Optional PCB state from a file.
+// Unmarshal restores the Optional PCB state from a file.
 func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	changed = make([]*TopicEntry, 0, len(t.allTopics))
 
@@ -149,23 +150,23 @@ func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	return
 }
 
-// Returns an entity with name given as an argument.
+// Lookup returns an entity with a name given as an argument.
 func (t *TopicData) Lookup(name string) (*TopicEntry, bool) {
 	elem, ok := t.topicNameLookup[name]
 	return elem, ok
 }
 
-// Returns all entities.
+// GetAll returns all entities.
 func (t *TopicData) GetAll() []*TopicEntry {
 	return t.allTopics
 }
 
-// Returns device name.
+// DeviceName returns  the device name as used on HA.
 func (t TopicData) DeviceName() string {
 	return t.deviceName
 }
 
-// Returns type of the device, i.e. Main or Optional.
+// Kind returns the type of the device, i.e. Main or Optional.
 func (t TopicData) Kind() DeviceType {
 	return t.kind
 }
