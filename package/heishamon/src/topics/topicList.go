@@ -13,8 +13,10 @@ import (
 type DeviceType string
 
 const (
-	Main     DeviceType = "main"     // type of device - IoT device
-	Optional            = "optional" // type of device - Optional PCB
+	// Main - DeviceType = IoT device
+	Main DeviceType = "main"
+	// Optional - DeviceType = Optional PCB
+	Optional = "optional"
 )
 
 // TopicEntry represents a single entity, e.g. a sensor or configuration option.

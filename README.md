@@ -6,7 +6,7 @@ It consists of:
 
 ## About
 ### The gateway
-The gateway (called GoHeishaMon or heishamon) is responsible for parsing the data received from the Heat Pump and posting it to MQTT topics. It is a reimplementation of the https://github.com/Egyras/HeishaMon project in Go.
+The gateway (called GoHeishaMon or heishamon) is responsible for parsing the data received from the Heat Pump and posting it to MQTT topics. It is a reimplementation of the <https://github.com/Egyras/HeishaMon> project in Go.
 **Features:**
 * posting Heat Pump data to MQTT
 * changing settings on the Heat Pump

@@ -35,7 +35,7 @@ type commandHandler struct {
 	mqtt mqtt.MQTT
 }
 
-// This is used to invoke Start()
+// Options is used to invoke Start()
 type Options struct {
 	MQTT          mqtt.MQTT     // This is used to publish entity updates immediately
 	QueryInterval time.Duration // Maximum interval between IoT device queries

@@ -11,8 +11,12 @@ import (
 )
 
 const dataBufferSize = 1024
-const OptionalMessageLength = 20 // Length of an Optional PCB datagram with checksum
-const DataMessageLength = 203    // Lenght of an IoT device datagram with a checksum
+
+// OptionalMessageLength is a length of an Optional PCB datagram with checksum
+const OptionalMessageLength = 20
+
+// DataMessageLength is a length of an IoT device datagram with a checksum
+const DataMessageLength = 203
 const loggingRatio = 150
 
 // Comms represents a serial port used to communicate with the heat pump.
