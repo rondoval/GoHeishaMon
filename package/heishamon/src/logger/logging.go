@@ -18,6 +18,7 @@ type mLogger struct {
 
 var logger mLogger
 
+// Writer used to send log messages via MQTT
 func (m mLogger) Write(p []byte) (n int, err error) {
 	if m.mclient == nil {
 		return 0, errors.New("No MQTT client")
@@ -26,23 +27,27 @@ func (m mLogger) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+// Sets logging level, i.e. enables/disables debug logging and datagram logging.
 func SetLevel(loghex, logdebug bool) {
 	logger.logDebug = logdebug
 	logger.logHex = loghex
 }
 
+// Used to log heat pump datagrams. Controlled by logHex config option.
 func LogHex(comment string, command []byte) {
 	if logger.logHex {
 		log.Printf("%s: %X\n", comment, command)
 	}
 }
 
+// Adds debug entry to log. Controlled by logDebug config option.
 func LogDebug(format string, v ...any) {
 	if logger.logDebug {
 		log.Printf(format, v...)
 	}
 }
 
+// Configures logging mechanism and enables syslog logging.
 func Configure() {
 	log.SetFlags(log.Lshortfile)
 	syslog, err := gsyslog.NewLogger(gsyslog.LOG_INFO, "user", "heishamon")
@@ -51,6 +56,7 @@ func Configure() {
 	}
 }
 
+// Enables MQTT logging. Does not disable syslog logging.
 func RedirectLogMQTT(mclient *mqtt.MQTT) {
 	logger.mclient = mclient
 	logger.mqttTopic = mclient.LogTopic()

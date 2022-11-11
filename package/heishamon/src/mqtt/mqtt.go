@@ -9,6 +9,7 @@ import (
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
+// Holds state of the MQTT client
 type MQTT struct {
 	mclient   paho.Client
 	baseTopic string
@@ -17,12 +18,14 @@ type MQTT struct {
 	commandChannel chan Command
 }
 
+// This is the structure being passed on the channel returned by CommandChannel()
 type Command struct {
 	Topic     string
 	Payload   string
 	AllTopics *topics.TopicData
 }
 
+// Use this to publish data via MQTT
 func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 	token := m.mclient.Publish(topic, qos, true, data)
 	go func() {
@@ -32,15 +35,18 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 	}()
 }
 
+// Use this to publish entity value via MQTT.
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
 	m.Publish(m.statusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
 
 }
 
+// Returns topic that shall be used by logging for posting log entries.
 func (m MQTT) LogTopic() string {
 	return m.baseTopic + "/log"
 }
 
+// Returns channel on which incoming MQTT requests are sent.
 func (m MQTT) CommandChannel() chan Command {
 	return m.commandChannel
 }
@@ -49,26 +55,29 @@ func (m MQTT) statusTopic(name string, kind topics.DeviceType) string {
 	return fmt.Sprintf("%s/%s/%s", m.baseTopic, string(kind), name)
 }
 
+// This is used as options to MakeMQTTConn
 type Options struct {
-	Server         string
-	Port           int
-	Username       string
-	Password       string
-	BaseTopic      string
-	KeepAlive      time.Duration
-	ListenOnly     bool
-	OptionalPCB    bool
-	CommandTopics  *topics.TopicData
-	OptionalTopics *topics.TopicData
+	Server         string            // MQTT server address
+	Port           int               // MQTT server port
+	Username       string            // MQTT server username
+	Password       string            // MQTT server password
+	BaseTopic      string            // Base topic for use on MQTT
+	KeepAlive      time.Duration     // MQTT keepalive
+	ListenOnly     bool              // Do not send anything to the heat pump
+	OptionalPCB    bool              // Enable Optional PCB emulation
+	CommandTopics  *topics.TopicData // Structure describing IoT device entities
+	OptionalTopics *topics.TopicData // Structure describing Optional PCB entities
 }
 
+// Creates a new MQTT connection.
+// Sets up subscriptions.
 func MakeMQTTConn(opt Options) MQTT {
 	log.Print("Setting up MQTT...")
-	var mqtt MQTT
-
-	mqtt.commandChannel = make(chan Command, 20)
-	mqtt.baseTopic = opt.BaseTopic
-	mqtt.willTopic = opt.BaseTopic + "/LWT"
+	mqtt := MQTT{
+		commandChannel: make(chan Command, 20),
+		baseTopic:      opt.BaseTopic,
+		willTopic:      opt.BaseTopic + "/LWT",
+	}
 
 	pahoOpt := paho.NewClientOptions()
 	pahoOpt.AddBroker(fmt.Sprintf("%s://%s:%d", "tcp", opt.Server, opt.Port))

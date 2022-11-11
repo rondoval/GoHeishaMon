@@ -15,6 +15,8 @@ const OptionalMessageLength = 20
 const DataMessageLength = 203
 const loggingRatio = 150
 
+// Represents a serial port used to communicate with the heat pump.
+// Handles low level communications, i.e. packet assembly, checksum generation/verification etc.
 type Comms struct {
 	goodreads, totalreads int64
 	buffer                bytes.Buffer
@@ -22,6 +24,7 @@ type Comms struct {
 	serialConfig          *tarm.Config
 }
 
+// Opens the serial port and initializes internal structures.
 func (s *Comms) Open(portName string, timeout time.Duration) {
 	s.serialConfig = &tarm.Config{Name: portName, Baud: 9600, Parity: tarm.ParityEven, StopBits: tarm.Stop1, ReadTimeout: timeout}
 	s.openInternal()
@@ -38,6 +41,7 @@ func (s *Comms) openInternal() {
 	s.serialPort.Flush()
 }
 
+// Closes the serial port.
 func (s *Comms) Close() {
 	s.serialPort.Close()
 }
@@ -58,6 +62,8 @@ func calcChecksum(command []byte) byte {
 	return (chk ^ 0xFF) + 01
 }
 
+// Sends command to the heat pump.
+// Appends checksum.
 func (s *Comms) SendCommand(command []byte) {
 	var chk = calcChecksum(command)
 
@@ -130,6 +136,8 @@ func (s *Comms) checkHeader() (len int, ok bool) {
 	return
 }
 
+// Attempts to read heat pump reply. Returns nil if full packet with correct checksum was not assembled.
+// It holds state and should be called periodically.
 func (s *Comms) Read(logHexDump bool) []byte {
 	s.readToBuffer()
 

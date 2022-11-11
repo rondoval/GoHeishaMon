@@ -8,6 +8,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// DeviceType is an enum used for distinguishing between two emulated devices,
+// i.e. the Optional PCB and an IoT gateway.
 type DeviceType string
 
 const (
@@ -15,6 +17,7 @@ const (
 	Optional            = "optional"
 )
 
+// TopicEntry represents a single entity, e.g. a sensor or configuration option.
 type TopicEntry struct {
 	SensorName     string   `yaml:"sensorName"`
 	DecodeFunction string   `yaml:"decodeFunction"`
@@ -32,16 +35,22 @@ type TopicEntry struct {
 	kind              DeviceType
 }
 
+// Returns type of device this TopicEntry is used with.
 func (t *TopicEntry) Kind() DeviceType {
 	return t.kind
 }
 
+// Return current value of the entity, i.e. either received from the device or requested via MQTT.
+// Thread safe.
 func (t *TopicEntry) CurrentValue() string {
 	t.currentValueMutex.Lock()
 	defer t.currentValueMutex.Unlock()
 	return t.currentValue
 }
 
+// Updates the value of the entity.
+// Returns true if the value has changed.
+// Thread safe.
 func (t *TopicEntry) UpdateValue(newValue string) bool {
 	t.currentValueMutex.Lock()
 	defer t.currentValueMutex.Unlock()
@@ -59,6 +68,10 @@ type TopicData struct {
 	kind            DeviceType
 }
 
+// Creates a TopicData strucutre by reading a YAML file.
+// filename - name of the file to load
+// deviceName - Name of the device, as should be used by HA discovery mechanism
+// kind - either Main or Optional
 func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	log.Print("Loading topic data from: ", filename)
 	var t TopicData
@@ -85,6 +98,8 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	return &t
 }
 
+// Used to store the Optional PCB state to a file.
+// Stores values that are being send to the heat pump only.
 func (t *TopicData) Marshal(filename string) {
 	m := make(map[string]string)
 	for _, val := range t.allTopics {
@@ -108,6 +123,7 @@ func (t *TopicData) Marshal(filename string) {
 	}
 }
 
+// Used to restore the Optional PCB state from a file.
 func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	changed = make([]*TopicEntry, 0, len(t.allTopics))
 
@@ -133,19 +149,23 @@ func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	return
 }
 
+// Returns an entity with name given as an argument.
 func (t *TopicData) Lookup(name string) (*TopicEntry, bool) {
 	elem, ok := t.topicNameLookup[name]
 	return elem, ok
 }
 
+// Returns all entities.
 func (t *TopicData) GetAll() []*TopicEntry {
 	return t.allTopics
 }
 
+// Returns device name.
 func (t TopicData) DeviceName() string {
 	return t.deviceName
 }
 
+// Returns type of the device, i.e. Main or Optional.
 func (t TopicData) Kind() DeviceType {
 	return t.kind
 }

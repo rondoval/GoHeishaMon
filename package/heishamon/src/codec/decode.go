@@ -191,6 +191,8 @@ func convertIntToEnum(value int, topic *topics.TopicEntry) string {
 	return fmt.Sprintf("%d", value)
 }
 
+// Decode decodes a byte slice received from the heat pump into a TopicData structure.
+// The returned value is a slice containing all TopicEntry records that have changed as a result of decoding.
 func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
 	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
 	for _, v := range allTopics.GetAll() {
