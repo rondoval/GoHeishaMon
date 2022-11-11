@@ -46,7 +46,7 @@ type Options struct {
 	OptionalTopics        *topics.TopicData // Optional PCB topic data
 }
 
-// Initializes the codec.
+// Start initializes the codec.
 // Codec is reposnsible for decoding and encoding datagrams to/from the heat pump.
 // It generates heat pump queries and commands at regular intervals - these are sent to the returned channel.
 // The ackChannel shall receive all datagrams received from the heatpump targeted at the Optional PCB - this is required to acknowledge heat pump requests.

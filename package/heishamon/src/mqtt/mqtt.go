@@ -9,7 +9,7 @@ import (
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
-// Holds state of the MQTT client
+// MQTT holds state of the MQTT client
 type MQTT struct {
 	mclient   paho.Client
 	baseTopic string
@@ -18,7 +18,7 @@ type MQTT struct {
 	commandChannel chan Command
 }
 
-// This is the structure being passed on the channel returned by CommandChannel()
+// Command is the structure being passed on the channel returned by CommandChannel()
 type Command struct {
 	Topic     string
 	Payload   string

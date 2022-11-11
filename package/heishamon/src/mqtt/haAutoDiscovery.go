@@ -143,6 +143,7 @@ func (s *mqttCommon) marshal() (topic string, data []byte, err error) {
 	return topic, data, err
 }
 
+// PublishDiscoveryTopics publishes Home Assistant discovery topics for a device
 func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 	log.Printf("Publishing Home Assistant %s discovery topics...", allTopics.Kind())
 	for _, value := range allTopics.GetAll() {

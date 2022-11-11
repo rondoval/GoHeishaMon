@@ -51,18 +51,18 @@ Overview of the process:
 * Backup **all** partitions (dd if=/dev/mtdx of=/tmp/mtdx_backup, then scp somewhere safe)
 * Reboot to U-Boot
 * Change boot address and options
-    * *skip this if you intend to only boot it from RAM without altering the MTD*
-    * setenv bootargs console=ttyS0,115200
-    * setenv bootcmd bootm 0x9f050000
-    * saveenv
+  * *skip this if you intend to only boot it from RAM without altering the MTD*
+  * setenv bootargs console=ttyS0,115200
+  * setenv bootcmd bootm 0x9f050000
+  * saveenv
 * Download the initramfs image to RAM using TFTP (you may want to change the IP addresses in serverip and ipaddr variables)
-    * tftp 0x81000000 openwrt-ath79-generic-panasonic_cz-taw1-initramfs-kernel.bin
+  * tftp 0x81000000 openwrt-ath79-generic-panasonic_cz-taw1-initramfs-kernel.bin
 * Boot the image
-    * bootm 0x81000000
+  * bootm 0x81000000
 * If you want this permanet, **ssh** to OpenWRT and:
-    * download openwrt-ath79-generic-panasonic_cz-taw1-squashfs-sysupgrade.bin to /tmp
-    * sysupgrade /tmp/openwrt-ath79-generic-panasonic_cz-taw1-squashfs-sysupgrade.bin
-    * ... or just do it from LuCI
+  * download openwrt-ath79-generic-panasonic_cz-taw1-squashfs-sysupgrade.bin to /tmp
+  * sysupgrade /tmp/openwrt-ath79-generic-panasonic_cz-taw1-squashfs-sysupgrade.bin
+  * ... or just do it from LuCI
 
 In order to configure GoHeishaMon:
 * service heishamon stop

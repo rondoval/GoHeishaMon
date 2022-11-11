@@ -11,11 +11,11 @@ import (
 )
 
 const dataBufferSize = 1024
-const OptionalMessageLength = 20
-const DataMessageLength = 203
+const OptionalMessageLength = 20 // Length of an Optional PCB datagram with checksum
+const DataMessageLength = 203    // Lenght of an IoT device datagram with a checksum
 const loggingRatio = 150
 
-// Represents a serial port used to communicate with the heat pump.
+// Comms represents a serial port used to communicate with the heat pump.
 // Handles low level communications, i.e. packet assembly, checksum generation/verification etc.
 type Comms struct {
 	goodreads, totalreads int64
