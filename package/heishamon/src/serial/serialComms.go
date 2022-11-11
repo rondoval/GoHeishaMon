@@ -15,19 +15,22 @@ const OptionalMessageLength = 20
 const DataMessageLength = 203
 const loggingRatio = 150
 
-type SerialComms struct {
+// Represents a serial port used to communicate with the heat pump.
+// Handles low level communications, i.e. packet assembly, checksum generation/verification etc.
+type Comms struct {
 	goodreads, totalreads int64
 	buffer                bytes.Buffer
 	serialPort            *tarm.Port
 	serialConfig          *tarm.Config
 }
 
-func (s *SerialComms) Open(portName string, timeout time.Duration) {
+// Opens the serial port and initializes internal structures.
+func (s *Comms) Open(portName string, timeout time.Duration) {
 	s.serialConfig = &tarm.Config{Name: portName, Baud: 9600, Parity: tarm.ParityEven, StopBits: tarm.Stop1, ReadTimeout: timeout}
 	s.openInternal()
 }
 
-func (s *SerialComms) openInternal() {
+func (s *Comms) openInternal() {
 	var err error
 	s.serialPort, err = tarm.OpenPort(s.serialConfig)
 	if err != nil {
@@ -38,7 +41,8 @@ func (s *SerialComms) openInternal() {
 	s.serialPort.Flush()
 }
 
-func (s *SerialComms) Close() {
+// Closes the serial port.
+func (s *Comms) Close() {
 	s.serialPort.Close()
 }
 
@@ -58,7 +62,9 @@ func calcChecksum(command []byte) byte {
 	return (chk ^ 0xFF) + 01
 }
 
-func (s *SerialComms) SendCommand(command []byte) {
+// Sends command to the heat pump.
+// Appends checksum.
+func (s *Comms) SendCommand(command []byte) {
 	var chk = calcChecksum(command)
 
 	_, err := s.serialPort.Write(command) //first send command
@@ -72,7 +78,7 @@ func (s *SerialComms) SendCommand(command []byte) {
 	logger.LogHex("Send", command)
 }
 
-func (s *SerialComms) readToBuffer() {
+func (s *Comms) readToBuffer() {
 	data := make([]byte, dataBufferSize)
 	n, err := s.serialPort.Read(data)
 	if err != nil && err != io.EOF {
@@ -83,7 +89,7 @@ func (s *SerialComms) readToBuffer() {
 	s.buffer.Write(data[:n])
 }
 
-func (s *SerialComms) findHeaderStart() bool {
+func (s *Comms) findHeaderStart() bool {
 	if s.buffer.Len() < 1 {
 		return false
 	}
@@ -99,7 +105,7 @@ func (s *SerialComms) findHeaderStart() bool {
 	return true
 }
 
-func (s *SerialComms) dispatchDatagram(len int) []byte {
+func (s *Comms) dispatchDatagram(len int) []byte {
 	s.goodreads++
 	readpercentage := float64(s.totalreads-s.goodreads) / float64(s.totalreads) * 100.
 	if s.totalreads%loggingRatio == 0 {
@@ -116,7 +122,7 @@ func (s *SerialComms) dispatchDatagram(len int) []byte {
 	return nil
 }
 
-func (s *SerialComms) checkHeader() (len int, ok bool) {
+func (s *Comms) checkHeader() (len int, ok bool) {
 	// opt header: 71 11 01 50; 20 bytes
 	// header:     71 c8 01 10; 203 bytes
 	data := s.buffer.Bytes()
@@ -130,7 +136,9 @@ func (s *SerialComms) checkHeader() (len int, ok bool) {
 	return
 }
 
-func (s *SerialComms) Read(logHexDump bool) []byte {
+// Attempts to read heat pump reply. Returns nil if full packet with correct checksum was not assembled.
+// It holds state and should be called periodically.
+func (s *Comms) Read(logHexDump bool) []byte {
 	s.readToBuffer()
 
 	if s.findHeaderStart() && s.buffer.Len() >= 4 { // have entire header at start of buffer
