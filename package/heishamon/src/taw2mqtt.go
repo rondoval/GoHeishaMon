@@ -69,9 +69,17 @@ func main() {
 	serialPort.Open(config.SerialPort, time.Millisecond*time.Duration(config.SerialTimeout))
 	defer serialPort.Close()
 
-	received := make(chan bool)
-	acknowledge := make(chan []byte)
-	commandChannel := codec.Start(mclient, time.Duration(config.QueryInterval), time.Duration(config.OptionalQueryInterval), optionalPCBTopics, acknowledge)
+	receivedChannel := make(chan bool)
+	acknowledgeChannel := make(chan []byte)
+	commandChannel := codec.Start(codec.Options{
+		MQTT:          mclient,
+		QueryInterval: time.Duration(config.QueryInterval),
+		AckChannel:    acknowledgeChannel,
+
+		OptionalPCB:           config.OptionalPCB,
+		OptionalQueryInterval: time.Duration(config.OptionalQueryInterval),
+		OptionalTopics:        optionalPCBTopics,
+	})
 
 	go func() {
 		log.Println("Receiver thread starting")
@@ -79,7 +87,7 @@ func main() {
 			data := serialPort.Read(config.LogHexDump)
 			if data != nil {
 				select {
-				case received <- true:
+				case receivedChannel <- true:
 				default:
 				}
 			}
@@ -88,7 +96,7 @@ func main() {
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
-				acknowledge <- data
+				acknowledgeChannel <- data
 			} else if len(data) == serial.DataMessageLength {
 				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
@@ -104,7 +112,7 @@ func main() {
 	for {
 		serialPort.SendCommand(<-commandChannel)
 		select {
-		case <-received:
+		case <-receivedChannel:
 			//ok, did receive something, can send next request
 		case <-time.After(15 * time.Second):
 			log.Println("Response not received, recovering")

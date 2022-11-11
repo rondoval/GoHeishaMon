@@ -5,7 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rondoval/GoHeishaMon/logger"
 	"github.com/rondoval/GoHeishaMon/mqtt"
+	"github.com/rondoval/GoHeishaMon/serial"
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
@@ -28,27 +30,49 @@ type commandHandler struct {
 	queryInterval         time.Duration
 	optionalQueryInterval time.Duration
 
+	optionalPCB bool
+
 	mqtt mqtt.MQTT
 }
 
-func Start(mqtt mqtt.MQTT, queryInterval, optionalQueryInterval time.Duration, optionalTopics *topics.TopicData, ackChannel chan []byte) chan []byte {
-	var c commandHandler
-	c.mqtt = mqtt
-	c.commandChannel = mqtt.CommandChannel()
-	c.ackChannel = ackChannel
-	c.serialChannel = make(chan []byte, 20)
+// This is used to invoke Start()
+type Options struct {
+	MQTT          mqtt.MQTT     // This is used to publish entity updates immediately
+	QueryInterval time.Duration // Maximum interval between IoT device queries
+	AckChannel    chan []byte   // Channel used to receive heat pump data (for acknowledgements on Optional PCB)
 
-	c.optionalQueryInterval = optionalQueryInterval
-	c.queryInterval = queryInterval
+	OptionalPCB           bool              // Optional PCB emulation on/off
+	OptionalQueryInterval time.Duration     // Optional PCB maximum interval between datagrams
+	OptionalTopics        *topics.TopicData // Optional PCB topic data
+}
 
-	c.optionalPCBCommand = []byte{0xF1, 0x11, 0x01, 0x50, 0x00, 0x00, 0x40, 0xFF, 0xFF, 0xE5, 0xFF, 0xFF, 0x00, 0xFF, 0xEB, 0xFF, 0xFF, 0x00, 0x00}
-	for _, sensor := range optionalTopics.GetAll() {
-		if sensor.EncodeFunction != "" && sensor.CurrentValue() != "" {
-			encode(sensor, c.optionalPCBCommand)
-		}
+// Initializes the codec.
+// Codec is reposnsible for decoding and encoding datagrams to/from the heat pump.
+// It generates heat pump queries and commands at regular intervals - these are sent to the returned channel.
+// The ackChannel shall receive all datagrams received from the heatpump targeted at the Optional PCB - this is required to acknowledge heat pump requests.
+func Start(options Options) chan []byte {
+	c := commandHandler{
+		mqtt: options.MQTT,
+
+		commandChannel: options.MQTT.CommandChannel(),
+		ackChannel:     options.AckChannel,
+		serialChannel:  make(chan []byte, 20),
+
+		queryInterval:    options.QueryInterval,
+		panasonicCommand: newPanasonicCommand(),
+
+		optionalPCB:           options.OptionalPCB,
+		optionalQueryInterval: options.OptionalQueryInterval,
+		optionalPCBCommand:    []byte{0xF1, 0x11, 0x01, 0x50, 0x00, 0x00, 0x40, 0xFF, 0xFF, 0xE5, 0xFF, 0xFF, 0x00, 0xFF, 0xEB, 0xFF, 0xFF, 0x00, 0x00},
 	}
 
-	c.panasonicCommand = newPanasonicCommand()
+	if c.optionalPCB {
+		for _, sensor := range options.OptionalTopics.GetAll() {
+			if sensor.EncodeFunction != "" && sensor.CurrentValue() != "" {
+				encode(sensor, c.optionalPCBCommand)
+			}
+		}
+	}
 
 	go c.encoderThread()
 	return c.serialChannel
@@ -62,7 +86,9 @@ func newPanasonicCommand() []byte {
 
 func (c *commandHandler) encoderThread() {
 	c.sendPanasonicQuery()
-	c.sendOptionalPCBCommand()
+	if c.optionalPCB {
+		c.sendOptionalPCBCommand()
+	}
 
 	panasonicTicker := time.NewTicker(time.Second * c.queryInterval)
 	optionalTicker := time.NewTicker(time.Second * c.optionalQueryInterval)
@@ -86,7 +112,9 @@ func (c *commandHandler) encoderThread() {
 			c.sendPanasonicQuery()
 
 		case <-optionalTicker.C:
-			c.sendOptionalPCBCommand()
+			if c.optionalPCB {
+				c.sendOptionalPCBCommand()
+			}
 
 		case <-setTimer.C:
 			panasonicTicker.Reset(time.Second * c.queryInterval)
@@ -115,9 +143,14 @@ func (c *commandHandler) sendPanasonicQuery() {
 }
 
 func (c *commandHandler) acknowledge(datagram []byte) {
-	//response to heatpump should contain the data from heatpump on byte 4 and 5
-	c.optionalPCBCommand[4] = datagram[4]
-	c.optionalPCBCommand[5] = datagram[5]
+	// for Optional PCB: response to heatpump should contain the data from heatpump on byte 4 and 5
+	if len(datagram) == serial.OptionalMessageLength {
+		c.optionalPCBCommand[4] = datagram[4]
+		c.optionalPCBCommand[5] = datagram[5]
+	} else {
+		log.Printf("This does not look like an Optional PCB datagram. Len: %d", len(datagram))
+		logger.LogHex("Acknowledge", datagram)
+	}
 }
 
 func (c *commandHandler) processCommand(mqttTopic, payload string, allTopics *topics.TopicData) {
