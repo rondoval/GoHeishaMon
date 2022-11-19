@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rondoval/GoHeishaMon/topics"
+	paho "tinygo.org/x/drivers/net/mqtt"
 )
 
 // MQTT holds state of the MQTT client
@@ -87,10 +87,11 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetWill(mqtt.willTopic, "offline", 0, true)
 	pahoOpt.SetKeepAlive(opt.KeepAlive)
 
-	pahoOpt.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
-	pahoOpt.SetAutoReconnect(true) // default, but I want it explicit
-	pahoOpt.SetConnectRetry(true)
-	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
+	//	pahoOpt.SetCleanSession(true)  // don't want to receive entire backlog of setting changes
+	//	pahoOpt.SetAutoReconnect(true) // default, but I want it explicit
+	//	pahoOpt.SetConnectRetry(true)
+	//	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
+	connected := func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
 		if opt.ListenOnly == false {
 			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
@@ -113,7 +114,8 @@ func MakeMQTTConn(opt Options) MQTT {
 			}
 		}
 		log.Print("MQTT connected")
-	})
+		//	})
+	}
 
 	// connect to broker
 	mqtt.mclient = paho.NewClient(pahoOpt)
@@ -123,6 +125,7 @@ func MakeMQTTConn(opt Options) MQTT {
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Failed to connect broker, %v", token.Error())
 			//should not happen - SetConnectRetry=true
+			connected(mqtt.mclient)
 		}
 	}()
 	log.Println("MQTT set up completed")

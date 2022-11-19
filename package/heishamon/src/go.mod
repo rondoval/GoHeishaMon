@@ -8,6 +8,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+require tinygo.org/x/drivers v0.23.0 // indirect
+
 require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
