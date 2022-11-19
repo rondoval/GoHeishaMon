@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 
-	gsyslog "github.com/hashicorp/go-syslog"
+	//	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/rondoval/GoHeishaMon/mqtt"
 )
 
@@ -50,10 +50,10 @@ func LogDebug(format string, v ...any) {
 // Configure sets up logging mechanism and enables syslog logging.
 func Configure() {
 	log.SetFlags(log.Lshortfile)
-	syslog, err := gsyslog.NewLogger(gsyslog.LOG_INFO, "user", "heishamon")
-	if err == nil {
-		log.SetOutput(syslog)
-	}
+	// syslog, err := gsyslog.NewLogger(gsyslog.LOG_INFO, "user", "heishamon")
+	// if err == nil {
+	// 	log.SetOutput(syslog)
+	// }
 }
 
 // RedirectLogMQTT enables MQTT logging. Does not disable syslog logging.
