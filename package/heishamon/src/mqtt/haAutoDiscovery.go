@@ -34,9 +34,9 @@ type mqttCommon struct {
 	PayloadOff        string   `json:"payload_off,omitempty"`
 	Options           []string `json:"options,omitempty"`
 	UnitOfMeasurement string   `json:"unit_of_measurement,omitempty"`
-	Min               int      `json:"min,omitempty"`
-	Max               int      `json:"max,omitempty"`
-	Step              int      `json:"step,omitempty"`
+	Min               float64  `json:"min,omitempty"`
+	Max               float64  `json:"max,omitempty"`
+	Step              float64  `json:"step,omitempty"`
 	StateClass        string   `json:"state_class,omitempty"`
 	Mode              string   `json:"mode,omitempty"`
 
