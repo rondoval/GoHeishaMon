@@ -28,9 +28,9 @@ type TopicEntry struct {
 	DisplayUnit    string   `yaml:"displayUnit"`
 	Category       string   `yaml:"category"`
 	Values         []string `yaml:"values"`
-	Min            int      `yaml:"min"`
-	Max            int      `yaml:"max"`
-	Step           int      `yaml:"step"`
+	Min            float64  `yaml:"min"`
+	Max            float64  `yaml:"max"`
+	Step           float64  `yaml:"step"`
 
 	currentValue      string
 	currentValueMutex sync.Mutex

@@ -30,6 +30,7 @@ var encodeInt = map[string]func(int, byte) byte{
 	"setBit8":          func(input int, val byte) byte { return val&0xfe | byte(input)&1 },
 	"setBit7":          func(input int, val byte) byte { return val&0xfd | byte(input)&1<<1 },
 	"setBit6":          func(input int, val byte) byte { return val&0xfb | byte(input)&1<<2 },
+	"setBit5":          func(input int, val byte) byte { return val&0xf7 | byte(input)&1<<3 },
 	"setBit4":          func(input int, val byte) byte { return val&0xef | byte(input)&1<<4 },
 	"setBit2":          func(input int, val byte) byte { return val&0xbf | byte(input)&1<<6 },
 	"setBit1":          func(input int, val byte) byte { return val&0x7f | byte(input)&1<<7 },

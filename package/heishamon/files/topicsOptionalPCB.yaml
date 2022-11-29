@@ -63,22 +63,30 @@
     - Capacity_1
     - 'Off'
     - Capacity_2
-- sensorName: External_Thermostat_1
+- sensorName: External_Thermostat_1_Heat
   decodeOffset: 6
-  encodeFunction: setBit5and6Z
+  encodeFunction: setBit5
   values:
-    - No_demand
-    - Cool_demand
-    - Heat_demand
-    - Cool_and_Heat_demand
-- sensorName: External_Thermostat_2
+    - 'Off'
+    - 'On'
+- sensorName: External_Thermostat_1_Cool
   decodeOffset: 6
-  encodeFunction: setBit7and8Z
+  encodeFunction: setBit6
   values:
-    - No_demand
-    - Cool_demand
-    - Heat_demand
-    - Cool_and_Heat_demand
+    - 'Off'
+    - 'On'
+- sensorName: External_Thermostat_2_Heat
+  decodeOffset: 6
+  encodeFunction: setBit7
+  values:
+    - 'Off'
+    - 'On'
+- sensorName: External_Thermostat_2_Cool
+  decodeOffset: 6
+  encodeFunction: setBit8
+  values:
+    - 'Off'
+    - 'On'
 - sensorName: Pool_Temp
   decodeOffset: 7
   encodeFunction: temp2hex
