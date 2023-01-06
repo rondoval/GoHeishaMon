@@ -68,7 +68,7 @@ func Start(options Options) chan []byte {
 
 	if c.optionalPCB {
 		for _, sensor := range options.OptionalTopics.GetAll() {
-			if sensor.EncodeFunction != "" && sensor.CurrentValue() != "" {
+			if sensor.Writable() && sensor.CurrentValue() != "" {
 				encode(sensor, c.optionalPCBCommand)
 			}
 		}

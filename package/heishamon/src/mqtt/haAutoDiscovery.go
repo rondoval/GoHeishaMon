@@ -151,7 +151,7 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 		var mqttAdvert mqttCommon
 		mqttAdvert.encodeCommon(value, m.statusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
 
-		if value.EncodeFunction != "" {
+		if value.Writable() {
 			// Read-Write value
 			if len(value.Values) == 0 {
 				mqttAdvert.encodeNumber(value)
