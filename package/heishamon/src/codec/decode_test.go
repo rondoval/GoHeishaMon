@@ -14,6 +14,8 @@ func TestDecode(t *testing.T) {
 	command[99] = 123  // -5
 	command[143] = 150 // inlet 22
 	command[118] = 3   // inlet 0.5
+	command[169] = 57  // pump flow 0.22
+	command[170] = 25  // pump flow 25
 
 	Decode(topics, command)
 	holi, _ := topics.Lookup("Holiday_Mode_State")
@@ -32,5 +34,11 @@ func TestDecode(t *testing.T) {
 	t.Logf("Main_Inlet_Temp %s", inlet.CurrentValue())
 	if inlet.CurrentValue() != "22.50" {
 		t.Error("Wrong inlet temp")
+	}
+
+	pumpFlow, _ := topics.Lookup("Pump_Flow")
+	t.Logf("Pump_Flow %s", pumpFlow.CurrentValue())
+	if pumpFlow.CurrentValue() != "25.22" {
+		t.Error("Pump_Flow decode error")
 	}
 }

@@ -39,6 +39,9 @@ var decodeToInt = map[string]func(byte) int{
 }
 
 var decodeToFloat = map[string]func(byte) float64{
+	"getIntMinus1Div5":  func(input byte) float64 { return float64(input-1) / 5.0 },
+	"getIntegral":       func(input byte) float64 { return float64(input) },
+	"getFractional":     func(input byte) float64 { return (float64(input) - 1.0) / 256.0 },
 	"hex2temp":          hex2temp,
 	"hex2demand":        hex2demand,
 	"getFractionalLow":  func(input byte) float64 { return getFractional(input & 0b111) },
@@ -46,11 +49,9 @@ var decodeToFloat = map[string]func(byte) float64{
 }
 
 var decodeToString = map[string]func([]byte, topics.CodecEntry) string{
-	"getIntMinus1Div5": getIntMinus1Div5,
-	"getPumpFlow":      getPumpFlow,
-	"getWord":          getWord,
-	"getErrorInfo":     getErrorInfo,
-	"getModel":         getModel,
+	"getWord":      getWord,
+	"getErrorInfo": getErrorInfo,
+	"getModel":     getModel,
 }
 
 func getOpMode(input byte) int {
@@ -137,18 +138,6 @@ func hex2demand(input byte) float64 {
 	}
 
 	return demand
-}
-
-func getIntMinus1Div5(data []byte, entry topics.CodecEntry) string {
-	value := int(data[entry.Offset]) - 1
-	return fmt.Sprintf("%.2f", float32(value)/5)
-}
-
-func getPumpFlow(data []byte, _ topics.CodecEntry) string {
-	PumpFlow1 := int(data[170])
-	PumpFlow2 := ((float64(data[169]) - 1) / 256)
-	PumpFlow := float64(PumpFlow1) + PumpFlow2
-	return fmt.Sprintf("%.2f", PumpFlow)
 }
 
 func getErrorInfo(data []byte, _ topics.CodecEntry) string {

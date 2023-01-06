@@ -9,8 +9,10 @@
     - 'On'
 - sensorName: Pump_Flow
   codec:
-    - decodeFunction: getPumpFlow
-      offset: 0
+    - decodeFunction: getIntegral
+      offset: 170
+    - decodeFunction: getFractional
+      offset: 169
   displayUnit: l/min
 - sensorName: Force_DHW_State
   codec:
