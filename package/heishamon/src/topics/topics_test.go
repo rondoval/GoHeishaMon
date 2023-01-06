@@ -27,3 +27,13 @@ func TestLoadMain(t *testing.T) {
 		t.Error("Codec entries missing")
 	}
 }
+
+func TestLoadOpt(t *testing.T) {
+	topics := LoadTopics("../../files/topicsOptionalPCB.yaml", "TestDevice", Optional)
+	if topics.Kind() != Optional {
+		t.Error("Wrong kind")
+	}
+	if topics.DeviceName() != "TestDevice" {
+		t.Error("Name not set")
+	}
+}
