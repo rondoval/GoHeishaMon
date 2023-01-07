@@ -15,7 +15,6 @@ The gateway (called GoHeishaMon or heishamon) is responsible for parsing the dat
 * changing settings on the Heat Pump
 * supports Home Assistant's MQTT discovery
 * emulation of the Optional PCB (not tested at all)
- 
 
 GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump.
 The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in Syslog (and MQTT topic).
