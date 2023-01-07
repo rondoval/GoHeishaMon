@@ -34,6 +34,8 @@ var decodeToInt = map[string]func(byte) int{
 	"getBit4":             func(input byte) int { return int((input & 0b1000) >> 4) },
 	"getBit2":             func(input byte) int { return int((input & 0b100000) >> 6) },
 	"getBit1":             func(input byte) int { return int(input >> 7) },
+	"getHiNibble":         func(input byte) int { return int(((input >> 4) & 0b1111) - 1) },
+	"getLoNibble":         func(input byte) int { return int((input & 0b1111) - 1) },
 	"getOpMode":           getOpMode,
 	"getPower":            func(input byte) int { return (int(input) - 1) * 200 },
 }

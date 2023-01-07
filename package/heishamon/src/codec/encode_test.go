@@ -35,4 +35,15 @@ func TestEncode(t *testing.T) {
 	if command[99] != 123 {
 		t.Error("DHW_Heat_Delta encode failed")
 	}
+
+	z1set, _ := topics.Lookup("Z1_Sensor_Settings")
+	z1set.UpdateValue("External thermostat")
+	encode(z1set, command)
+	z2set, _ := topics.Lookup("Z2_Sensor_Settings")
+	z2set.UpdateValue("Internal thermostat")
+	encode(z2set, command)
+	if command[22] != 0x32 {
+		t.Errorf("Thermostat settings encode failed: %x", command[22])
+	}
+
 }

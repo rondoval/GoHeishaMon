@@ -16,6 +16,7 @@ func TestDecode(t *testing.T) {
 	command[118] = 3   // inlet 0.5
 	command[169] = 57  // pump flow 0.22
 	command[170] = 25  // pump flow 25
+	command[22] = 0x14 // Z1 - thermistor, Z2 - water temp
 
 	Decode(topics, command)
 	holi, _ := topics.Lookup("Holiday_Mode_State")
@@ -40,5 +41,17 @@ func TestDecode(t *testing.T) {
 	t.Logf("Pump_Flow %s", pumpFlow.CurrentValue())
 	if pumpFlow.CurrentValue() != "25.22" {
 		t.Error("Pump_Flow decode error")
+	}
+
+	z1set, _ := topics.Lookup("Z1_Sensor_Settings")
+	t.Logf("Z1_Sensor_Settings %s", z1set.CurrentValue())
+	if z1set.CurrentValue() != "Thermistor" {
+		t.Error("Z1_Sensor_Settings decode error")
+	}
+
+	z2set, _ := topics.Lookup("Z2_Sensor_Settings")
+	t.Logf("Z2_Sensor_Settings %s", z2set.CurrentValue())
+	if z2set.CurrentValue() != "Water temperature" {
+		t.Error("Z2_Sensor_Settings decode error")
 	}
 }

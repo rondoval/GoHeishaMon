@@ -987,3 +987,25 @@
   values:
     - 'Off'
     - 'On'
+- sensorName: Z1_Sensor_Settings
+  codec:
+    - decodeFunction: getLoNibble
+      encodeFunction: setLoNibble
+      offset: 22
+  category: config
+  values:
+    - Water temperature
+    - External thermostat
+    - Internal thermostat
+    - Thermistor
+- sensorName: Z2_Sensor_Settings
+  codec:
+    - decodeFunction: getHiNibble
+      encodeFunction: setHiNibble
+      offset: 22
+  category: config
+  values:
+    - Water temperature
+    - External thermostat
+    - Internal thermostat
+    - Thermistor

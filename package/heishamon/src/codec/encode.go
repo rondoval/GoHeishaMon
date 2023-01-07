@@ -34,6 +34,8 @@ var encodeInt = map[string]func(int, byte) byte{
 	"setBit4":          func(input int, val byte) byte { return val&0xef | byte(input)&1<<4 },
 	"setBit2":          func(input int, val byte) byte { return val&0xbf | byte(input)&1<<6 },
 	"setBit1":          func(input int, val byte) byte { return val&0x7f | byte(input)&1<<7 },
+	"setHiNibble":      func(input int, val byte) byte { return val&0xf | byte(input+1)&0xf<<4 },
+	"setLoNibble":      func(input int, val byte) byte { return val&0xf0 | byte(input+1)&0xf },
 	"setOpMode":        setOperationMode,
 }
 
