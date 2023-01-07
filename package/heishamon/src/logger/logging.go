@@ -1,3 +1,4 @@
+// Package logger implements a Syslog/MQTT logger.
 package logger
 
 import (

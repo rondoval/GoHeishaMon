@@ -1,3 +1,4 @@
+// Package codec implements functions used to decode and encode heat pump data to binary format.
 package codec
 
 import (
