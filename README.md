@@ -11,7 +11,7 @@ This is an alternative firmware for the Panasonic CZ-TAW1, an IoT adapter for th
 
 The gateway (called GoHeishaMon or heishamon) is responsible for parsing the data received from the Heat Pump and posting it to MQTT topics. It is a reimplementation of the <https://github.com/Egyras/HeishaMon> project in Go.
 
-#### Features
+#### Gateway features
 
 * posting Heat Pump data to MQTT
 * changing settings on the Heat Pump
@@ -28,7 +28,7 @@ GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go
 
 ### OpenWRT 21.02.1 image for the CZ-TAW1
 
-#### Features
+#### Firmware features
 
 * stock OpenWRT, with up-to-date kernel (5.4.158)
 * GoHeishaMon is preinstalled and running as a system service (named heishamon)
