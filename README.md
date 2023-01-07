@@ -1,6 +1,6 @@
 # Custom firmware for the Panasonic CZ-TAW1
-This is an alternative firmware for the Panasonic CZ-TAW1, an IoT adapter for the H-series heat pumps.
-It consists of:
+
+This is an alternative firmware for the Panasonic CZ-TAW1, an IoT adapter for the H-series heat pumps. It consists of:
 
 * a gateway written in Go that translates serial comms with the heat pump on the CN-CNT link to MQTT
 * a port of OpenWRT (21.02.1 currently) for the CZ-TAW1
@@ -11,15 +11,14 @@ It consists of:
 
 The gateway (called GoHeishaMon or heishamon) is responsible for parsing the data received from the Heat Pump and posting it to MQTT topics. It is a reimplementation of the <https://github.com/Egyras/HeishaMon> project in Go.
 
-#### Features:
+#### Features
 
 * posting Heat Pump data to MQTT
 * changing settings on the Heat Pump
 * supports Home Assistant's MQTT discovery
 * emulation of the Optional PCB (not tested at all)
 
-GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump.
-The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in Syslog (and MQTT topic).
+GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump. The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in Syslog (and MQTT topic).
 
 #### Note
 
@@ -29,7 +28,7 @@ The new version is running as a daemon. As a consequence, the logs are no longer
 
 ### OpenWRT 21.02.1 image for the CZ-TAW1
 
-**Features**
+#### Features
 
 * stock OpenWRT, with up-to-date kernel (5.4.158)
 * GoHeishaMon is preinstalled and running as a system service (named heishamon)
@@ -58,14 +57,14 @@ Overview of the process:
 
 * Backup MTD layout (cat /proc/mtd)
 * Backup U-Boot env (fw_printenv)
-* Backup **all** partitions (dd if=/dev/mtdx of=/tmp/mtdx_backup, then scp somewhere safe)
+* Backup **all** partitions (dd if=/dev/mtdx of=/tmp/mtdx_backup, then scp somewhere)
 * Reboot to U-Boot
 * Change boot address and options
   * *skip this if you intend to only boot it from RAM without altering the MTD*
   * setenv bootargs console=ttyS0,115200
   * setenv bootcmd bootm 0x9f050000
   * saveenv
-* Download the initramfs image to RAM using TFTP (you may want to change the IP addresses in serverip and ipaddr variables)
+* Download the initramfs image to RAM using TFTP (set the IP addresses in serverip/ipaddr variables)
   * tftp 0x81000000 openwrt-ath79-generic-panasonic_cz-taw1-initramfs-kernel.bin
 * Boot the image
   * bootm 0x81000000
