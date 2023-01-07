@@ -1,3 +1,4 @@
+// Package mqtt implements MQTT communication with Home Assistant.
 package mqtt
 
 import (

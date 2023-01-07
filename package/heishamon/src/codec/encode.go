@@ -1,3 +1,4 @@
+// Package codec implements functions used to decode and encode heat pump data to binary format.
 package codec
 
 import (
@@ -34,6 +35,8 @@ var encodeInt = map[string]func(int, byte) byte{
 	"setBit4":          func(input int, val byte) byte { return val&0xef | byte(input)&1<<4 },
 	"setBit2":          func(input int, val byte) byte { return val&0xbf | byte(input)&1<<6 },
 	"setBit1":          func(input int, val byte) byte { return val&0x7f | byte(input)&1<<7 },
+	"setHiNibble":      func(input int, val byte) byte { return val&0xf | byte(input+1)&0xf<<4 },
+	"setLoNibble":      func(input int, val byte) byte { return val&0xf0 | byte(input+1)&0xf },
 	"setOpMode":        setOperationMode,
 }
 
@@ -124,34 +127,36 @@ func verboseToNumber(value string, sensor *topics.TopicEntry) (int, error) {
 }
 
 func encode(sensor *topics.TopicEntry, command []byte) {
-	if sensor.EncodeFunction == "" {
+	if !sensor.Writable() {
 		log.Println("No encode function specified: " + sensor.SensorName)
 		return
 	}
 	msg := sensor.CurrentValue()
 
-	if handler, ok := encodeInt[sensor.EncodeFunction]; ok {
-		v, err := verboseToNumber(msg, sensor)
-		if err != nil {
-			log.Println(err)
+	for _, codec := range sensor.Codec {
+		if handler, ok := encodeInt[codec.EncodeFunction]; ok {
+			v, err := verboseToNumber(msg, sensor)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			data := handler(v, command[codec.Offset])
+			log.Printf("Setting offset %d to %d", codec.Offset, data)
+			command[codec.Offset] = data
+			return
+		} else if handler, ok := encodeFloat[codec.EncodeFunction]; ok {
+			v, err := strconv.ParseFloat(msg, 64)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			data := handler(v)
+			log.Printf("Setting offset %d to %d", codec.Offset, data)
+			command[codec.Offset] = data
+			return
+		} else {
+			log.Println("No encoder implemented for " + codec.EncodeFunction)
 			return
 		}
-		data := handler(v, command[sensor.DecodeOffset])
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
-		command[sensor.DecodeOffset] = data
-		return
-	} else if handler, ok := encodeFloat[sensor.EncodeFunction]; ok {
-		v, err := strconv.ParseFloat(msg, 64)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		data := handler(v)
-		log.Printf("Setting offset %d to %d", sensor.DecodeOffset, data)
-		command[sensor.DecodeOffset] = data
-		return
-	} else {
-		log.Println("No encoder implemented for " + sensor.EncodeFunction)
-		return
 	}
 }

@@ -1,3 +1,4 @@
+// Package serial implements serial port communication with the heat pump.
 package serial
 
 import (

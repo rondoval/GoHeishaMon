@@ -1,6 +1,8 @@
+// Package codec implements functions used to decode and encode heat pump data to binary format.
 package codec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -33,18 +35,26 @@ var decodeToInt = map[string]func(byte) int{
 	"getBit4":             func(input byte) int { return int((input & 0b1000) >> 4) },
 	"getBit2":             func(input byte) int { return int((input & 0b100000) >> 6) },
 	"getBit1":             func(input byte) int { return int(input >> 7) },
+	"getHiNibble":         func(input byte) int { return int(((input >> 4) & 0b1111) - 1) },
+	"getLoNibble":         func(input byte) int { return int((input & 0b1111) - 1) },
 	"getOpMode":           getOpMode,
-	"getModel":            getModel,
 	"getPower":            func(input byte) int { return (int(input) - 1) * 200 },
-	"hex2temp":            hex2temp,
-	"hex2demand":          hex2demand,
 }
 
-var decodeToString = map[string]func([]byte, int) string{
-	"getIntMinus1Div5": getIntMinus1Div5,
-	"getPumpFlow":      getPumpFlow,
-	"getWord":          getWord,
-	"getErrorInfo":     getErrorInfo,
+var decodeToFloat = map[string]func(byte) float64{
+	"getIntMinus1Div5":  func(input byte) float64 { return float64(input-1) / 5.0 },
+	"getIntegral":       func(input byte) float64 { return float64(input) },
+	"getFractional":     func(input byte) float64 { return (float64(input) - 1.0) / 256.0 },
+	"hex2temp":          hex2temp,
+	"hex2demand":        hex2demand,
+	"getFractionalLow":  func(input byte) float64 { return getFractional(input & 0b111) },
+	"getFractionalHigh": func(input byte) float64 { return getFractional((input >> 3) & 0b111) },
+}
+
+var decodeToString = map[string]func([]byte, topics.CodecEntry) string{
+	"getWord":      getWord,
+	"getErrorInfo": getErrorInfo,
+	"getModel":     getModel,
 }
 
 func getOpMode(input byte) int {
@@ -76,44 +86,32 @@ func getOpMode(input byte) int {
 	}
 }
 
-func getModel(input byte) int {
-	switch int(input) {
-	case 19:
-		return 0
-	case 20:
-		return 1
-	case 119:
-		return 2
-	case 136:
-		return 3
-	case 133:
-		return 4
-	case 134:
-		return 5
-	case 135:
-		return 6
-	case 113:
-		return 7
-	case 67:
-		return 8
-	case 51:
-		return 9
-	case 21:
-		return 10
-	case 65:
-		return 11
-	case 69:
-		return 12
-	case 116:
-		return 13
-	case 130:
-		return 14
-	default:
-		return -1
+func getModel(data []byte, entry topics.CodecEntry) string {
+	fingerprint := data[entry.Offset : entry.Offset+9]
+	var arr []topics.MappingEntry
+	for _, val := range arr {
+		if bytes.Equal(val.ID, fingerprint) {
+			return val.Name
+		}
 	}
+	return fmt.Sprintf("Unknwon model with fingerprint: %x", fingerprint)
 }
 
-func hex2temp(input byte) int {
+func getFractional(input byte) float64 {
+	switch input {
+	case 1:
+		return 0.0
+	case 2:
+		return 0.25
+	case 3:
+		return 0.5
+	case 4:
+		return 0.75
+	}
+	return 0
+}
+
+func hex2temp(input byte) float64 {
 	const Uref float64 = 255
 	const constant float64 = 3695
 	const R25 float64 = 6340
@@ -123,12 +121,11 @@ func hex2temp(input byte) int {
 	hextemp := float64(input)
 
 	RT := hextemp * Rf / (Uref - hextemp)
-	var temp int = int(constant/(math.Log(RT/R25)+constant/(T25+K)) - K)
-	return temp
+	return constant/(math.Log(RT/R25)+constant/(T25+K)) - K
 }
 
-func hex2demand(input byte) int {
-	var demand int
+func hex2demand(input byte) float64 {
+	var demand float64
 
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
@@ -140,25 +137,13 @@ func hex2demand(input byte) int {
 	} else {
 		const a float64 = 95. / (max - min)
 		const b float64 = 5 - 95.*min/(max-min)
-		demand = int(a*float64(input) + b)
+		demand = a*float64(input) + b
 	}
 
 	return demand
 }
 
-func getIntMinus1Div5(data []byte, index int) string {
-	value := int(data[index]) - 1
-	return fmt.Sprintf("%.2f", float32(value)/5)
-}
-
-func getPumpFlow(data []byte, _ int) string {
-	PumpFlow1 := int(data[170])
-	PumpFlow2 := ((float64(data[169]) - 1) / 256)
-	PumpFlow := float64(PumpFlow1) + PumpFlow2
-	return fmt.Sprintf("%.2f", PumpFlow)
-}
-
-func getErrorInfo(data []byte, _ int) string {
+func getErrorInfo(data []byte, _ topics.CodecEntry) string {
 	errorType := int(data[113])
 	errorNumber := int(data[114]) - 17
 	var errorString string
@@ -176,8 +161,8 @@ func getErrorInfo(data []byte, _ int) string {
 	return errorString
 }
 
-func getWord(data []byte, index int) string {
-	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[index+1], data[index]}))-1)
+func getWord(data []byte, entry topics.CodecEntry) string {
+	return fmt.Sprintf("%d", int(binary.BigEndian.Uint16([]byte{data[entry.Offset+1], data[entry.Offset]}))-1)
 }
 
 func convertIntToEnum(value int, topic *topics.TopicEntry) string {
@@ -197,19 +182,25 @@ func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
 	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
 	for _, v := range allTopics.GetAll() {
 		var topicValue string
+		floatValue := 0.0
 
-		if v.DecodeFunction != "" {
-			if byteOperator, ok := decodeToInt[v.DecodeFunction]; ok {
-				topicValue = convertIntToEnum(byteOperator(data[v.DecodeOffset]), v)
-			} else if arrayOperator, ok := decodeToString[v.DecodeFunction]; ok {
-				topicValue = arrayOperator(data, v.DecodeOffset)
+		for _, decode := range v.Codec {
+			if byteOperator, ok := decodeToInt[decode.DecodeFunction]; ok {
+				decoded := byteOperator(data[decode.Offset])
+				floatValue += float64(decoded)
+				topicValue = convertIntToEnum(decoded, v)
+			} else if floatOperator, ok := decodeToFloat[decode.DecodeFunction]; ok {
+				floatValue += floatOperator(data[decode.Offset])
+				topicValue = fmt.Sprintf("%.2f", floatValue)
+			} else if arrayOperator, ok := decodeToString[decode.DecodeFunction]; ok {
+				topicValue = arrayOperator(data, decode)
 			} else {
-				log.Print("Unknown codec function: ", v.DecodeFunction)
+				log.Print("Unknown codec function: ", decode.DecodeFunction)
 			}
+		}
 
-			if v.UpdateValue(topicValue) {
-				changed = append(changed, v)
-			}
+		if v.UpdateValue(topicValue) {
+			changed = append(changed, v)
 		}
 	}
 	return changed

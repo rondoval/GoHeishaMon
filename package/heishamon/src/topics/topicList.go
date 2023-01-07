@@ -1,3 +1,5 @@
+// Package topics implements a structure used for representing topic data for the heat pump,
+// including loading topic data from a YAML file and loading/storing of writable topics data.
 package topics
 
 import (
@@ -19,22 +21,40 @@ const (
 	Optional = "optional"
 )
 
+// MappingEntry represents a relation between a byte array with a hardware ID and hardware name
+type MappingEntry struct {
+	ID   []byte `yaml:"id"`
+	Name string `yaml:"name"`
+}
+
+// CodecEntry represents an encoding/decoding function
+type CodecEntry struct {
+	EncodeFunction string `yaml:"encodeFunction"`
+	DecodeFunction string `yaml:"decodeFunction"`
+	Offset         int    `yaml:"offset"`
+}
+
 // TopicEntry represents a single entity, e.g. a sensor or configuration option.
 type TopicEntry struct {
-	SensorName     string   `yaml:"sensorName"`
-	DecodeFunction string   `yaml:"decodeFunction"`
-	EncodeFunction string   `yaml:"encodeFunction"`
-	DecodeOffset   int      `yaml:"decodeOffset"`
-	DisplayUnit    string   `yaml:"displayUnit"`
-	Category       string   `yaml:"category"`
-	Values         []string `yaml:"values"`
-	Min            float64  `yaml:"min"`
-	Max            float64  `yaml:"max"`
-	Step           float64  `yaml:"step"`
+	SensorName  string         `yaml:"sensorName"`
+	Codec       []CodecEntry   `yaml:"codec"`
+	DisplayUnit string         `yaml:"displayUnit"`
+	Category    string         `yaml:"category"`
+	Values      []string       `yaml:"values"`
+	Mapping     []MappingEntry `yaml:"mapping"`
+	Min         float64        `yaml:"min"`
+	Max         float64        `yaml:"max"`
+	Step        float64        `yaml:"step"`
 
 	currentValue      string
 	currentValueMutex sync.Mutex
 	kind              DeviceType
+	writable          bool
+}
+
+// Writable returns true if this TopicEntry has got at least one encode function, i.e. it can be written to the heat pump.
+func (t *TopicEntry) Writable() bool {
+	return t.writable
 }
 
 // Kind returns the type of the device this TopicEntry is used with.
@@ -93,6 +113,12 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	for _, val := range t.allTopics {
 		t.topicNameLookup[val.SensorName] = val
 		val.kind = kind
+		val.writable = false
+		for _, codec := range val.Codec {
+			if codec.EncodeFunction != "" {
+				val.writable = true
+			}
+		}
 	}
 
 	t.deviceName = deviceName
@@ -108,7 +134,7 @@ func (t *TopicData) Marshal(filename string) {
 	for _, val := range t.allTopics {
 		// we'll marshal only the values that we write/send to the pump
 		// this is the state that is to be restored after reboot
-		if val.EncodeFunction != "" {
+		if val.Writable() {
 			m[val.SensorName] = val.CurrentValue()
 		}
 	}

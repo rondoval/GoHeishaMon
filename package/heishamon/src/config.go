@@ -1,3 +1,4 @@
+// Package main is the acutal Heishamon program.
 package main
 
 import (
