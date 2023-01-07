@@ -8,8 +8,10 @@ It consists of:
 ## About
 
 ### The gateway
+
 The gateway (called GoHeishaMon or heishamon) is responsible for parsing the data received from the Heat Pump and posting it to MQTT topics. It is a reimplementation of the <https://github.com/Egyras/HeishaMon> project in Go.
-**Features:**
+
+#### Features:
 
 * posting Heat Pump data to MQTT
 * changing settings on the Heat Pump
@@ -19,7 +21,8 @@ The gateway (called GoHeishaMon or heishamon) is responsible for parsing the dat
 GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump.
 The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in Syslog (and MQTT topic).
 
-*Note*
+#### Note
+
 * the binary is /usr/bin/heishamon by default
 * the configuration is stored in /etc/heishamon/ and is preserved on upgrades
 * the service name is **heishamon**
@@ -29,7 +32,7 @@ The new version is running as a daemon. As a consequence, the logs are no longer
 **Features**
 
 * stock OpenWRT, with up-to-date kernel (5.4.158)
-* GoHeishaMon is preinstalled and running as a system service (named heishamon) 
+* GoHeishaMon is preinstalled and running as a system service (named heishamon)
 * sysupgrade and upgrades from LuCI are working
 * The CZ-TAW1's WiFi can be used as an Access Point
 * ca. 6.6 MiB free on JFFS
@@ -42,6 +45,7 @@ There is no default password. The default host name is "aquarea".
 This firmware is **not** using the factory MTD layout, i.e. the two "sides" are gone. In exchange you have a lot more space on the JFFS partiion. Of the stock partitions, u-boot, u-boot env and art are preserved. There is no easy way to migrate from stock and there is no easy way back. Back up everything.
 
 ## Installation
+
 Beware: This is a dangerous process that may brick your device! You do it on your own responsibility.
 
 ### Prerequisites
