@@ -1,3 +1,5 @@
+// Package topics implements a structure used for representing topic data for the heat pump,
+// including loading topic data from a YAML file and loading/storing of writable topics data.
 package topics
 
 import (
@@ -19,11 +21,13 @@ const (
 	Optional = "optional"
 )
 
+// MappingEntry represents a relation between a byte array with a hardware ID and hardware name
 type MappingEntry struct {
-	Id   []byte `yaml:"id"`
+	ID   []byte `yaml:"id"`
 	Name string `yaml:"name"`
 }
 
+// CodecEntry represents an encoding/decoding function
 type CodecEntry struct {
 	EncodeFunction string `yaml:"encodeFunction"`
 	DecodeFunction string `yaml:"decodeFunction"`
@@ -48,6 +52,7 @@ type TopicEntry struct {
 	writable          bool
 }
 
+// Writable returns true if this TopicEntry has got at least one encode function, i.e. it can be written to the heat pump.
 func (t *TopicEntry) Writable() bool {
 	return t.writable
 }

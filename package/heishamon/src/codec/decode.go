@@ -89,7 +89,7 @@ func getModel(data []byte, entry topics.CodecEntry) string {
 	fingerprint := data[entry.Offset : entry.Offset+9]
 	var arr []topics.MappingEntry
 	for _, val := range arr {
-		if bytes.Equal(val.Id, fingerprint) {
+		if bytes.Equal(val.ID, fingerprint) {
 			return val.Name
 		}
 	}
