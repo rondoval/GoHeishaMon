@@ -4,7 +4,7 @@
 # options you can use, and when you might want them.
 
 USE_PROCD=1
-START=99
+START=95
 
 start_service() {
         [ -e /etc/heishamon/config.yaml ] || return 1

@@ -4,6 +4,9 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/rondoval/GoHeishaMon/codec"
@@ -109,10 +112,22 @@ func main() {
 		}
 	}()
 
+	shutdownChannel := make(chan os.Signal, 1)
+	signal.Notify(shutdownChannel, syscall.SIGTERM)
+	shallTerminate := false
+
 	log.Print("Entering main loop")
 	for {
-		serialPort.SendCommand(<-commandChannel)
+		command := <-commandChannel
+		serialPort.SendCommand(command)
+		if shallTerminate && (!config.OptionalPCB || len(command) == codec.OptionalDatagramSize) {
+			return
+		}
+
 		select {
+		case <-shutdownChannel:
+			log.Print("SIGTERM received")
+			shallTerminate = true
 		case <-receivedChannel:
 			//ok, did receive something, can send next request
 		case <-time.After(15 * time.Second):
