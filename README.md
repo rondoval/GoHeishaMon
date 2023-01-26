@@ -3,7 +3,7 @@
 This is an alternative firmware for the Panasonic CZ-TAW1, an IoT adapter for the H-series heat pumps. It consists of:
 
 * a gateway written in Go that translates serial comms with the heat pump on the CN-CNT link to MQTT
-* a port of OpenWRT (21.02.1 currently) for the CZ-TAW1
+* a port of OpenWRT (22.03.3 currently) for the CZ-TAW1
 
 ## About
 
@@ -16,9 +16,9 @@ The gateway (called GoHeishaMon or heishamon) is responsible for parsing the dat
 * posting Heat Pump data to MQTT
 * changing settings on the Heat Pump
 * supports Home Assistant's MQTT discovery
-* emulation of the Optional PCB (not tested at all)
+* emulation of the Optional PCB
 
-GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump. The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in Syslog (and MQTT topic).
+GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go. It requires a serial port connection to the Heat Pump. The new version is running as a daemon. As a consequence, the logs are no longer written to stdout, they end up in system log (and MQTT topic).
 
 #### Note
 
@@ -26,22 +26,22 @@ GoHeishaMon can be used without the CZ-TAW1 module on a platform supported by Go
 * the configuration is stored in /etc/heishamon/ and is preserved on upgrades
 * the service name is **heishamon**
 
-### OpenWRT 21.02.1 image for the CZ-TAW1
+### OpenWRT 22.03.3 image for the CZ-TAW1
 
 #### Firmware features
 
-* stock OpenWRT, with up-to-date kernel (5.4.158)
+* stock OpenWRT, with up-to-date kernel (5.10.161)
 * GoHeishaMon is preinstalled and running as a system service (named heishamon)
 * sysupgrade and upgrades from LuCI are working
 * The CZ-TAW1's WiFi can be used as an Access Point
-* ca. 6.6 MiB free on JFFS
+* ca. 5.5 MiB free on JFFS
 * WPA3, LuCI over HTTPS etc.
 
 This is pretty much stock OpenWRT, by default configured as an Acess Point/range extender, i.e. on first boot the Ethernet interface is configured as an DHCP client, and the AP is disabled. Both are in the LAN firewall zone, though one can of course reconfigure it and use the device as a router.
 There is no default password. The default host name is "aquarea".
 
 *Note*
-This firmware is **not** using the factory MTD layout, i.e. the two "sides" are gone. In exchange you have a lot more space on the JFFS partiion. Of the stock partitions, u-boot, u-boot env and art are preserved. There is no easy way to migrate from stock and there is no easy way back. Back up everything.
+This firmware is **not** using the factory MTD layout, i.e. the two "sides" of the original firmware are gone. In exchange you have a lot more space on the JFFS partiion. Of the stock partitions, u-boot, u-boot env and art are preserved. There is no easy way to migrate from stock and there is no easy way back. Back up everything.
 
 ## Installation
 
