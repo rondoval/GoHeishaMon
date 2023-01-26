@@ -50,11 +50,17 @@ type TopicEntry struct {
 	currentValueMutex sync.Mutex
 	kind              DeviceType
 	writable          bool
+	readable          bool
 }
 
 // Writable returns true if this TopicEntry has got at least one encode function, i.e. it can be written to the heat pump.
 func (t *TopicEntry) Writable() bool {
 	return t.writable
+}
+
+// Readable returns true if this TopicEntry hs got at least one decode function, i.e. it can be read from.
+func (t *TopicEntry) Readable() bool {
+	return t.readable
 }
 
 // Kind returns the type of the device this TopicEntry is used with.
@@ -114,9 +120,13 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 		t.topicNameLookup[val.SensorName] = val
 		val.kind = kind
 		val.writable = false
+		val.readable = false
 		for _, codec := range val.Codec {
 			if codec.EncodeFunction != "" {
 				val.writable = true
+			}
+			if codec.DecodeFunction != "" {
+				val.readable = true
 			}
 		}
 	}

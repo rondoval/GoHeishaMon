@@ -87,7 +87,7 @@ func getOpMode(input byte) int {
 }
 
 func getModel(data []byte, entry topics.CodecEntry) string {
-	fingerprint := data[entry.Offset : entry.Offset+9]
+	fingerprint := data[entry.Offset : entry.Offset+10]
 	var arr []topics.MappingEntry
 	for _, val := range arr {
 		if bytes.Equal(val.ID, fingerprint) {
@@ -181,10 +181,18 @@ func convertIntToEnum(value int, topic *topics.TopicEntry) string {
 func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
 	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
 	for _, v := range allTopics.GetAll() {
+		if !v.Readable() {
+			continue
+		}
+
 		var topicValue string
 		floatValue := 0.0
 
 		for _, decode := range v.Codec {
+			if decode.DecodeFunction == "" {
+				continue
+			}
+
 			if byteOperator, ok := decodeToInt[decode.DecodeFunction]; ok {
 				decoded := byteOperator(data[decode.Offset])
 				floatValue += float64(decoded)
