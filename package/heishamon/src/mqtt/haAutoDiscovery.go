@@ -90,7 +90,7 @@ func (s *mqttCommon) encodeSensor(info *topics.TopicEntry) {
 	switch s.UnitOfMeasurement {
 	case "h", "Counter":
 		s.StateClass = "total_increasing"
-	case "ErrorState", "":
+	case "":
 		// nothing
 	default:
 		s.StateClass = "measurement"
