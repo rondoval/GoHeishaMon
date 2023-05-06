@@ -352,7 +352,6 @@
 - sensorName: Error
   codec:
     - decodeFunction: getErrorInfo
-  displayUnit: ErrorState
 - sensorName: Room_Holiday_Shift_Temp
   codec:
     - decodeFunction: getIntMinus128
