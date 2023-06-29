@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=heishamon
 PKG_VERSION:=3.3.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_MAINTAINER:=Lukasz Winczura <rondoval@gmail.com>
 PKG_LICENSE:=MIT
@@ -12,6 +12,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/heishamon-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/rondoval/GoHeishaMon
 
