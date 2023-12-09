@@ -955,7 +955,7 @@
   codec:
     - decodeFunction: getBit1
       offset: 20
-  category: config
+  category: diagnostic
   values:
     - Water
     - Glycol
