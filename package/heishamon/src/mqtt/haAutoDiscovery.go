@@ -10,6 +10,8 @@ import (
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
+const SET = "/set"
+
 type mqttDevice struct {
 	Manufacturer string `json:"manufacturer,omitempty"`
 	Model        string `json:"model,omitempty"`
@@ -107,7 +109,7 @@ func (s *mqttCommon) encodeBinarySensor(info *topics.TopicEntry) {
 }
 
 func (s *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.PayloadOn = info.Values[1]
 	s.PayloadOff = info.Values[0]
 
@@ -115,7 +117,7 @@ func (s *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
 }
 
 func (s *mqttCommon) encodeSelect(info *topics.TopicEntry) {
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.Options = info.Values
 
 	s.entityType = "select"
@@ -127,7 +129,7 @@ func (s *mqttCommon) encodeNumber(info *topics.TopicEntry) {
 	if s.DeviceClass != "temperature" {
 		s.DeviceClass = ""
 	}
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.UnitOfMeasurement = info.DisplayUnit
 	s.Min = info.Min
 	s.Max = info.Max
