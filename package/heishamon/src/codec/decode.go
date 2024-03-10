@@ -94,7 +94,7 @@ func getModel(data []byte, entry topics.CodecEntry) string {
 			return val.Name
 		}
 	}
-	return fmt.Sprintf("Unknwon model with fingerprint: %x", fingerprint)
+	return fmt.Sprintf("Unknown model with fingerprint: %x", fingerprint)
 }
 
 func getFractional(input byte) float64 {

@@ -107,7 +107,7 @@ func main() {
 					mclient.PublishValue(v)
 				}
 			} else if data != nil {
-				logger.LogDebug("Unkown message length: %d", len(data))
+				logger.LogDebug("Unknown message length: %d", len(data))
 			}
 		}
 	}()

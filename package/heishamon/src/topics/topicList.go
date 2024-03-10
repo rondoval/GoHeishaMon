@@ -97,7 +97,7 @@ type TopicData struct {
 	kind            DeviceType
 }
 
-// LoadTopics creates a TopicData strucutre by reading a YAML file.
+// LoadTopics creates a TopicData structure by reading a YAML file.
 // filename - name of the file to load
 // deviceName - Name of the device, as should be used by HA discovery mechanism
 // kind - either Main or Optional
