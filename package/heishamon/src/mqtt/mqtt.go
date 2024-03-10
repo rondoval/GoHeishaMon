@@ -93,7 +93,7 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetConnectRetry(true)
 	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
-		if opt.ListenOnly == false {
+		if !opt.ListenOnly {
 			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
 				mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.CommandTopics}
 			})
@@ -102,7 +102,7 @@ func MakeMQTTConn(opt Options) MQTT {
 					log.Printf("Failed to subscribe, %v", tokenMain.Error())
 				}
 			}()
-			if opt.OptionalPCB == true {
+			if opt.OptionalPCB {
 				tokenOptional := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
 					mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.OptionalTopics}
 				})

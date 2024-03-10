@@ -46,9 +46,9 @@ func main() {
 		logger.RedirectLogMQTT(&mclient)
 	}
 
-	if config.HAAutoDiscover == true {
+	if config.HAAutoDiscover {
 		mclient.PublishDiscoveryTopics(commandTopics)
-		if config.OptionalPCB == true {
+		if config.OptionalPCB {
 			mclient.PublishDiscoveryTopics(optionalPCBTopics)
 		}
 	}
