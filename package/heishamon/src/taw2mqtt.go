@@ -95,18 +95,19 @@ func main() {
 				default:
 				}
 			}
-			if len(data) == serial.OptionalMessageLength {
+			switch {
+			case len(data) == serial.OptionalMessageLength:
 				values := codec.Decode(optionalPCBTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
 				acknowledgeChannel <- data
-			} else if len(data) == serial.DataMessageLength {
+			case len(data) == serial.DataMessageLength:
 				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
-			} else if data != nil {
+			case data != nil:
 				logger.LogDebug("Unknown message length: %d", len(data))
 			}
 		}

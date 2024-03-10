@@ -155,13 +155,14 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 
 		if value.Writable() {
 			// Read-Write value
-			if len(value.Values) == 0 {
+			switch {
+			case len(value.Values) == 0:
 				mqttAdvert.encodeNumber(value)
-			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+			case len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive"):
 				mqttAdvert.encodeSelect(value)
-			} else if len(value.Values) == 2 {
+			case len(value.Values) == 2:
 				mqttAdvert.encodeSwitch(value)
-			} else {
+			default:
 				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
 		} else {

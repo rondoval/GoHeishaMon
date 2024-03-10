@@ -130,11 +130,12 @@ func hex2demand(input byte) float64 {
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
 
-	if input >= max {
+	switch {
+	case input >= max:
 		demand = 100
-	} else if input <= min+5 {
+	case input <= min+5:
 		demand = 5
-	} else {
+	default:
 		const a float64 = 95. / (max - min)
 		const b float64 = 5 - 95.*min/(max-min)
 		demand = a*float64(input) + b
