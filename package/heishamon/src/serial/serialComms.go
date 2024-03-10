@@ -154,7 +154,10 @@ func (s *Comms) Read(logHexDump bool) []byte {
 
 		if len, ok = s.checkHeader(); !ok {
 			//consume byte, it's not a header
-			s.buffer.ReadByte()
+			_, err := s.buffer.ReadByte()
+			if err != nil {
+				logger.LogDebug("Read error")
+			}
 			return nil
 		}
 
@@ -165,7 +168,11 @@ func (s *Comms) Read(logHexDump bool) []byte {
 				return s.dispatchDatagram(len)
 			}
 			// invalid checksum, need to consume 0x71 and look for another one
-			s.buffer.ReadByte()
+			_, err := s.buffer.ReadByte()
+			if err != nil {
+				logger.LogDebug("Read error")
+			}
+
 			log.Println("Invalid checksum on receive!")
 
 		} else {
