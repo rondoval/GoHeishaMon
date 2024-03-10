@@ -148,9 +148,9 @@ func getErrorInfo(data []byte, _ topics.CodecEntry) string {
 	errorNumber := int(data[114]) - 17
 	var errorString string
 	switch errorType {
-	case 177: //B1=F type error
+	case 177: // B1=F type error
 		errorString = fmt.Sprintf("F%02X", errorNumber)
-	case 161: //A1=H type error
+	case 161: // A1=H type error
 		errorString = fmt.Sprintf("H%02X", errorNumber)
 	default:
 		errorString = "No error"

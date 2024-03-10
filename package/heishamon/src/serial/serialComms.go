@@ -56,7 +56,7 @@ func isValidReceiveChecksum(data []byte) bool {
 	for _, v := range data {
 		chk += v
 	}
-	return (chk == 0) //all received bytes + checksum should result in 0
+	return (chk == 0) // all received bytes + checksum should result in 0
 }
 
 func calcChecksum(command []byte) byte {
@@ -72,11 +72,11 @@ func calcChecksum(command []byte) byte {
 func (s *Comms) SendCommand(command []byte) {
 	var chk = calcChecksum(command)
 
-	_, err := s.serialPort.Write(command) //first send command
+	_, err := s.serialPort.Write(command) // first send command
 	if err != nil {
 		log.Print(err)
 	}
-	_, err = s.serialPort.Write([]byte{chk}) //then calculcated checksum byte afterwards
+	_, err = s.serialPort.Write([]byte{chk}) // then calculcated checksum byte afterwards
 	if err != nil {
 		log.Print(err)
 	}
@@ -153,7 +153,7 @@ func (s *Comms) Read(logHexDump bool) []byte {
 		)
 
 		if length, ok = s.checkHeader(); !ok {
-			//consume byte, it's not a header
+			// consume byte, it's not a header
 			_, err := s.buffer.ReadByte()
 			if err != nil {
 				logger.LogDebug("Read error")

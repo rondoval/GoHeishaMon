@@ -122,7 +122,7 @@ func MakeMQTTConn(opt Options) MQTT {
 	go func() {
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Failed to connect broker, %v", token.Error())
-			//should not happen - SetConnectRetry=true
+			// should not happen - SetConnectRetry=true
 		}
 	}()
 	log.Println("MQTT set up completed")

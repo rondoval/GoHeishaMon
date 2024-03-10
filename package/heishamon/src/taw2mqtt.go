@@ -129,7 +129,7 @@ func main() {
 			log.Print("SIGTERM received")
 			shallTerminate = true
 		case <-receivedChannel:
-			//ok, did receive something, can send next request
+			// ok, did receive something, can send next request
 		case <-time.After(15 * time.Second):
 			log.Println("Response not received, recovering")
 		}
