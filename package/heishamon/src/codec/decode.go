@@ -155,7 +155,7 @@ func getErrorInfo(data []byte, _ topics.CodecEntry) string {
 		errorString = fmt.Sprintf("H%02X", errorNumber)
 
 	default:
-		errorString = fmt.Sprintf("No error")
+		errorString = "No error"
 
 	}
 	return errorString
