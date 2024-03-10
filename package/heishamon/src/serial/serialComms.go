@@ -174,7 +174,6 @@ func (s *Comms) Read(logHexDump bool) []byte {
 			}
 
 			log.Println("Invalid checksum on receive!")
-
 		} else {
 			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), length-s.buffer.Len())
 		}

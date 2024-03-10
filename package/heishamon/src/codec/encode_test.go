@@ -45,5 +45,4 @@ func TestEncode(t *testing.T) {
 	if command[22] != 0x32 {
 		t.Errorf("Thermostat settings encode failed: %x", command[22])
 	}
-
 }

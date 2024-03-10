@@ -39,7 +39,6 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 // PublishValue posts an entity value via MQTT.
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
 	m.Publish(m.statusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
-
 }
 
 // LogTopic returns a topic that shall be used by logging for posting log entries.

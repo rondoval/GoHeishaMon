@@ -150,7 +150,6 @@ func (s *mqttCommon) marshal() (topic string, data []byte, err error) {
 func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 	log.Printf("Publishing Home Assistant %s discovery topics...", allTopics.Kind())
 	for _, value := range allTopics.GetAll() {
-
 		var mqttAdvert mqttCommon
 		mqttAdvert.encodeCommon(value, m.statusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
 
