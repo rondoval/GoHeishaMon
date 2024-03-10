@@ -123,7 +123,7 @@ func verboseToNumber(value string, sensor *topics.TopicEntry) (int, error) {
 			return valueKey, nil
 		}
 	}
-	return 0, errors.New("Can't convert literal to number")
+	return 0, errors.New("can't convert literal to number")
 }
 
 func encode(sensor *topics.TopicEntry, command []byte) {
