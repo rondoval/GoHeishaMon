@@ -127,11 +127,11 @@ func (s *Comms) dispatchDatagram(len int) []byte {
 	return nil
 }
 
-func (s *Comms) checkHeader() (len int, ok bool) {
+func (s *Comms) checkHeader() (length int, ok bool) {
 	// opt header: 71 11 01 50; 20 bytes
 	// header:     71 c8 01 10; 203 bytes
 	data := s.buffer.Bytes()
-	len = int(data[1]) + 3
+	length = int(data[1]) + 3
 	ok = false
 	if data[0] == 0x71 && data[2] == 0x1 && (data[3] == 0x50 || data[3] == 0x10) {
 		ok = true
@@ -148,11 +148,11 @@ func (s *Comms) Read(logHexDump bool) []byte {
 
 	if s.findHeaderStart() && s.buffer.Len() >= 4 { // have entire header at start of buffer
 		var (
-			len int
-			ok  bool
+			length int
+			ok     bool
 		)
 
-		if len, ok = s.checkHeader(); !ok {
+		if length, ok = s.checkHeader(); !ok {
 			//consume byte, it's not a header
 			_, err := s.buffer.ReadByte()
 			if err != nil {
@@ -161,11 +161,11 @@ func (s *Comms) Read(logHexDump bool) []byte {
 			return nil
 		}
 
-		if s.buffer.Len() >= len { // have entire packet
+		if s.buffer.Len() >= length { // have entire packet
 			s.totalreads++
 
-			if isValidReceiveChecksum(s.buffer.Bytes()[:len]) {
-				return s.dispatchDatagram(len)
+			if isValidReceiveChecksum(s.buffer.Bytes()[:length]) {
+				return s.dispatchDatagram(length)
 			}
 			// invalid checksum, need to consume 0x71 and look for another one
 			_, err := s.buffer.ReadByte()
@@ -176,7 +176,7 @@ func (s *Comms) Read(logHexDump bool) []byte {
 			log.Println("Invalid checksum on receive!")
 
 		} else {
-			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), len-s.buffer.Len())
+			logger.LogDebug("Awaiting full packet. Have %d, missing %d", s.buffer.Len(), length-s.buffer.Len())
 		}
 	}
 	return nil
