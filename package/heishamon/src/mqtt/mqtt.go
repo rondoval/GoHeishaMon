@@ -93,18 +93,32 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
 		if !opt.ListenOnly {
-			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
-				mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.CommandTopics}
-			})
+			tokenMain := mclient.Subscribe(
+				mqtt.statusTopic("+/set", topics.Main), 0,
+				func(client paho.Client, payload paho.Message) {
+					mqtt.commandChannel <- Command{
+						Topic:     payload.Topic(),
+						Payload:   string(payload.Payload()),
+						AllTopics: opt.CommandTopics,
+					}
+				},
+			)
 			go func() {
 				if tokenMain.Wait() && tokenMain.Error() != nil {
 					log.Printf("Failed to subscribe, %v", tokenMain.Error())
 				}
 			}()
 			if opt.OptionalPCB {
-				tokenOptional := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
-					mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.OptionalTopics}
-				})
+				tokenOptional := mclient.Subscribe(
+					mqtt.statusTopic("+/set", topics.Optional), 0,
+					func(client paho.Client, payload paho.Message) {
+						mqtt.commandChannel <- Command{
+							Topic:     payload.Topic(),
+							Payload:   string(payload.Payload()),
+							AllTopics: opt.OptionalTopics,
+						}
+					},
+				)
 				go func() {
 					if tokenOptional.Wait() && tokenOptional.Error() != nil {
 						log.Printf("Failed to subscribe, %v", tokenOptional.Error())

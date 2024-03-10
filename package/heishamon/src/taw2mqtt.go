@@ -28,7 +28,11 @@ func main() {
 	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
-	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
+	optionalPCBTopics := topics.LoadTopics(
+		config.topicsOptionalPCBFile,
+		config.getDeviceName(topics.Optional),
+		topics.Optional,
+	)
 
 	mclient := mqtt.MakeMQTTConn(mqtt.Options{
 		Server:         config.MqttServer,

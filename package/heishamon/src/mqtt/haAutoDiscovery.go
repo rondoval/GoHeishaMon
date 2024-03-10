@@ -158,7 +158,8 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 			switch {
 			case len(value.Values) == 0:
 				mqttAdvert.encodeNumber(value)
-			case len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive"):
+			case len(value.Values) > 2 ||
+				!(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive"):
 				mqttAdvert.encodeSelect(value)
 			case len(value.Values) == 2:
 				mqttAdvert.encodeSwitch(value)
@@ -167,7 +168,8 @@ func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 			}
 		} else {
 			// Read only value
-			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+			if len(value.Values) == 2 &&
+				(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				mqttAdvert.encodeBinarySensor(value)
 			} else {
 				mqttAdvert.encodeSensor(value)

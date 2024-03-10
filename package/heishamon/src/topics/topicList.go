@@ -53,7 +53,8 @@ type TopicEntry struct {
 	readable          bool
 }
 
-// Writable returns true if this TopicEntry has got at least one encode function, i.e. it can be written to the heat pump.
+// Writable returns true if this TopicEntry has got at least one encode function,
+// i.e. it can be written to the heat pump.
 func (t *TopicEntry) Writable() bool {
 	return t.writable
 }

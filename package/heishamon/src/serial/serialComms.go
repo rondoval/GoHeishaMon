@@ -31,7 +31,13 @@ type Comms struct {
 
 // Open opens the serial port and initializes internal structures.
 func (s *Comms) Open(portName string, timeout time.Duration) {
-	s.serialConfig = &tarm.Config{Name: portName, Baud: 9600, Parity: tarm.ParityEven, StopBits: tarm.Stop1, ReadTimeout: timeout}
+	s.serialConfig = &tarm.Config{
+		Name:        portName,
+		Baud:        9600,
+		Parity:      tarm.ParityEven,
+		StopBits:    tarm.Stop1,
+		ReadTimeout: timeout,
+	}
 	s.openInternal()
 }
 
