@@ -157,9 +157,8 @@ func encode(sensor *topics.TopicEntry, command []byte) {
 			log.Printf("Setting offset %d to %d", codec.Offset, data)
 			command[codec.Offset] = data
 			return
-		} else {
-			log.Println("No encoder implemented for " + codec.EncodeFunction)
-			return
 		}
+
+		log.Println("No encoder implemented for " + codec.EncodeFunction)
 	}
 }
