@@ -3,8 +3,8 @@
 package topics
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -105,7 +105,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	log.Print("Loading topic data from: ", filename)
 	var t TopicData
 
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func (t *TopicData) Marshal(filename string) {
 		return
 	}
 
-	err = ioutil.WriteFile(filename, data, 0644)
+	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
 		log.Printf("Error while saving optional PCB state: %v", err)
 		return
@@ -166,7 +166,7 @@ func (t *TopicData) Marshal(filename string) {
 func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	changed = make([]*TopicEntry, 0, len(t.allTopics))
 
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Printf("Error while loading optional PCB state: %v", err)
 		return
