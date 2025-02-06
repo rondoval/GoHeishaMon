@@ -26,6 +26,11 @@ func TestLoadMain(t *testing.T) {
 	if len(inlet.Codec) != 2 {
 		t.Error("Codec entries missing")
 	}
+
+	pumpModel, _ := topics.Lookup("Heat_Pump_Model")
+	if pumpModel.Codec[0].Mapping[0].Name != "IDU: Monoblock ODU: WH-MDC05H3E5" {
+		t.Error("Can't load model mapping")
+	}
 }
 
 func TestLoadOpt(t *testing.T) {

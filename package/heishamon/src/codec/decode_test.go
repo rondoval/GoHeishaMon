@@ -76,4 +76,10 @@ func TestDecode(t *testing.T) {
 	if z2set.CurrentValue() != "Water temperature" {
 		t.Error("Z2_Sensor_Settings decode error")
 	}
+
+	model, _ := topics.Lookup("Heat_Pump_Model")
+	t.Logf("Heat_Pump_Model %s", model.CurrentValue())
+	if model.CurrentValue() != "IDU: Monoblock ODU: WH-MXC09J3E8" {
+		t.Error("Unexpected heat pump model")
+	}
 }

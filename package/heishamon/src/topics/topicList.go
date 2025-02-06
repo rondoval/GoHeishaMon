@@ -29,22 +29,22 @@ type MappingEntry struct {
 
 // CodecEntry represents an encoding/decoding function
 type CodecEntry struct {
-	EncodeFunction string `yaml:"encodeFunction"`
-	DecodeFunction string `yaml:"decodeFunction"`
-	Offset         int    `yaml:"offset"`
+	EncodeFunction string         `yaml:"encodeFunction"`
+	DecodeFunction string         `yaml:"decodeFunction"`
+	Offset         int            `yaml:"offset"`
+	Mapping        []MappingEntry `yaml:"mapping"`
 }
 
 // TopicEntry represents a single entity, e.g. a sensor or configuration option.
 type TopicEntry struct {
-	SensorName  string         `yaml:"sensorName"`
-	Codec       []CodecEntry   `yaml:"codec"`
-	DisplayUnit string         `yaml:"displayUnit"`
-	Category    string         `yaml:"category"`
-	Values      []string       `yaml:"values"`
-	Mapping     []MappingEntry `yaml:"mapping"`
-	Min         float64        `yaml:"min"`
-	Max         float64        `yaml:"max"`
-	Step        float64        `yaml:"step"`
+	SensorName  string       `yaml:"sensorName"`
+	Codec       []CodecEntry `yaml:"codec"`
+	DisplayUnit string       `yaml:"displayUnit"`
+	Category    string       `yaml:"category"`
+	Values      []string     `yaml:"values"`
+	Min         float64      `yaml:"min"`
+	Max         float64      `yaml:"max"`
+	Step        float64      `yaml:"step"`
 
 	currentValue      string
 	currentValueMutex sync.Mutex
