@@ -3,8 +3,8 @@
 package topics
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -53,7 +53,8 @@ type TopicEntry struct {
 	readable          bool
 }
 
-// Writable returns true if this TopicEntry has got at least one encode function, i.e. it can be written to the heat pump.
+// Writable returns true if this TopicEntry has got at least one encode function,
+// i.e. it can be written to the heat pump.
 func (t *TopicEntry) Writable() bool {
 	return t.writable
 }
@@ -97,7 +98,7 @@ type TopicData struct {
 	kind            DeviceType
 }
 
-// LoadTopics creates a TopicData strucutre by reading a YAML file.
+// LoadTopics creates a TopicData structure by reading a YAML file.
 // filename - name of the file to load
 // deviceName - Name of the device, as should be used by HA discovery mechanism
 // kind - either Main or Optional
@@ -105,7 +106,7 @@ func LoadTopics(filename, deviceName string, kind DeviceType) *TopicData {
 	log.Print("Loading topic data from: ", filename)
 	var t TopicData
 
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +156,7 @@ func (t *TopicData) Marshal(filename string) {
 		return
 	}
 
-	err = ioutil.WriteFile(filename, data, 0644)
+	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
 		log.Printf("Error while saving optional PCB state: %v", err)
 		return
@@ -166,7 +167,7 @@ func (t *TopicData) Marshal(filename string) {
 func (t *TopicData) Unmarshal(filename string) (changed []*TopicEntry) {
 	changed = make([]*TopicEntry, 0, len(t.allTopics))
 
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Printf("Error while loading optional PCB state: %v", err)
 		return

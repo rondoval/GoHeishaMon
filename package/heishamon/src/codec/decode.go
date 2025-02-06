@@ -94,7 +94,7 @@ func getModel(data []byte, entry topics.CodecEntry) string {
 			return val.Name
 		}
 	}
-	return fmt.Sprintf("Unknwon model with fingerprint: %x", fingerprint)
+	return fmt.Sprintf("Unknown model with fingerprint: %x", fingerprint)
 }
 
 func getFractional(input byte) float64 {
@@ -130,11 +130,12 @@ func hex2demand(input byte) float64 {
 	const min = 43 - 5 // 0% in hex
 	const max = 234    // 100% in hex
 
-	if input >= max {
+	switch {
+	case input >= max:
 		demand = 100
-	} else if input <= min+5 {
+	case input <= min+5:
 		demand = 5
-	} else {
+	default:
 		const a float64 = 95. / (max - min)
 		const b float64 = 5 - 95.*min/(max-min)
 		demand = a*float64(input) + b
@@ -148,15 +149,12 @@ func getErrorInfo(data []byte, _ topics.CodecEntry) string {
 	errorNumber := int(data[114]) - 17
 	var errorString string
 	switch errorType {
-	case 177: //B1=F type error
+	case 177: // B1=F type error
 		errorString = fmt.Sprintf("F%02X", errorNumber)
-
-	case 161: //A1=H type error
+	case 161: // A1=H type error
 		errorString = fmt.Sprintf("H%02X", errorNumber)
-
 	default:
-		errorString = fmt.Sprintf("No error")
-
+		errorString = "No error"
 	}
 	return errorString
 }

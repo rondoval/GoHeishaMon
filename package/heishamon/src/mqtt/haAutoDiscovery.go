@@ -10,6 +10,8 @@ import (
 	"github.com/rondoval/GoHeishaMon/topics"
 )
 
+const SET = "/set"
+
 type mqttDevice struct {
 	Manufacturer string `json:"manufacturer,omitempty"`
 	Model        string `json:"model,omitempty"`
@@ -107,7 +109,7 @@ func (s *mqttCommon) encodeBinarySensor(info *topics.TopicEntry) {
 }
 
 func (s *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.PayloadOn = info.Values[1]
 	s.PayloadOff = info.Values[0]
 
@@ -115,7 +117,7 @@ func (s *mqttCommon) encodeSwitch(info *topics.TopicEntry) {
 }
 
 func (s *mqttCommon) encodeSelect(info *topics.TopicEntry) {
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.Options = info.Values
 
 	s.entityType = "select"
@@ -127,7 +129,7 @@ func (s *mqttCommon) encodeNumber(info *topics.TopicEntry) {
 	if s.DeviceClass != "temperature" {
 		s.DeviceClass = ""
 	}
-	s.CommandTopic = s.StateTopic + "/set"
+	s.CommandTopic = s.StateTopic + SET
 	s.UnitOfMeasurement = info.DisplayUnit
 	s.Min = info.Min
 	s.Max = info.Max
@@ -148,24 +150,26 @@ func (s *mqttCommon) marshal() (topic string, data []byte, err error) {
 func (m MQTT) PublishDiscoveryTopics(allTopics *topics.TopicData) {
 	log.Printf("Publishing Home Assistant %s discovery topics...", allTopics.Kind())
 	for _, value := range allTopics.GetAll() {
-
 		var mqttAdvert mqttCommon
 		mqttAdvert.encodeCommon(value, m.statusTopic(value.SensorName, value.Kind()), m.willTopic, allTopics.DeviceName())
 
 		if value.Writable() {
 			// Read-Write value
-			if len(value.Values) == 0 {
+			switch {
+			case len(value.Values) == 0:
 				mqttAdvert.encodeNumber(value)
-			} else if len(value.Values) > 2 || !(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+			case len(value.Values) > 2 ||
+				!(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive"):
 				mqttAdvert.encodeSelect(value)
-			} else if len(value.Values) == 2 {
+			case len(value.Values) == 2:
 				mqttAdvert.encodeSwitch(value)
-			} else {
+			default:
 				log.Println("Warning: Don't know how to encode " + value.SensorName)
 			}
 		} else {
 			// Read only value
-			if len(value.Values) == 2 && (value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
+			if len(value.Values) == 2 &&
+				(value.Values[0] == "Off" || value.Values[0] == "Disabled" || value.Values[0] == "Inactive") {
 				mqttAdvert.encodeBinarySensor(value)
 			} else {
 				mqttAdvert.encodeSensor(value)

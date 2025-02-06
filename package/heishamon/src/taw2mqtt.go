@@ -28,7 +28,11 @@ func main() {
 	logger.SetLevel(config.LogHexDump, config.LogDebug)
 
 	commandTopics := topics.LoadTopics(config.topicsFile, config.getDeviceName(topics.Main), topics.Main)
-	optionalPCBTopics := topics.LoadTopics(config.topicsOptionalPCBFile, config.getDeviceName(topics.Optional), topics.Optional)
+	optionalPCBTopics := topics.LoadTopics(
+		config.topicsOptionalPCBFile,
+		config.getDeviceName(topics.Optional),
+		topics.Optional,
+	)
 
 	mclient := mqtt.MakeMQTTConn(mqtt.Options{
 		Server:         config.MqttServer,
@@ -46,9 +50,9 @@ func main() {
 		logger.RedirectLogMQTT(&mclient)
 	}
 
-	if config.HAAutoDiscover == true {
+	if config.HAAutoDiscover {
 		mclient.PublishDiscoveryTopics(commandTopics)
-		if config.OptionalPCB == true {
+		if config.OptionalPCB {
 			mclient.PublishDiscoveryTopics(optionalPCBTopics)
 		}
 	}
@@ -95,19 +99,20 @@ func main() {
 				default:
 				}
 			}
-			if len(data) == serial.OptionalMessageLength {
+			switch {
+			case len(data) == serial.OptionalMessageLength:
 				values := codec.Decode(optionalPCBTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
 				acknowledgeChannel <- data
-			} else if len(data) == serial.DataMessageLength {
+			case len(data) == serial.DataMessageLength:
 				values := codec.Decode(commandTopics, data)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
-			} else if data != nil {
-				logger.LogDebug("Unkown message length: %d", len(data))
+			case data != nil:
+				logger.LogDebug("Unknown message length: %d", len(data))
 			}
 		}
 	}()
@@ -129,7 +134,7 @@ func main() {
 			log.Print("SIGTERM received")
 			shallTerminate = true
 		case <-receivedChannel:
-			//ok, did receive something, can send next request
+			// ok, did receive something, can send next request
 		case <-time.After(15 * time.Second):
 			log.Println("Response not received, recovering")
 		}

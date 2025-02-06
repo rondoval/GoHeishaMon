@@ -2,7 +2,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -57,7 +56,7 @@ func (c *configStruct) readConfig(configPath string) {
 		log.Fatalf("Config file is missing: %s ", configFile)
 	}
 
-	data, err := ioutil.ReadFile(configFile)
+	data, err := os.ReadFile(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}

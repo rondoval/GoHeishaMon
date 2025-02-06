@@ -22,7 +22,7 @@ var logger mLogger
 // Writer used to send log messages via MQTT
 func (m mLogger) Write(p []byte) (n int, err error) {
 	if m.mclient == nil {
-		return 0, errors.New("No MQTT client")
+		return 0, errors.New("no MQTT client")
 	}
 	m.mclient.Publish(m.mqttTopic, p, 0)
 	return len(p), nil

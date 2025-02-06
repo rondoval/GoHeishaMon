@@ -39,7 +39,6 @@ func (m MQTT) Publish(topic string, data interface{}, qos byte) {
 // PublishValue posts an entity value via MQTT.
 func (m MQTT) PublishValue(value *topics.TopicEntry) {
 	m.Publish(m.statusTopic(value.SensorName, value.Kind()), value.CurrentValue(), 0)
-
 }
 
 // LogTopic returns a topic that shall be used by logging for posting log entries.
@@ -93,19 +92,33 @@ func MakeMQTTConn(opt Options) MQTT {
 	pahoOpt.SetConnectRetry(true)
 	pahoOpt.SetOnConnectHandler(func(mclient paho.Client) {
 		mqtt.Publish(mqtt.willTopic, "online", 0)
-		if opt.ListenOnly == false {
-			tokenMain := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Main), 0, func(client paho.Client, payload paho.Message) {
-				mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.CommandTopics}
-			})
+		if !opt.ListenOnly {
+			tokenMain := mclient.Subscribe(
+				mqtt.statusTopic("+/set", topics.Main), 0,
+				func(client paho.Client, payload paho.Message) {
+					mqtt.commandChannel <- Command{
+						Topic:     payload.Topic(),
+						Payload:   string(payload.Payload()),
+						AllTopics: opt.CommandTopics,
+					}
+				},
+			)
 			go func() {
 				if tokenMain.Wait() && tokenMain.Error() != nil {
 					log.Printf("Failed to subscribe, %v", tokenMain.Error())
 				}
 			}()
-			if opt.OptionalPCB == true {
-				tokenOptional := mclient.Subscribe(mqtt.statusTopic("+/set", topics.Optional), 0, func(client paho.Client, payload paho.Message) {
-					mqtt.commandChannel <- Command{Topic: payload.Topic(), Payload: string(payload.Payload()), AllTopics: opt.OptionalTopics}
-				})
+			if opt.OptionalPCB {
+				tokenOptional := mclient.Subscribe(
+					mqtt.statusTopic("+/set", topics.Optional), 0,
+					func(client paho.Client, payload paho.Message) {
+						mqtt.commandChannel <- Command{
+							Topic:     payload.Topic(),
+							Payload:   string(payload.Payload()),
+							AllTopics: opt.OptionalTopics,
+						}
+					},
+				)
 				go func() {
 					if tokenOptional.Wait() && tokenOptional.Error() != nil {
 						log.Printf("Failed to subscribe, %v", tokenOptional.Error())
@@ -123,7 +136,7 @@ func MakeMQTTConn(opt Options) MQTT {
 	go func() {
 		if token.Wait() && token.Error() != nil {
 			log.Printf("Failed to connect broker, %v", token.Error())
-			//should not happen - SetConnectRetry=true
+			// should not happen - SetConnectRetry=true
 		}
 	}()
 	log.Println("MQTT set up completed")
