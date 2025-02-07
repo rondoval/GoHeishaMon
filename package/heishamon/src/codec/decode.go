@@ -88,8 +88,7 @@ func getOpMode(input byte) int {
 
 func getModel(data []byte, entry topics.CodecEntry) string {
 	fingerprint := data[entry.Offset : entry.Offset+10]
-	var arr []topics.MappingEntry
-	for _, val := range arr {
+	for _, val := range entry.Mapping {
 		if bytes.Equal(val.ID, fingerprint) {
 			return val.Name
 		}
