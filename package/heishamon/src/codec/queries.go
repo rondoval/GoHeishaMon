@@ -13,8 +13,10 @@ import (
 )
 
 const (
-	OptionalDatagramSize  = 19  // Size of Optional PCB datagram
-	PanasonicDatagramSize = 110 // Size of CZ-TAW1 datagram
+	// Size of Optional PCB datagram
+	OptionalDatagramSize = 19
+	// Size of CZ-TAW1 datagram
+	PanasonicDatagramSize = 110
 )
 
 var panasonicQuery = [PanasonicDatagramSize]byte{
