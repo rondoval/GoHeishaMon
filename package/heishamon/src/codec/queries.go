@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	// Size of Optional PCB datagram
+	// OptionalDatagramSize is the size in bytes of Optional PCB datagram
 	OptionalDatagramSize = 19
-	// Size of CZ-TAW1 datagram
+	// PanasonicDatagramSize is the size in bytes of CZ-TAW1 datagram
 	PanasonicDatagramSize = 110
 )
 
