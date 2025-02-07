@@ -70,17 +70,17 @@ func temp2hex(temp float64) byte {
 func demand2hex(demand float64) byte {
 	var hexdemand byte
 
-	const min = 43 - 5 // 0% in hex
-	const max = 234    // 100% in hex
+	const minimum = 43 - 5 // 0% in hex
+	const maximum = 234    // 100% in hex
 
 	switch {
 	case demand >= 100:
-		hexdemand = max
+		hexdemand = maximum
 	case demand <= 5:
-		hexdemand = min + 5
+		hexdemand = minimum + 5
 	default:
-		const a float64 = (max - min) / 100.
-		hexdemand = byte(a*demand + min)
+		const a float64 = (maximum - minimum) / 100.
+		hexdemand = byte(a*demand + minimum)
 	}
 
 	return hexdemand
