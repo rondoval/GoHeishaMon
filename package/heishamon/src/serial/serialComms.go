@@ -116,20 +116,20 @@ func (s *Comms) findHeaderStart() bool {
 	return true
 }
 
-func (s *Comms) dispatchDatagram(len int) []byte {
+func (s *Comms) dispatchDatagram(length int) []byte {
 	s.goodreads++
 	readpercentage := float64(s.totalreads-s.goodreads) / float64(s.totalreads) * 100.
 	if s.totalreads%loggingRatio == 0 {
 		log.Printf("RX: %d RX errors: %d (%.2f %%)", s.totalreads, s.totalreads-s.goodreads, readpercentage)
 	}
 
-	packet := s.buffer.Next(len)
+	packet := s.buffer.Next(length)
 	logger.LogHex("Received", packet)
-	if len == DataMessageLength || len == OptionalMessageLength {
-		logger.LogDebug("Received %d bytes of data with correct header and checksum", len)
+	if length == DataMessageLength || length == OptionalMessageLength {
+		logger.LogDebug("Received %d bytes of data with correct header and checksum", length)
 		return packet
 	}
-	log.Printf("Received an unknown datagram. Can't decode this (yet?). Length: %d", len)
+	log.Printf("Received an unknown datagram. Can't decode this (yet?). Length: %d", length)
 	return nil
 }
 
@@ -149,7 +149,7 @@ func (s *Comms) checkHeader() (length int, ok bool) {
 
 // Read attempts to read heat pump reply. Returns nil if full packet with correct checksum was not assembled.
 // It holds state and should be called periodically.
-func (s *Comms) Read(logHexDump bool) []byte {
+func (s *Comms) Read() []byte {
 	s.readToBuffer()
 
 	if s.findHeaderStart() && s.buffer.Len() >= 4 { // have entire header at start of buffer

@@ -92,7 +92,7 @@ func main() {
 	go func() {
 		log.Println("Receiver thread starting")
 		for {
-			data := serialPort.Read(config.LogHexDump)
+			data := serialPort.Read()
 			if data != nil {
 				select {
 				case receivedChannel <- true:

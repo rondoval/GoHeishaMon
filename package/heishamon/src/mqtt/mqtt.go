@@ -95,7 +95,7 @@ func MakeMQTTConn(opt Options) MQTT {
 		if !opt.ListenOnly {
 			tokenMain := mclient.Subscribe(
 				mqtt.statusTopic("+/set", topics.Main), 0,
-				func(client paho.Client, payload paho.Message) {
+				func(_ paho.Client, payload paho.Message) {
 					mqtt.commandChannel <- Command{
 						Topic:     payload.Topic(),
 						Payload:   string(payload.Payload()),
@@ -111,7 +111,7 @@ func MakeMQTTConn(opt Options) MQTT {
 			if opt.OptionalPCB {
 				tokenOptional := mclient.Subscribe(
 					mqtt.statusTopic("+/set", topics.Optional), 0,
-					func(client paho.Client, payload paho.Message) {
+					func(_ paho.Client, payload paho.Message) {
 						mqtt.commandChannel <- Command{
 							Topic:     payload.Topic(),
 							Payload:   string(payload.Payload()),
