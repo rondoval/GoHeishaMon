@@ -7,7 +7,7 @@ import (
 )
 
 func TestDecode(t *testing.T) {
-	topics := topics.LoadTopics("../../files/topics.yaml", "TestDevice", topics.Main)
+	topicData := topics.LoadTopics("../../files/topics.yaml", "TestDevice", topics.Main)
 
 	command := []byte{
 		0x71, 0xC8, 0x01, 0x10, 0x56, 0x55, 0x61, 0x49, 0x00, 0x55,
@@ -40,46 +40,94 @@ func TestDecode(t *testing.T) {
 	command[170] = 25  // pump flow 25
 	command[22] = 0x14 // Z1 - thermistor, Z2 - water temp
 
-	Decode(topics, command)
-	holi, _ := topics.Lookup("Holiday_Mode_State")
-	t.Logf("Holiday_Mode_State %s", holi.CurrentValue())
-	if holi.CurrentValue() != "Scheduled" {
-		t.Error("Holiday_Mode_State decode error")
+	Decode(topicData, command, true)
+	{
+		holi, _ := topicData.Lookup("Holiday_Mode_State")
+		t.Logf("Holiday_Mode_State %s", holi.CurrentValue())
+		if holi.CurrentValue() != "Scheduled" {
+			t.Error("Holiday_Mode_State decode error")
+		}
+
+		dhw, _ := topicData.Lookup("DHW_Heat_Delta")
+		t.Logf("DHW_Heat_Delta %s", dhw.CurrentValue())
+		if dhw.CurrentValue() != "-5" {
+			t.Errorf("DHW_Heat_Delta decode error: %s", dhw.CurrentValue())
+		}
+
+		inlet, _ := topicData.Lookup("Main_Inlet_Temp")
+		t.Logf("Main_Inlet_Temp %s", inlet.CurrentValue())
+		if inlet.CurrentValue() != "22.50" {
+			t.Error("Wrong inlet temp")
+		}
+
+		pumpFlow, _ := topicData.Lookup("Pump_Flow")
+		t.Logf("Pump_Flow %s", pumpFlow.CurrentValue())
+		if pumpFlow.CurrentValue() != "25.22" {
+			t.Error("Pump_Flow decode error")
+		}
+
+		z1set, _ := topicData.Lookup("Z1_Sensor_Settings")
+		t.Logf("Z1_Sensor_Settings %s", z1set.CurrentValue())
+		if z1set.CurrentValue() != "Thermistor" {
+			t.Error("Z1_Sensor_Settings decode error")
+		}
+
+		z2set, _ := topicData.Lookup("Z2_Sensor_Settings")
+		t.Logf("Z2_Sensor_Settings %s", z2set.CurrentValue())
+		if z2set.CurrentValue() != "Water temperature" {
+			t.Error("Z2_Sensor_Settings decode error")
+		}
+
+		model, _ := topicData.Lookup("Heat_Pump_Model")
+		t.Logf("Heat_Pump_Model %s", model.CurrentValue())
+		if model.CurrentValue() != "IDU: Monoblock ODU: WH-MXC09J3E8" {
+			t.Error("Unexpected heat pump model")
+		}
 	}
 
-	dhw, _ := topics.Lookup("DHW_Heat_Delta")
-	t.Logf("DHW_Heat_Delta %s", dhw.CurrentValue())
-	if dhw.CurrentValue() != "-5" {
-		t.Errorf("DHW_Heat_Delta decode error: %s", dhw.CurrentValue())
-	}
+	// test raw values
+	Decode(topicData, command, false)
+	{
+		holi, _ := topicData.Lookup("Holiday_Mode_State")
+		t.Logf("Holiday_Mode_State %s", holi.CurrentValue())
+		if holi.CurrentValue() != "1" {
+			t.Error("Holiday_Mode_State decode error")
+		}
 
-	inlet, _ := topics.Lookup("Main_Inlet_Temp")
-	t.Logf("Main_Inlet_Temp %s", inlet.CurrentValue())
-	if inlet.CurrentValue() != "22.50" {
-		t.Error("Wrong inlet temp")
-	}
+		dhw, _ := topicData.Lookup("DHW_Heat_Delta")
+		t.Logf("DHW_Heat_Delta %s", dhw.CurrentValue())
+		if dhw.CurrentValue() != "-5" {
+			t.Errorf("DHW_Heat_Delta decode error: %s", dhw.CurrentValue())
+		}
 
-	pumpFlow, _ := topics.Lookup("Pump_Flow")
-	t.Logf("Pump_Flow %s", pumpFlow.CurrentValue())
-	if pumpFlow.CurrentValue() != "25.22" {
-		t.Error("Pump_Flow decode error")
-	}
+		inlet, _ := topicData.Lookup("Main_Inlet_Temp")
+		t.Logf("Main_Inlet_Temp %s", inlet.CurrentValue())
+		if inlet.CurrentValue() != "22.50" {
+			t.Error("Wrong inlet temp")
+		}
 
-	z1set, _ := topics.Lookup("Z1_Sensor_Settings")
-	t.Logf("Z1_Sensor_Settings %s", z1set.CurrentValue())
-	if z1set.CurrentValue() != "Thermistor" {
-		t.Error("Z1_Sensor_Settings decode error")
-	}
+		pumpFlow, _ := topicData.Lookup("Pump_Flow")
+		t.Logf("Pump_Flow %s", pumpFlow.CurrentValue())
+		if pumpFlow.CurrentValue() != "25.22" {
+			t.Error("Pump_Flow decode error")
+		}
 
-	z2set, _ := topics.Lookup("Z2_Sensor_Settings")
-	t.Logf("Z2_Sensor_Settings %s", z2set.CurrentValue())
-	if z2set.CurrentValue() != "Water temperature" {
-		t.Error("Z2_Sensor_Settings decode error")
-	}
+		z1set, _ := topicData.Lookup("Z1_Sensor_Settings")
+		t.Logf("Z1_Sensor_Settings %s", z1set.CurrentValue())
+		if z1set.CurrentValue() != "3" {
+			t.Error("Z1_Sensor_Settings decode error")
+		}
 
-	model, _ := topics.Lookup("Heat_Pump_Model")
-	t.Logf("Heat_Pump_Model %s", model.CurrentValue())
-	if model.CurrentValue() != "IDU: Monoblock ODU: WH-MXC09J3E8" {
-		t.Error("Unexpected heat pump model")
+		z2set, _ := topicData.Lookup("Z2_Sensor_Settings")
+		t.Logf("Z2_Sensor_Settings %s", z2set.CurrentValue())
+		if z2set.CurrentValue() != "0" {
+			t.Error("Z2_Sensor_Settings decode error")
+		}
+
+		model, _ := topicData.Lookup("Heat_Pump_Model")
+		t.Logf("Heat_Pump_Model %s", model.CurrentValue())
+		if model.CurrentValue() != "IDU: Monoblock ODU: WH-MXC09J3E8" {
+			t.Error("Unexpected heat pump model")
+		}
 	}
 }

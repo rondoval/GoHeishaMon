@@ -41,6 +41,24 @@ func TestEncode(t *testing.T) {
 		t.Error("Holiday_Mode_State encode error")
 	}
 
+	holi.UpdateValue("0")
+	encode(holi, command)
+	if command[5] != 16 {
+		t.Error("Holiday_Mode_State encode error")
+	}
+	
+	holi.UpdateValue("1")
+	encode(holi, command)
+	if command[5] != 32 {
+		t.Error("Holiday_Mode_State encode error")
+	}
+	
+	holi.UpdateValue("2")
+	encode(holi, command)
+	if command[5] != 48 {
+		t.Error("Holiday_Mode_State encode error")
+	}
+
 	dhw, _ := topics.Lookup("DHW_Heat_Delta")
 	dhw.UpdateValue("-5")
 	encode(dhw, command)
