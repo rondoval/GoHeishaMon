@@ -7,7 +7,7 @@ optionalPCB: false
 optionalQueryInterval: 5
 optionalSaveInterval: 60
 mqttServer: "127.0.0.1"
-mqttPort: "1883"
+mqttPort: 1883
 mqttLogin: ""
 mqttPass: ""
 mqttKeepalive: 60
