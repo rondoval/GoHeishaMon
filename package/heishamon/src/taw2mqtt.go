@@ -101,13 +101,13 @@ func main() {
 			}
 			switch {
 			case len(data) == serial.OptionalMessageLength:
-				values := codec.Decode(optionalPCBTopics, data)
+				values := codec.Decode(optionalPCBTopics, data, config.DecodeEnums)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}
 				acknowledgeChannel <- data
 			case len(data) == serial.DataMessageLength:
-				values := codec.Decode(commandTopics, data)
+				values := codec.Decode(commandTopics, data, config.DecodeEnums)
 				for _, v := range values {
 					mclient.PublishValue(v)
 				}

@@ -27,6 +27,7 @@ type configStruct struct {
 	MqttKeepalive  int    `yaml:"mqttKeepalive"`
 	MqttTopicBase  string `yaml:"mqttTopicBase"`
 	HAAutoDiscover bool   `yaml:"haAutoDiscover"`
+	DecodeEnums    bool   `yaml:"decodeEnums"`
 
 	LogMqtt    bool `yaml:"logmqtt"`
 	LogHexDump bool `yaml:"loghex"`

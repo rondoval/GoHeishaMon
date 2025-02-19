@@ -175,7 +175,7 @@ func convertIntToEnum(value int, topic *topics.TopicEntry) string {
 
 // Decode decodes a byte slice received from the heat pump into a TopicData structure.
 // The returned value is a slice containing all TopicEntry records that have changed as a result of decoding.
-func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
+func Decode(allTopics *topics.TopicData, data []byte, decodeEnums bool) []*topics.TopicEntry {
 	changed := make([]*topics.TopicEntry, 0, len(allTopics.GetAll()))
 	for _, v := range allTopics.GetAll() {
 		if !v.Readable() {
@@ -193,7 +193,11 @@ func Decode(allTopics *topics.TopicData, data []byte) []*topics.TopicEntry {
 			if byteOperator, ok := decodeToInt[decode.DecodeFunction]; ok {
 				decoded := byteOperator(data[decode.Offset])
 				floatValue += float64(decoded)
-				topicValue = convertIntToEnum(decoded, v)
+				if decodeEnums {
+					topicValue = convertIntToEnum(decoded, v)
+				} else {
+					topicValue = fmt.Sprintf("%d", decoded)
+				}
 			} else if floatOperator, ok := decodeToFloat[decode.DecodeFunction]; ok {
 				floatValue += floatOperator(data[decode.Offset])
 				topicValue = fmt.Sprintf("%.2f", floatValue)
